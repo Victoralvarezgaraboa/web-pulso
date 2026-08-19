@@ -9,7 +9,10 @@ import { precio, incluye, noEs, siEs } from '../data/pulso';
 
     <div class="rejilla" data-anim-grupo>
       <article class="plan">
-        <p class="rotulo">Cuota mensual</p>
+        <p class="rotulo">
+          Cuota mensual
+          <span class="etiqueta mono">{precio.etiqueta}</span>
+        </p>
         <p class="importe">
           <span class="serif cifra">{precio.cuota}</span>
           <span class="periodo">{precio.periodo}</span>
@@ -90,9 +93,23 @@ import { precio, incluye, noEs, siEs } from '../data/pulso';
   }
 
   .rotulo {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
     font-size: 15px;
     color: var(--muted);
     margin-bottom: 14px;
+  }
+
+  .etiqueta {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--pulso);
+    border: 1px solid rgba(92, 227, 163, 0.35);
+    border-radius: 100px;
+    padding: 4px 11px;
   }
 
   .importe {

@@ -28,15 +28,31 @@ public/                ← favicon y archivos que se sirven tal cual
 diseno/                ← archivos fuente del diseño en canvas (no afectan a la web)
 ```
 
+## Desplegar en Render
+
+El repositorio incluye `render.yaml`, así que Render lo configura solo:
+
+1. En Render: **New → Blueprint** y elegir este repositorio.
+2. Render lee `render.yaml`, ejecuta `npm ci && npm run build` y publica `dist/`.
+3. Cada push a `main` vuelve a desplegar.
+
+Es un sitio estático: sin servidor ni base de datos, entra en el plan gratuito. El primer dominio
+es `https://web-pulso.onrender.com`; cuando conectes uno propio, cámbialo en `astro.config.mjs`
+(campo `site`), que es de donde salen los enlaces canónicos.
+
 ## Antes de publicar
 
 Todo lo que aparece **entre corchetes** en la web es un hueco pendiente, a propósito, para que no
 se cuele sin rellenar:
 
-- [ ] `src/data/pulso.ts`: precio, condiciones de la prueba, email y WhatsApp
+- [ ] `src/data/pulso.ts`: email y WhatsApp
 - [ ] Nombres reales de los casos en `src/components/Casos.astro` (ahora van anónimos)
 - [ ] Aviso legal y política de privacidad en `src/components/Footer.astro`
 - [ ] Imagen de Open Graph en `src/layouts/Base.astro` (lo que se ve al pegar el enlace)
+
+El precio (49 €/mes) va etiquetado como **precio de lanzamiento**. Esa etiqueta es lo que permite
+subirlo al ampliar cartera sin quedar mal con los primeros clientes: si lo subes, respeta el precio
+a quien ya entró o avísale con margen.
 
 Los números del panel de ejemplo son inventados y la propia sección lo dice. Si se cambian por
 datos reales de un cliente, hay que pedirle permiso antes.

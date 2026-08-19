@@ -12,12 +12,17 @@ export const contacto = {
 };
 
 export const precio = {
-  /** Cuota mensual, con moneda. p. ej. '120 €' */
-  cuota: '[TU PRECIO]',
+  /**
+   * Precio de entrada mientras se hace cartera. La etiqueta de lanzamiento no
+   * es decorativa: es lo que permite subirlo más adelante sin que los primeros
+   * clientes se sientan engañados. Si se sube, respetar el precio a quien ya
+   * entró (o avisar con margen) y actualizar también `diseno/Main.dc.html`.
+   */
+  cuota: '49 €',
   periodo: '/ mes',
-  /** Condición de la prueba inicial. Revísala antes de publicar. */
-  prueba:
-    'Primer mes de prueba: si el cierre no te dice nada que no supieras, no lo pagas. [confirmar condiciones]',
+  etiqueta: 'Precio de lanzamiento',
+  /** Condición de la prueba inicial. Es un compromiso real: revísalo antes de publicar. */
+  prueba: 'Primer mes de prueba: si el cierre no te dice nada que no supieras, no lo pagas.',
 };
 
 export const incluye = [

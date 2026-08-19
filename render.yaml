@@ -1,0 +1,35 @@
+# Blueprint de Render para la web de Pulso.
+# Sitio estático: Render ejecuta el build y sirve el contenido de dist/.
+# No hay servidor ni base de datos, así que entra en el plan gratuito.
+#
+# Para desplegar: Render → New → Blueprint → elegir este repositorio.
+
+services:
+  - type: web
+    name: web-pulso
+    runtime: static
+    # npm ci respeta package-lock.json: mismas versiones que en local.
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    # Solo se reconstruye si cambia algo que afecta al sitio.
+    buildFilter:
+      paths:
+        - src/**
+        - public/**
+        - package.json
+        - package-lock.json
+        - astro.config.mjs
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+    headers:
+      # Los archivos con hash en el nombre no cambian nunca: caché larga.
+      - path: /_astro/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
