@@ -4,7 +4,7 @@
     { "file": "Movil.dc.html", "title": "Landing · móvil", "x": 1400, "y": 0, "w": 390, "h": 2600 }
   ],
   "annotations": [
-    { "id": "pendientes", "x": 0, "y": -190, "w": 420, "text": "Pendiente de tus datos reales:\n· [TU EMAIL] y [TU NÚMERO] de WhatsApp\n· Nombres reales de los dos casos (ahora anónimos)\n\nEl precio (49 €/mes) es de lanzamiento, para subirlo al ampliar cartera.\nLas cifras del panel son de ejemplo, marcadas como tal en la propia sección." }
+    { "id": "pendientes", "x": 0, "y": -190, "w": 420, "text": "Pendiente:\n· Aviso legal y política de privacidad\n· Nombres reales de los dos casos (ahora anónimos)\n\nEl precio (49 €/mes) es de lanzamiento, para subirlo al ampliar cartera.\nLas cifras del panel son de ejemplo, marcadas como tal en la propia sección." }
   ],
   "launch": { "view": "canvas" }
 }

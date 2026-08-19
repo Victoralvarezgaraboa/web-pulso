@@ -6,9 +6,11 @@
 
 export const contacto = {
   /** Correo al que llegan las peticiones de primer cierre. */
-  email: '[TU EMAIL]',
-  /** Teléfono en formato internacional y sin signos, p. ej. 34600111222 */
-  whatsapp: '[TU NÚMERO]',
+  email: 'pulso.gestiona@gmail.com',
+  /** Teléfono en formato internacional y sin signos, para el enlace de wa.me */
+  whatsapp: '34654103406',
+  /** El mismo número, escrito como se lee en España. */
+  telefonoVisible: '654 10 34 06',
 };
 
 export const precio = {
@@ -47,9 +49,14 @@ export const siEs = [
   'Saber dónde estás, cada mes, sin sustos',
 ];
 
+/** Mensaje con el que se abre WhatsApp, para que no tengan que pensar qué escribir. */
+const saludo = 'Hola, tengo un negocio pequeño y me gustaría saber cómo funciona Pulso.';
+
 /** El enlace de WhatsApp solo es válido cuando hay un número de verdad. */
 export const enlaceWhatsapp = /^\d{8,15}$/.test(contacto.whatsapp)
-  ? `https://wa.me/${contacto.whatsapp}`
+  ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(saludo)}`
   : null;
 
-export const enlaceEmail = contacto.email.includes('@') ? `mailto:${contacto.email}` : null;
+export const enlaceEmail = contacto.email.includes('@')
+  ? `mailto:${contacto.email}?subject=${encodeURIComponent('Quiero mi primer cierre de Pulso')}`
+  : null;

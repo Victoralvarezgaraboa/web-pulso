@@ -51,6 +51,10 @@ import { contacto, enlaceEmail, enlaceWhatsapp } from '../data/pulso';
         )
       }
     </div>
+
+    <p class="directo mono" data-anim>
+      {contacto.email} · {contacto.telefonoVisible}
+    </p>
   </div>
 </section>
 
@@ -88,6 +92,14 @@ import { contacto, enlaceEmail, enlaceWhatsapp } from '../data/pulso';
     gap: 14px;
     justify-content: center;
     flex-wrap: wrap;
+  }
+
+  /* Los datos en claro, para quien prefiere copiarlos que pulsar un botón */
+  .directo {
+    margin-top: 28px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--muted2);
   }
 
   /* Estado visible mientras el dato de contacto siga sin rellenar */
