@@ -1,0 +1,155 @@
+---
+// Sección de apertura. La tagline sale del manual de marca: "El pulso de tu negocio."
+---
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker mono" data-hero-kicker>Control de gestión para negocios pequeños</p>
+
+    <h1 class="titular">
+      <span class="linea" data-hero-linea>El pulso</span>
+      <span class="linea ultima" data-hero-linea>
+        de tu negocio.
+        <span class="latido" data-hero-latido aria-hidden="true"></span>
+      </span>
+    </h1>
+
+    <svg
+      class="ecg"
+      viewBox="0 0 640 80"
+      fill="none"
+      preserveAspectRatio="xMinYMid meet"
+      aria-hidden="true"
+      data-hero-ecg
+    >
+      <path
+        d="M0 40 H150 L172 40 L190 12 L212 68 L236 26 L256 40 H392 L414 40 L430 20 L450 60 L468 40 H640"
+        stroke="var(--pulso)"
+        stroke-width="2.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        data-trazo></path>
+    </svg>
+
+    <p class="entrada" data-hero-texto>
+      No llevamos tus cuentas: <strong>te hacemos verlas</strong>. Cada mes leemos los signos vitales
+      de tu negocio y te decimos, en claro, dónde pierdes dinero y dónde puedes ganarlo.
+    </p>
+    <p class="matiz" data-hero-texto>
+      Sin instalar nada. Sin cambiar tu forma de trabajar. Sin una sola palabra que tengas que buscar
+      en Google.
+    </p>
+
+    <div class="acciones" data-hero-cta>
+      <a href="#contacto" class="btn">
+        Pide tu primer cierre
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M3 8h10M9 4l4 4-4 4"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </svg>
+      </a>
+      <a href="#panel" class="btn ghost">Ver un panel por dentro</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(70px, 11vw, 120px) clamp(60px, 9vw, 100px);
+    border-top: none;
+  }
+
+  .kicker {
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 30px;
+  }
+
+  .titular {
+    font-size: clamp(52px, 10.5vw, 132px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 0.94;
+    margin-bottom: 6px;
+  }
+  .linea {
+    display: block;
+  }
+  .ultima {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* El punto que late junto al titular */
+  .latido {
+    display: inline-block;
+    width: 0.11em;
+    height: 0.11em;
+    border-radius: 50%;
+    background: var(--pulso);
+    box-shadow: 0 0 26px var(--pulso);
+    margin-left: 0.06em;
+    vertical-align: baseline;
+    animation: latir 2.2s ease-in-out infinite;
+  }
+  @keyframes latir {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.82);
+    }
+  }
+
+  .ecg {
+    display: block;
+    width: min(640px, 100%);
+    height: auto;
+    margin-block: clamp(24px, 4vw, 34px) clamp(22px, 3vw, 30px);
+  }
+
+  .entrada {
+    font-size: clamp(18px, 2.4vw, 22px);
+    line-height: 1.55;
+    max-width: 40ch;
+    margin-bottom: 14px;
+    text-wrap: pretty;
+  }
+  .entrada strong {
+    color: var(--pulso);
+    font-weight: 600;
+  }
+
+  .matiz {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 46ch;
+    margin-bottom: 40px;
+  }
+
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  @media (max-width: 520px) {
+    .acciones {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .acciones :global(.btn) {
+      justify-content: center;
+      padding-block: 17px;
+    }
+  }
+</style>

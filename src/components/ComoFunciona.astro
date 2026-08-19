@@ -1,0 +1,101 @@
+---
+const pasos = [
+  {
+    n: '01',
+    titulo: 'Te preguntamos qué te quita el sueño',
+    texto:
+      'Antes de mirar una sola cifra. Todo negocio tiene un quebradero de cabeza concreto, y no siempre es el que aparece en el balance. Tu panel se construye alrededor de él.',
+  },
+  {
+    n: '02',
+    titulo: 'Conectamos tus datos',
+    texto:
+      'Compras, gastos, ingresos e inventario, desde un Excel de control que preparamos contigo. Tú sigues trabajando igual; el trabajo sucio lo hacemos nosotros.',
+  },
+  {
+    n: '03',
+    titulo: 'Cada mes, tu cierre de gestión',
+    texto:
+      'Entras a tu panel y en treinta segundos sabes cómo ha ido el mes, dónde se te está escapando el dinero y qué tres cosas conviene hacer. Nada que rellenar.',
+  },
+];
+---
+
+<section id="como">
+  <div class="wrap">
+    <p class="sec-label" data-anim>02 · Cómo funciona</p>
+    <h2 data-anim>Tres pasos. Ninguno lo das tú solo.</h2>
+
+    <ol class="pasos" data-anim-grupo>
+      {
+        pasos.map((p) => (
+          <li class="paso">
+            <span class="numero mono" aria-hidden="true">
+              {p.n}
+            </span>
+            <h3>{p.titulo}</h3>
+            <p>{p.texto}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  h2 {
+    max-width: 20ch;
+    margin-bottom: 52px;
+  }
+
+  .pasos {
+    list-style: none;
+  }
+
+  .paso {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+    padding-block: 38px;
+    border-top: 1px solid var(--line);
+  }
+  .paso:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .numero {
+    font-size: 34px;
+    color: var(--pulso);
+    line-height: 1;
+  }
+
+  .paso h3 {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .paso p {
+    font-size: 17px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    .paso {
+      grid-template-columns: 60px 1fr;
+      gap: 16px 20px;
+      padding-block: 30px;
+    }
+    .numero {
+      font-size: 26px;
+      grid-row: 1;
+    }
+    .paso h3 {
+      font-size: 23px;
+    }
+    /* El texto se alinea bajo el título, no bajo el número */
+    .paso p {
+      grid-column: 2;
+    }
+  }
+</style>

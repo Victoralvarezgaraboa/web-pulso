@@ -1,0 +1,148 @@
+---
+import '../styles/marca.css';
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+}
+
+const { titulo, descripcion } = Astro.props;
+const url = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/pulso.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={url} />
+
+    <!-- Open Graph: lo que se ve al pegar el enlace en WhatsApp o LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:locale" content="es_ES" />
+    <meta name="theme-color" content="#07120D" />
+
+    <!-- Tipografías de marca: Fraunces (serif), Hanken Grotesk (sans), JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <slot />
+
+    <script>
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Si el sistema pide menos movimiento, se muestra todo sin animar y punto.
+      const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (sinMovimiento) {
+        gsap.set('[data-anim], [data-anim-grupo] > *', { opacity: 1, y: 0 });
+        document.querySelectorAll<SVGPathElement>('[data-trazo]').forEach((p) => {
+          p.style.strokeDasharray = 'none';
+          p.style.strokeDashoffset = '0';
+        });
+      } else {
+        // ---- Entrada del hero: una sola secuencia, sin cascada infinita ----
+        const hero = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+        hero
+          .from('[data-hero-kicker]', { opacity: 0, y: 14, duration: 0.6 })
+          .from('[data-hero-linea]', { opacity: 0, y: 40, duration: 0.9, stagger: 0.1 }, '-=0.3')
+          .from('[data-hero-latido]', { opacity: 0, scale: 0.4, duration: 0.6 }, '-=0.5')
+          .add(dibujarTrazo('[data-hero-ecg] [data-trazo]', 1.6), '-=0.4')
+          .from('[data-hero-texto]', { opacity: 0, y: 20, duration: 0.7, stagger: 0.12 }, '-=1.1')
+          .from('[data-hero-cta] > *', { opacity: 0, y: 18, duration: 0.6, stagger: 0.1 }, '-=0.5');
+
+        // ---- Revelado al hacer scroll ----
+        document.querySelectorAll('[data-anim]').forEach((el) => {
+          gsap.from(el, {
+            opacity: 0,
+            y: 34,
+            duration: 0.85,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 85%' },
+          });
+        });
+
+        // Grupos: los hijos entran escalonados
+        document.querySelectorAll('[data-anim-grupo]').forEach((grupo) => {
+          gsap.from(grupo.children, {
+            opacity: 0,
+            y: 30,
+            duration: 0.7,
+            ease: 'power3.out',
+            stagger: 0.12,
+            scrollTrigger: { trigger: grupo, start: 'top 82%' },
+          });
+        });
+
+        // ---- Trazos SVG que se dibujan al entrar en pantalla ----
+        document.querySelectorAll('[data-trazo-scroll]').forEach((svg) => {
+          const tl = gsap.timeline({ scrollTrigger: { trigger: svg, start: 'top 80%' } });
+          tl.add(dibujarTrazo(svg.querySelectorAll('[data-trazo]'), 1.4));
+        });
+
+        // ---- Cifras que cuentan hacia arriba ----
+        document.querySelectorAll<HTMLElement>('[data-contador]').forEach((el) => {
+          const destino = parseFloat(el.dataset.contador ?? '0');
+          const decimales = parseInt(el.dataset.decimales ?? '0', 10);
+          const sufijo = el.dataset.sufijo ?? '';
+          const prefijo = el.dataset.prefijo ?? '';
+          const cifra = { valor: 0 };
+
+          gsap.to(cifra, {
+            valor: destino,
+            duration: 1.6,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: el, start: 'top 88%' },
+            onUpdate() {
+              const n = cifra.valor.toLocaleString('es-ES', {
+                minimumFractionDigits: decimales,
+                maximumFractionDigits: decimales,
+              });
+              el.textContent = `${prefijo}${n}${sufijo}`;
+            },
+          });
+        });
+
+        // ---- Cabecera: se vuelve sólida en cuanto sales del hero ----
+        ScrollTrigger.create({
+          start: 'top -80',
+          onUpdate: (self) =>
+            document.querySelector('[data-nav]')?.classList.toggle('pegada', self.scroll() > 80),
+        });
+      }
+
+      /** Dibuja un path SVG de principio a fin usando su longitud real. */
+      function dibujarTrazo(selector: string | NodeListOf<Element>, duracion: number) {
+        const paths =
+          typeof selector === 'string'
+            ? document.querySelectorAll<SVGPathElement>(selector)
+            : (selector as NodeListOf<SVGPathElement>);
+
+        const tl = gsap.timeline();
+        paths.forEach((path) => {
+          const largo = path.getTotalLength();
+          gsap.set(path, { strokeDasharray: largo, strokeDashoffset: largo });
+          tl.to(path, { strokeDashoffset: 0, duration: duracion, ease: 'power2.inOut' }, 0);
+        });
+        return tl;
+      }
+    </script>
+  </body>
+</html>

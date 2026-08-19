@@ -1,0 +1,24 @@
+---
+// El símbolo de la marca: una línea de ECG. Se usa en la nav, el panel y el pie.
+interface Props {
+  tamano?: number;
+  color?: string;
+}
+const { tamano = 26, color = 'var(--pulso)' } = Astro.props;
+---
+
+<svg
+  width={tamano}
+  height={tamano}
+  viewBox="0 0 26 26"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path
+    d="M2 13 H7 L9.5 5 L13 21 L16 9 L18.5 13 H24"
+    stroke={color}
+    stroke-width="2.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"></path>
+</svg>

@@ -1,0 +1,176 @@
+---
+import { precio, incluye, noEs, siEs } from '../data/pulso';
+---
+
+<section id="precio">
+  <div class="wrap">
+    <p class="sec-label" data-anim>05 · Precio</p>
+    <h2 data-anim>Si no te enseñamos dónde recuperar lo que cuesta, sobramos</h2>
+
+    <div class="rejilla" data-anim-grupo>
+      <article class="plan">
+        <p class="rotulo">Cuota mensual</p>
+        <p class="importe">
+          <span class="serif cifra">{precio.cuota}</span>
+          <span class="periodo">{precio.periodo}</span>
+        </p>
+        <p class="prueba">{precio.prueba}</p>
+
+        <ul class="lista">
+          {
+            incluye.map((i) => (
+              <li>
+                <span class="flecha" aria-hidden="true">
+                  →
+                </span>
+                {i}
+              </li>
+            ))
+          }
+        </ul>
+
+        <a href="#contacto" class="btn">Pide tu primer cierre</a>
+      </article>
+
+      <div class="columna">
+        <article class="tarjeta">
+          <h3>Lo que Pulso no es</h3>
+          <ul class="lista tenue">
+            {
+              noEs.map((n) => (
+                <li>
+                  <span class="cruz" aria-hidden="true">
+                    ×
+                  </span>
+                  {n}
+                </li>
+              ))
+            }
+          </ul>
+        </article>
+
+        <article class="tarjeta">
+          <h3>Lo que sí</h3>
+          <ul class="lista tenue">
+            {
+              siEs.map((s) => (
+                <li>
+                  <span class="flecha" aria-hidden="true">
+                    →
+                  </span>
+                  {s}
+                </li>
+              ))
+            }
+          </ul>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  h2 {
+    max-width: 22ch;
+    margin-bottom: 52px;
+  }
+
+  .rejilla {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+
+  .plan {
+    background: var(--card2);
+    border: 1px solid rgba(92, 227, 163, 0.25);
+    border-radius: var(--radius);
+    padding: 38px;
+  }
+
+  .rotulo {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .importe {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .importe .cifra {
+    font-size: clamp(38px, 5vw, 52px);
+    font-weight: 600;
+    color: var(--pulso);
+    line-height: 1;
+  }
+  .periodo {
+    font-size: 17px;
+    color: var(--muted);
+  }
+
+  .prueba {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 26px;
+  }
+
+  .lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+  .lista li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 16px;
+  }
+  .lista.tenue {
+    margin-bottom: 0;
+    color: var(--muted);
+  }
+  .flecha {
+    color: var(--pulso);
+    flex-shrink: 0;
+  }
+  .cruz {
+    color: var(--coral);
+    flex-shrink: 0;
+  }
+
+  .columna {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .tarjeta {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+  .tarjeta h3 {
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 860px) {
+    .rejilla {
+      grid-template-columns: 1fr;
+    }
+    .plan {
+      padding: 28px;
+    }
+    .plan :global(.btn) {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

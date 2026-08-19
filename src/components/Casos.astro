@@ -1,0 +1,107 @@
+---
+// Los dos casos salen del manual de marca. Van sin nombre propio hasta que
+// el cliente autorice aparecer: cambia `sector` por su nombre cuando lo tengas.
+const casos = [
+  {
+    sector: 'Grupo de música · merchandising',
+    dolor:
+      'El caos del merch en el directo: unidades, papel, regalos, y una caja que al final de la noche nunca cuadra.',
+    solucion:
+      'Control de ventas por evento y un cuadre de caja fiable. Ahora saben qué camiseta llevar al bolo y cuál dejar en casa.',
+  },
+  {
+    sector: 'Box de CrossFit · socios',
+    dolor:
+      'El socio que se está yendo y todavía no lo sabe. Se le nota en el ritmo de asistencia mucho antes que en el recibo.',
+    solucion: 'Un semáforo de clientes en riesgo para llamar antes de la baja, no después.',
+  },
+];
+---
+
+<section id="casos">
+  <div class="wrap">
+    <p class="sec-label" data-anim>04 · Casos</p>
+    <h2 data-anim>Cada negocio duerme mal por algo distinto</h2>
+
+    <div class="rejilla" data-anim-grupo>
+      {
+        casos.map((c) => (
+          <article class="caso">
+            <p class="sector mono">{c.sector}</p>
+            <blockquote>«{c.dolor}»</blockquote>
+            <hr />
+            <p class="solucion">
+              <span class="flecha" aria-hidden="true">
+                →
+              </span>
+              {c.solucion}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  h2 {
+    max-width: 20ch;
+    margin-bottom: 52px;
+  }
+
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .caso {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 34px;
+  }
+
+  .sector {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--pulso);
+    margin-bottom: 22px;
+  }
+
+  blockquote {
+    font-size: 19px;
+    line-height: 1.5;
+    margin-bottom: 22px;
+    text-wrap: pretty;
+  }
+
+  hr {
+    border: none;
+    height: 1px;
+    background: var(--line);
+    margin-bottom: 22px;
+  }
+
+  .solucion {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 16px;
+    color: var(--muted);
+  }
+  .flecha {
+    color: var(--pulso);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 860px) {
+    .rejilla {
+      grid-template-columns: 1fr;
+    }
+    .caso {
+      padding: 26px;
+    }
+  }
+</style>

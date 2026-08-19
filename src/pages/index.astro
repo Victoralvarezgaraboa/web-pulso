@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Problema from '../components/Problema.astro';
+import ComoFunciona from '../components/ComoFunciona.astro';
+import Panel from '../components/Panel.astro';
+import Casos from '../components/Casos.astro';
+import Precio from '../components/Precio.astro';
+import CtaFinal from '../components/CtaFinal.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base
+  titulo="Pulso · El pulso de tu negocio"
+  descripcion="Control de gestión para negocios pequeños. Cada mes te decimos, en claro, dónde pierdes dinero y dónde puedes ganarlo."
+>
+  <Nav />
+  <main>
+    <Hero />
+    <Problema />
+    <ComoFunciona />
+    <Panel />
+    <Casos />
+    <Precio />
+    <CtaFinal />
+  </main>
+  <Footer />
+</Base>

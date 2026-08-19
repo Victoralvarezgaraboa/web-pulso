@@ -1,0 +1,233 @@
+---
+import Latido from './Latido.astro';
+
+// Cifras de ejemplo. Se declaran aquí para que el contador animado y el texto
+// visible sin JavaScript salgan siempre del mismo sitio.
+const metricas = [
+  { rotulo: 'Margen real', valor: 21.4, decimales: 1, sufijo: '%', pie: '+2,1 pts vs. abril', tono: 'bien' },
+  { rotulo: 'Ingresos', valor: 18240, decimales: 0, sufijo: ' €', pie: '+7,8% vs. abril', tono: 'bien' },
+  { rotulo: 'Fuga detectada', valor: 612, decimales: 0, prefijo: '−', sufijo: ' €', pie: 'proveedor de bebidas', tono: 'fuga' },
+  { rotulo: 'Oportunidad', valor: 840, decimales: 0, prefijo: '+', sufijo: ' €', pie: 'stock parado en almacén', tono: 'aviso' },
+];
+
+const acciones = [
+  'Renegociar el pedido de bebidas: pagas un 9% más que en enero.',
+  'Sacar las 34 unidades paradas antes de que caduquen.',
+  'Llamar a los 6 clientes que llevan 3 semanas sin aparecer.',
+];
+
+const formatear = (m: (typeof metricas)[number]) =>
+  `${m.prefijo ?? ''}${m.valor.toLocaleString('es-ES', {
+    minimumFractionDigits: m.decimales,
+    maximumFractionDigits: m.decimales,
+  })}${m.sufijo}`;
+---
+
+<section id="panel">
+  <div class="wrap">
+    <p class="sec-label" data-anim>03 · El panel</p>
+    <h2 data-anim>Lo que ves un martes por la mañana</h2>
+    <p class="bajada" data-anim>
+      Solo lectura. Sin campos que rellenar, sin menús que aprender. Datos de ejemplo, panel real.
+    </p>
+
+    <div class="marco" data-anim>
+      <div class="cabecera">
+        <div class="titulo">
+          <Latido tamano={20} />
+          <span class="serif">Cierre de mayo</span>
+        </div>
+        <span class="mono sello">actualizado el 03/06</span>
+      </div>
+
+      <div class="metricas">
+        {
+          metricas.map((m) => (
+            <div class="metrica">
+              <p class="rotulo">{m.rotulo}</p>
+              <p
+                class:list={['cifra', 'mono', m.tono]}
+                data-contador={m.valor}
+                data-decimales={m.decimales}
+                data-prefijo={m.prefijo ?? ''}
+                data-sufijo={m.sufijo}
+              >
+                {formatear(m)}
+              </p>
+              <p class:list={['pie', m.tono === 'bien' ? 'verde' : '']}>{m.pie}</p>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="inferior">
+        <div class="grafico">
+          <p class="rotulo">Margen mes a mes</p>
+          <svg viewBox="0 0 560 130" fill="none" preserveAspectRatio="none" aria-label="Evolución del margen, de menor a mayor" data-trazo-scroll>
+            <path
+              d="M0 96 L80 88 L160 102 L240 74 L320 82 L400 58 L480 46 L560 34 L560 130 L0 130 Z"
+              fill="var(--pulso)"
+              fill-opacity="0.07"></path>
+            <path
+              d="M0 96 L80 88 L160 102 L240 74 L320 82 L400 58 L480 46 L560 34"
+              stroke="var(--pulso)"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              data-trazo></path>
+          </svg>
+        </div>
+
+        <div class="acciones">
+          <p class="rotulo">Tus 3 acciones del mes</p>
+          <ol>
+            {
+              acciones.map((a, i) => (
+                <li>
+                  <span class="mono orden">{String(i + 1).padStart(2, '0')}</span>
+                  <span>{a}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  h2 {
+    max-width: 20ch;
+    margin-bottom: 20px;
+  }
+  .bajada {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 56ch;
+    margin-bottom: 44px;
+  }
+
+  .marco {
+    background: var(--ink2);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: clamp(18px, 3vw, 30px);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+  }
+
+  .cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+  .titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .sello {
+    font-size: 12px;
+    color: var(--muted2);
+  }
+
+  .metricas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .metrica,
+  .grafico,
+  .acciones {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .rotulo {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .cifra {
+    font-size: clamp(22px, 2.4vw, 28px);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .cifra.fuga {
+    color: var(--coral);
+  }
+  .cifra.aviso {
+    color: var(--amber);
+  }
+
+  .pie {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .pie.verde {
+    color: var(--pulso);
+  }
+
+  .inferior {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 14px;
+  }
+
+  .grafico .rotulo {
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+  .grafico svg {
+    width: 100%;
+    height: 130px;
+    display: block;
+  }
+
+  .acciones .rotulo {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .acciones ol {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .acciones li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .orden {
+    font-size: 13px;
+    color: var(--pulso);
+    padding-top: 2px;
+  }
+
+  @media (max-width: 900px) {
+    .metricas {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .inferior {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 420px) {
+    .metricas {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

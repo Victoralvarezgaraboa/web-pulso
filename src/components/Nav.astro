@@ -1,0 +1,88 @@
+---
+import Latido from './Latido.astro';
+
+const enlaces = [
+  { href: '#como', texto: 'Cómo funciona' },
+  { href: '#panel', texto: 'El panel' },
+  { href: '#casos', texto: 'Casos' },
+  { href: '#precio', texto: 'Precio' },
+];
+---
+
+<header class="nav" data-nav>
+  <div class="wrap fila">
+    <a href="#" class="marca" aria-label="Pulso, inicio">
+      <Latido tamano={26} />
+      <span class="serif nombre">Pulso</span>
+    </a>
+
+    <nav class="enlaces" aria-label="Principal">
+      {enlaces.map((e) => <a href={e.href}>{e.texto}</a>)}
+    </nav>
+
+    <a href="#contacto" class="btn compacto">Hablemos</a>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: background 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
+    border-bottom: 1px solid transparent;
+  }
+  /* La clase la pone GSAP al salir del hero */
+  .nav.pegada {
+    background: rgba(7, 18, 13, 0.82);
+    backdrop-filter: blur(14px);
+    border-bottom-color: var(--line);
+  }
+
+  .fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-block: 18px;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .nombre {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .enlaces {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  .enlaces a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 15px;
+    transition: color 0.2s ease;
+  }
+  .enlaces a:hover {
+    color: var(--pulso);
+  }
+
+  .btn.compacto {
+    padding: 11px 22px;
+    font-size: 15px;
+  }
+
+  /* En móvil el menú central estorba: mandan el logo y el botón */
+  @media (max-width: 860px) {
+    .enlaces {
+      display: none;
+    }
+  }
+</style>

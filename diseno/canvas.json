@@ -1,0 +1,10 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "Landing · escritorio", "x": 0, "y": 0, "w": 1280, "h": 4900 },
+    { "file": "Movil.dc.html", "title": "Landing · móvil", "x": 1400, "y": 0, "w": 390, "h": 2600 }
+  ],
+  "annotations": [
+    { "id": "pendientes", "x": 0, "y": -190, "w": 420, "text": "Pendiente de tus datos reales:\n· [TU PRECIO] y condiciones del primer mes\n· [TU EMAIL] y [TU NÚMERO] de WhatsApp\n· Nombres reales de los dos casos (ahora anónimos)\n\nLas cifras del panel son de ejemplo, marcadas como tal en la propia sección." }
+  ],
+  "launch": { "view": "canvas" }
+}
