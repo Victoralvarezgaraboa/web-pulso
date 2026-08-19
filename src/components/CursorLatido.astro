@@ -1,0 +1,127 @@
+---
+// Cursor con latido. El anillo sigue al puntero con retraso y late con el
+// ritmo de dos tiempos de un corazón (lub-dub), no con un parpadeo simple.
+//
+// Solo aparece en ratón/trackpad. En pantallas táctiles y con "reducir
+// movimiento" activado no se monta siquiera: no hay puntero que acompañar.
+---
+
+<div class="anillo" data-cursor aria-hidden="true">
+  <span class="latido" data-cursor-latido></span>
+</div>
+
+<style>
+  .anillo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 34px;
+    height: 34px;
+    z-index: 100;
+    pointer-events: none; /* jamás debe interceptar un clic */
+    opacity: 0; /* lo enciende el script en el primer movimiento */
+    will-change: transform;
+  }
+
+  .latido {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1.5px solid rgba(92, 227, 163, 0.55);
+  }
+
+  /*
+    El cursor del sistema se mantiene visible a propósito: quitarlo se ve muy
+    "de estudio de diseño", pero desorienta a quien no espera ese truco, y
+    esta web la van a abrir dueños de negocio, no diseñadores.
+    Si algún día lo quieres ocultar, descomenta esto:
+
+    :global(html.cursor-vivo),
+    :global(html.cursor-vivo *) { cursor: none; }
+  */
+
+  /* En móvil no existe puntero: que no ocupe ni un píxel */
+  @media (hover: none), (pointer: coarse) {
+    .anillo {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const anillo = document.querySelector<HTMLElement>('[data-cursor]');
+  const latido = document.querySelector<HTMLElement>('[data-cursor-latido]');
+
+  const hayPuntero = window.matchMedia('(pointer: fine)').matches;
+  const quietud = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (anillo && latido && hayPuntero && !quietud) {
+    gsap.set(anillo, { xPercent: -50, yPercent: -50 });
+
+    // El retraso es lo que le da vida. Muy corto y no se nota; muy largo y
+    // parece que el cursor va arrastrando algo roto.
+    const seguirX = gsap.quickTo(anillo, 'x', { duration: 0.45, ease: 'power3' });
+    const seguirY = gsap.quickTo(anillo, 'y', { duration: 0.45, ease: 'power3' });
+
+    let encendido = false;
+
+    window.addEventListener('mousemove', (e) => {
+      seguirX(e.clientX);
+      seguirY(e.clientY);
+
+      if (!encendido) {
+        encendido = true;
+        gsap.to(anillo, { opacity: 1, duration: 0.4 });
+      }
+    });
+
+    // Al salir de la ventana se apaga, para que no se quede un anillo huérfano
+    // pegado en el borde.
+    document.addEventListener('mouseleave', () => gsap.to(anillo, { opacity: 0, duration: 0.25 }));
+    document.addEventListener('mouseenter', () => gsap.to(anillo, { opacity: 1, duration: 0.25 }));
+
+    // ---- El latido: lub-dub, con su pausa. Es el ritmo de un corazón real,
+    // no un pulso regular. Se anima el interior para no pelearse con la
+    // escala que aplica el hover al anillo de fuera.
+    gsap
+      .timeline({ repeat: -1, repeatDelay: 1.5 })
+      .to(latido, { scale: 1.24, duration: 0.14, ease: 'power2.out' })
+      .to(latido, { scale: 1, duration: 0.18, ease: 'power2.in' })
+      .to(latido, { scale: 1.13, duration: 0.12, ease: 'power2.out' })
+      .to(latido, { scale: 1, duration: 0.24, ease: 'power2.in' });
+
+    // ---- Sobre algo pulsable, el anillo se abre y se marca más.
+    const pulsables = 'a, button, [role="button"], summary';
+
+    document.querySelectorAll<HTMLElement>(pulsables).forEach((el) => {
+      el.addEventListener('mouseenter', () => {
+        gsap.to(anillo, { scale: 1.7, duration: 0.3, ease: 'power3.out' });
+        gsap.to(latido, {
+          borderColor: 'rgba(92,227,163,1)',
+          backgroundColor: 'rgba(92,227,163,0.10)',
+          duration: 0.3,
+        });
+      });
+
+      el.addEventListener('mouseleave', () => {
+        gsap.to(anillo, { scale: 1, duration: 0.35, ease: 'power3.out' });
+        gsap.to(latido, {
+          borderColor: 'rgba(92,227,163,0.55)',
+          backgroundColor: 'rgba(92,227,163,0)',
+          duration: 0.3,
+        });
+      });
+    });
+
+    // ---- Al pulsar, el anillo se contrae: acusa el clic.
+    window.addEventListener('mousedown', () =>
+      gsap.to(anillo, { scale: 0.8, duration: 0.15, ease: 'power2.out' })
+    );
+    window.addEventListener('mouseup', () =>
+      gsap.to(anillo, { scale: 1, duration: 0.35, ease: 'elastic.out(1, 0.5)' })
+    );
+  }
+</script>
