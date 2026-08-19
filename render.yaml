@@ -19,9 +19,8 @@ services:
         - package.json
         - package-lock.json
         - astro.config.mjs
-    envVars:
-      - key: NODE_VERSION
-        value: '22'
+    # La versión de Node la decide el campo "engines" de package.json,
+    # para no tener el dato repetido en dos sitios que puedan discrepar.
     headers:
       # Los archivos con hash en el nombre no cambian nunca: caché larga.
       - path: /_astro/*
