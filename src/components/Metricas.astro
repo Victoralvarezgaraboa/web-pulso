@@ -1,0 +1,134 @@
+---
+/**
+ * Qué medimos. El vocabulario financiero de verdad, pero traducido: cada
+ * término lleva su definición en llano justo debajo. Enseñar el término sin
+ * traducirlo es presumir; traducirlo sin usarlo es infantilizar al cliente.
+ */
+const metricas = [
+  {
+    termino: 'EBITDA',
+    literal: 'Beneficio antes de intereses, impuestos y amortizaciones',
+    llano:
+      'Lo que gana tu negocio por operar, antes de bancos y de Hacienda. Es la cifra que mira quien quiera comprarte algún día.',
+  },
+  {
+    termino: 'Margen bruto',
+    literal: 'Ingresos menos coste directo',
+    llano:
+      'De cada 100 € que entran, lo que queda tras pagar lo que costó producirlo. Si esto va mal, no lo arregla vender más.',
+  },
+  {
+    termino: 'Punto de equilibrio',
+    literal: 'Facturación mínima para no perder dinero',
+    llano:
+      'La cifra exacta a partir de la cual empiezas a ganar. Saberla cambia cómo negocias y cuándo te puedes permitir decir que no.',
+  },
+  {
+    termino: 'Flujo de caja',
+    literal: 'Dinero que entra menos dinero que sale, cuando ocurre',
+    llano:
+      'Ganar dinero y tener dinero no son lo mismo. Un negocio rentable cierra si cobra a 90 días y paga a 30.',
+  },
+  {
+    termino: 'Coste directo',
+    literal: 'Lo que te cuesta cada unidad vendida',
+    llano:
+      'Lo que sube cuando vendes más: género, material, comisiones. Separarlo del gasto fijo es lo que hace que el resto tenga sentido.',
+  },
+  {
+    termino: 'Valoración orientativa',
+    literal: 'Múltiplo de EBITDA más equipamiento',
+    llano:
+      'Cuánto vale tu negocio hoy, en un número. Orientativo, no es una tasación, pero te dice si estás construyendo patrimonio o comprándote un empleo.',
+  },
+];
+---
+
+<section id="metricas">
+  <div class="wrap">
+    <p class="sec-label" data-anim>02 · Qué medimos</p>
+    <h2 data-anim>Los mismos números que mira un director financiero</h2>
+    <p class="bajada" data-anim>
+      Con una diferencia: aquí vienen traducidos. No hay ninguna razón para que el dueño de un
+      taller tenga que aprender contabilidad para saber si su taller gana dinero.
+    </p>
+
+    <div class="rejilla" data-anim-grupo>
+      {
+        metricas.map((m) => (
+          <article class="metrica">
+            <h3 class="termino">{m.termino}</h3>
+            <p class="literal mono">{m.literal}</p>
+            <p class="llano">{m.llano}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  h2 {
+    max-width: 20ch;
+    margin-bottom: 20px;
+  }
+
+  .bajada {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 62ch;
+    margin-bottom: 52px;
+    text-wrap: pretty;
+  }
+
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line); /* las juntas hacen de rejilla */
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .metrica {
+    background: var(--ink);
+    padding: 32px 28px;
+    transition: background 0.25s ease;
+  }
+  .metrica:hover {
+    background: var(--card);
+  }
+
+  .termino {
+    font-size: 24px;
+    color: var(--pulso);
+    margin-bottom: 8px;
+  }
+
+  .literal {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--muted2);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .llano {
+    font-size: 16px;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 900px) {
+    .rejilla {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    .rejilla {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

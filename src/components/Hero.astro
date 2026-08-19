@@ -55,6 +55,28 @@
       <a href="#panel" class="btn ghost">Ver un panel por dentro</a>
     </div>
   </div>
+
+  <!-- Franja de credibilidad: solo hechos comprobables. Nada de "+500 clientes". -->
+  <div class="franja">
+    <div class="wrap fila" data-anim-grupo>
+      <div class="hecho">
+        <span class="cifra mono">6</span>
+        <span class="que">sectores con panel propio</span>
+      </div>
+      <div class="hecho">
+        <span class="cifra mono">4</span>
+        <span class="que">generadores en producción</span>
+      </div>
+      <div class="hecho">
+        <span class="cifra mono">UE</span>
+        <span class="que">tus datos, alojados en Fráncfort</span>
+      </div>
+      <div class="hecho">
+        <span class="cifra mono">EBITDA</span>
+        <span class="que">calculado y traducido cada mes</span>
+      </div>
+    </div>
+  </div>
 </section>
 
 <style>
@@ -140,6 +162,46 @@
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
+  }
+
+  /* ---------- franja de credibilidad ---------- */
+  .franja {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: rgba(11, 26, 19, 0.5);
+    margin-top: clamp(50px, 8vw, 90px);
+  }
+
+  .fila {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    padding-block: 32px;
+  }
+
+  .hecho {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .cifra {
+    font-size: clamp(24px, 3vw, 32px);
+    color: var(--pulso);
+    line-height: 1;
+  }
+
+  .que {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  @media (max-width: 760px) {
+    .fila {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 26px 20px;
+    }
   }
 
   @media (max-width: 520px) {

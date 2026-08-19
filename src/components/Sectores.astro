@@ -1,0 +1,154 @@
+---
+import { sectores, muroDemos } from '../data/herramientas';
+---
+
+<section id="sectores">
+  <div class="wrap">
+    <p class="sec-label" data-anim>05 · Sectores</p>
+    <h2 data-anim>Un panel por oficio, no una plantilla para todos</h2>
+    <p class="bajada" data-anim>
+      El motor de ingresos de un box son las cuotas; el de un grupo de música, los bolos; el de un
+      taller, las reparaciones. Un panel genérico mide lo mismo en los tres y por eso no sirve en
+      ninguno.
+    </p>
+
+    <div class="tabla" data-anim-grupo>
+      {
+        sectores.map((s) => (
+          <article class="sector">
+            <h3>{s.nombre}</h3>
+            <div class="campo">
+              <span class="etiqueta mono">Motor de ingresos</span>
+              <span class="valor">{s.motor}</span>
+            </div>
+            <div class="campo">
+              <span class="etiqueta mono">Lo que vigilamos</span>
+              <span class="valor">{s.vigila}</span>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="demo" data-anim>
+      <div>
+        <h3 class="serif">Los seis paneles están en vivo</h3>
+        <p>
+          No hace falta que nos creas: entra y toca. Son los mismos que usan los clientes, con datos
+          de ejemplo.
+        </p>
+      </div>
+      <a href={muroDemos} class="btn" target="_blank" rel="noopener">
+        Ver los paneles
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M3 8h10M9 4l4 4-4 4"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  h2 {
+    max-width: 22ch;
+    margin-bottom: 20px;
+  }
+
+  .bajada {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 64ch;
+    margin-bottom: 48px;
+    text-wrap: pretty;
+  }
+
+  .tabla {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .sector {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 26px;
+  }
+
+  .sector h3 {
+    font-size: 20px;
+    color: var(--pulso);
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .campo:last-child {
+    margin-bottom: 0;
+  }
+
+  .etiqueta {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted2);
+  }
+  .valor {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Franja final con el enlace al muro de demos */
+  .demo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    background: var(--card2);
+    border: 1px solid rgba(92, 227, 163, 0.25);
+    border-radius: var(--radius);
+    padding: 30px 34px;
+  }
+  .demo h3 {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .demo p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 52ch;
+  }
+
+  @media (max-width: 900px) {
+    .tabla {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    .tabla {
+      grid-template-columns: 1fr;
+    }
+    .demo {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: left;
+    }
+    .demo :global(.btn) {
+      justify-content: center;
+    }
+  }
+</style>

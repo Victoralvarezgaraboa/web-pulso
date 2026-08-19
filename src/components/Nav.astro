@@ -2,9 +2,11 @@
 import Latido from './Latido.astro';
 
 const enlaces = [
-  { href: '#como', texto: 'Cómo funciona' },
+  { href: '#metricas', texto: 'Qué medimos' },
   { href: '#panel', texto: 'El panel' },
-  { href: '#casos', texto: 'Casos' },
+  { href: '#herramientas', texto: 'Herramientas' },
+  { href: '#sectores', texto: 'Sectores' },
+  { href: '#metodo', texto: 'Método' },
   { href: '#precio', texto: 'Precio' },
 ];
 ---
@@ -62,7 +64,7 @@ const enlaces = [
   .enlaces {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 26px;
   }
   .enlaces a {
     color: var(--muted);
@@ -80,7 +82,7 @@ const enlaces = [
   }
 
   /* En móvil el menú central estorba: mandan el logo y el botón */
-  @media (max-width: 860px) {
+  @media (max-width: 1060px) {
     .enlaces {
       display: none;
     }
