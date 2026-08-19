@@ -46,11 +46,12 @@ export const herramientas: Herramienta[] = [
     destacado: 'Lectura automática de placas',
   },
   {
-    nombre: 'Control de compras · taller',
+    nombre: 'Comparador de recambios · taller',
     familia: 'Operación',
-    que: 'La lista de la compra del taller, con su coste al día.',
+    que: 'El precio de cada recambio, en todos tus proveedores a la vez.',
     detalle:
-      'Qué hay que reponer, a qué proveedor y a qué precio. Alimenta directamente el cierre mensual: cada compra registrada es una fuga menos que se escapa sin verse.',
+      'Compara al instante y compra siempre al mejor precio. Y como cada compra queda registrada, el cierre del mes deja de tener el agujero negro de "material varios".',
+    destacado: 'Compra al mejor precio',
   },
   {
     nombre: 'Paneles de cierre por sector',
@@ -61,45 +62,76 @@ export const herramientas: Herramienta[] = [
   },
 ];
 
-export interface Sector {
+/** Muro público con las demos. Cada una es enlazable directamente. */
+export const muroDemos = 'https://pulso-demos.onrender.com';
+
+export interface Demo {
   nombre: string;
-  motor: string;
-  vigila: string;
+  sector: string;
+  /** 'panel' = lo que consultas cada mes · 'herramienta' = lo que usas cada día */
+  tipo: 'panel' | 'herramienta';
+  /** Descripción tomada del propio muro, para que las dos webs no se contradigan. */
+  gancho: string;
+  /** Lo concreto que se ve al abrirla. Sirve para que nadie entre a ciegas. */
+  dentro: string;
+  archivo: string;
 }
 
-/** Los sectores con panel demo funcionando. */
-export const sectores: Sector[] = [
+export const demos: Demo[] = [
   {
-    nombre: 'Gimnasios y boxes',
-    motor: 'Cuotas de socios, bonos y nevera',
-    vigila: 'Socios en riesgo de baja, ocupación por turno, margen de la nevera',
+    nombre: 'Fitness y box',
+    sector: 'Gimnasios',
+    tipo: 'panel',
+    gancho:
+      'Semáforo de bajas y control de cuotas para detectar socios en riesgo antes de que se vayan.',
+    dentro: 'Radiografía económica del año, trimestres, tarifas, ocupación por turno y nevera.',
+    archivo: 'fitness.html',
   },
   {
     nombre: 'Música y eventos',
-    motor: 'Cachés por bolo y merchandising',
-    vigila: 'Aportación por evento, cuadre de caja, stock de merch',
+    sector: 'Grupos y salas',
+    tipo: 'panel',
+    gancho:
+      'Rentabilidad por bolo: cachés, gastos y merchandising, con el beneficio real de cada actuación.',
+    dentro: 'Aportación por evento, detalle de cada bolo y stock de merch.',
+    archivo: 'eventos.html',
   },
   {
-    nombre: 'Talleres',
-    motor: 'Reparaciones y recambios',
-    vigila: 'Compras por proveedor, precio de reposición, material a reponer',
-  },
-  {
-    nombre: 'Reformas y pintura',
-    motor: 'Obra presupuestada',
-    vigila: 'Desviación entre presupuesto y coste real, margen por obra',
-  },
-  {
-    nombre: 'Climatización',
-    motor: 'Instalaciones y mantenimientos',
-    vigila: 'Margen por instalación, recurrencia de mantenimientos',
+    nombre: 'Taller · recambios',
+    sector: 'Automoción',
+    tipo: 'herramienta',
+    gancho:
+      'Compara al instante el precio de cada recambio entre tus proveedores y compra siempre al mejor precio.',
+    dentro: 'Lista de compra con el precio de cada proveedor enfrentado.',
+    archivo: 'taller.html',
   },
   {
     nombre: 'Electricidad',
-    motor: 'Instalaciones y averías',
-    vigila: 'Coste de partida, rentabilidad por tipo de trabajo',
+    sector: 'Instaladores',
+    tipo: 'herramienta',
+    gancho:
+      'Presupuestos de instalación en minutos: mano de obra y material, con catálogo cargado y PDF al momento.',
+    dentro: 'Cabecera, partidas por capítulo y PDF listo para enviar.',
+    archivo: 'generador.html',
+  },
+  {
+    nombre: 'Reformas y obra',
+    sector: 'Construcción',
+    tipo: 'herramienta',
+    gancho:
+      'Presupuestos por capítulos: albañilería, fontanería, pintura, carpintería… con PDF al momento.',
+    dentro: 'Capítulos de obra, mediciones y precios propios.',
+    archivo: 'reformas.html',
+  },
+  {
+    nombre: 'Clima y aire acondicionado',
+    sector: 'Climatización',
+    tipo: 'herramienta',
+    gancho:
+      'Presupuestos con catálogo de equipos de aire acondicionado e instalación, con PDF al momento.',
+    dentro: 'Equipos por potencia, instalación y envío directo por WhatsApp.',
+    archivo: 'clima.html',
   },
 ];
 
-/** Muro público con los paneles de demostración. */
-export const muroDemos = 'https://pulso-demos.onrender.com';
+export const enlaceDemo = (d: Demo) => `${muroDemos}/${d.archivo}`;
