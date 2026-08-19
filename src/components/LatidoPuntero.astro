@@ -1,0 +1,206 @@
+---
+// El latido de la marca, aplicado a cómo señala cada persona.
+//
+//   Ratón o trackpad → un anillo sigue al puntero con retraso y late solo.
+//   Pantalla táctil  → cada toque suelta una onda desde el punto tocado.
+//
+// Es el mismo gesto en los dos casos (el lub-dub de un corazón), cambia
+// quién lo dispara. Con "reducir movimiento" activado no se monta ninguno.
+---
+
+<div class="anillo" data-cursor aria-hidden="true">
+  <span class="latido" data-cursor-latido></span>
+</div>
+
+<style>
+  .anillo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 34px;
+    height: 34px;
+    z-index: 100;
+    pointer-events: none; /* jamás debe interceptar un clic */
+    opacity: 0; /* lo enciende el script en el primer movimiento */
+    will-change: transform;
+  }
+
+  .latido {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1.5px solid rgba(92, 227, 163, 0.55);
+  }
+
+  /*
+    El cursor del sistema se mantiene visible a propósito: quitarlo se ve muy
+    "de estudio de diseño", pero desorienta a quien no espera ese truco, y
+    esta web la van a abrir dueños de negocio, no diseñadores.
+    Si algún día lo quieres ocultar, descomenta esto:
+
+    :global(html.cursor-vivo),
+    :global(html.cursor-vivo *) { cursor: none; }
+  */
+
+  /* En móvil no existe puntero: que el anillo no ocupe ni un píxel */
+  @media (hover: none), (pointer: coarse) {
+    .anillo {
+      display: none;
+    }
+  }
+
+  /*
+    Las ondas del táctil se crean desde el script y se cuelgan del body, así
+    que quedan fuera del alcance de los estilos de este componente: por eso
+    van marcadas como globales.
+  */
+  :global(.onda-latido) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--pulso);
+    pointer-events: none;
+    z-index: 100;
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const quietud = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hayPuntero = window.matchMedia('(pointer: fine)').matches;
+
+  if (!quietud && hayPuntero) montarAnillo();
+  if (!quietud && !hayPuntero) montarOndas();
+
+  // ===========================================================
+  //  RATÓN Y TRACKPAD — un anillo que sigue y late
+  // ===========================================================
+  function montarAnillo() {
+    const anillo = document.querySelector<HTMLElement>('[data-cursor]');
+    const latido = document.querySelector<HTMLElement>('[data-cursor-latido]');
+    if (!anillo || !latido) return;
+
+    gsap.set(anillo, { xPercent: -50, yPercent: -50 });
+
+    // El retraso es lo que le da vida. Muy corto y no se nota; muy largo y
+    // parece que el cursor va arrastrando algo roto.
+    const seguirX = gsap.quickTo(anillo, 'x', { duration: 0.45, ease: 'power3' });
+    const seguirY = gsap.quickTo(anillo, 'y', { duration: 0.45, ease: 'power3' });
+
+    let encendido = false;
+
+    window.addEventListener('mousemove', (e) => {
+      seguirX(e.clientX);
+      seguirY(e.clientY);
+
+      if (!encendido) {
+        encendido = true;
+        gsap.to(anillo, { opacity: 1, duration: 0.4 });
+      }
+    });
+
+    // Al salir de la ventana se apaga, para que no se quede un anillo huérfano
+    // pegado en el borde.
+    document.addEventListener('mouseleave', () => gsap.to(anillo, { opacity: 0, duration: 0.25 }));
+    document.addEventListener('mouseenter', () => gsap.to(anillo, { opacity: 1, duration: 0.25 }));
+
+    // Lub-dub, con su pausa. Se anima el interior para no pelearse con la
+    // escala que aplica el hover al anillo de fuera.
+    gsap
+      .timeline({ repeat: -1, repeatDelay: 1.5 })
+      .to(latido, { scale: 1.24, duration: 0.14, ease: 'power2.out' })
+      .to(latido, { scale: 1, duration: 0.18, ease: 'power2.in' })
+      .to(latido, { scale: 1.13, duration: 0.12, ease: 'power2.out' })
+      .to(latido, { scale: 1, duration: 0.24, ease: 'power2.in' });
+
+    // Sobre algo pulsable, el anillo se abre y se marca más.
+    document.querySelectorAll<HTMLElement>('a, button, [role="button"], summary').forEach((el) => {
+      el.addEventListener('mouseenter', () => {
+        gsap.to(anillo, { scale: 1.7, duration: 0.3, ease: 'power3.out' });
+        gsap.to(latido, {
+          borderColor: 'rgba(92,227,163,1)',
+          backgroundColor: 'rgba(92,227,163,0.10)',
+          duration: 0.3,
+        });
+      });
+
+      el.addEventListener('mouseleave', () => {
+        gsap.to(anillo, { scale: 1, duration: 0.35, ease: 'power3.out' });
+        gsap.to(latido, {
+          borderColor: 'rgba(92,227,163,0.55)',
+          backgroundColor: 'rgba(92,227,163,0)',
+          duration: 0.3,
+        });
+      });
+    });
+
+    // Al pulsar, el anillo se contrae: acusa el clic.
+    window.addEventListener('mousedown', () =>
+      gsap.to(anillo, { scale: 0.8, duration: 0.15, ease: 'power2.out' })
+    );
+    window.addEventListener('mouseup', () =>
+      gsap.to(anillo, { scale: 1, duration: 0.35, ease: 'elastic.out(1, 0.5)' })
+    );
+  }
+
+  // ===========================================================
+  //  TÁCTIL — cada toque suelta un latido
+  // ===========================================================
+  function montarOndas() {
+    let inicioX = 0;
+    let inicioY = 0;
+    let inicioT = 0;
+
+    document.addEventListener(
+      'touchstart',
+      (e) => {
+        const t = e.changedTouches[0];
+        inicioX = t.clientX;
+        inicioY = t.clientY;
+        inicioT = Date.now();
+      },
+      { passive: true }
+    );
+
+    document.addEventListener(
+      'touchend',
+      (e) => {
+        const t = e.changedTouches[0];
+        const recorrido = Math.hypot(t.clientX - inicioX, t.clientY - inicioY);
+
+        // Solo late si fue un toque de verdad. Sin este filtro, cada vez que
+        // alguien hiciera scroll saltaría una onda: ruido visual constante.
+        const esToque = recorrido < 12 && Date.now() - inicioT < 500;
+        if (!esToque) return;
+
+        // Dos tiempos, como el corazón: el golpe fuerte y el eco.
+        onda(t.clientX, t.clientY, 3.4, 0, 0.85);
+        onda(t.clientX, t.clientY, 2.2, 0.14, 0.5);
+      },
+      { passive: true }
+    );
+
+    function onda(x: number, y: number, tamano: number, retraso: number, fuerza: number) {
+      const el = document.createElement('span');
+      el.className = 'onda-latido';
+      document.body.appendChild(el);
+
+      gsap.set(el, { x, y, xPercent: -50, yPercent: -50, scale: 0.3, opacity: fuerza });
+      gsap.to(el, {
+        scale: tamano,
+        opacity: 0,
+        duration: 0.75,
+        delay: retraso,
+        ease: 'power2.out',
+        // Se destruye al terminar: si no, cada toque dejaría un elemento
+        // muerto en el DOM hasta recargar la página.
+        onComplete: () => el.remove(),
+      });
+    }
+  }
+</script>
