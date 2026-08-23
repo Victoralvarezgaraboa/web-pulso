@@ -29,7 +29,7 @@ const actual = Astro.url.pathname.replace(/\/$/, '') || '/';
       }
     </nav>
 
-    <a href="/contacto" class="btn compacto">Hablemos</a>
+    <a href="/contacto" class="btn compacto">Contacta</a>
   </div>
   <div class="filo" aria-hidden="true"></div>
 </header>
@@ -111,9 +111,8 @@ const actual = Astro.url.pathname.replace(/\/$/, '') || '/';
     }
   }
 
-  /* Movil: el menu pasa debajo del logo y se reparte en las lineas que haga
-     falta. Nada de desplazar a los lados para descubrir que habia mas enlaces.
-     El boton sobra: "Contacto" ya esta en el menu. */
+  /* Movil: tres lineas. Logo, menu entero y boton. Nada de desplazar a los
+     lados para descubrir que habia mas enlaces. */
   @media (max-width: 700px) {
     .fila {
       flex-direction: column;
@@ -126,7 +125,7 @@ const actual = Astro.url.pathname.replace(/\/$/, '') || '/';
       gap: 4px 6px;
     }
     .btn.compacto {
-      display: none;
+      padding: 10px 26px;
     }
   }
 </style>
