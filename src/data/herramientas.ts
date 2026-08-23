@@ -84,7 +84,8 @@ export const demos: Demo[] = [
     tipo: 'panel',
     gancho:
       'Semáforo de bajas y control de cuotas para detectar socios en riesgo antes de que se vayan.',
-    dentro: 'Radiografía económica del año, trimestres, tarifas, ocupación por turno y nevera.',
+    dentro:
+      'Dos pestañas: el día a día (socios en riesgo, reservas de hoy, cuadrante de coaches y nevera con el pedido ya redactado) y el cierre del mes con EBITDA, punto de equilibrio y trimestres.',
     archivo: 'fitness.html',
   },
   {
@@ -93,7 +94,8 @@ export const demos: Demo[] = [
     tipo: 'panel',
     gancho:
       'Rentabilidad por bolo: cachés, gastos y merchandising, con el beneficio real de cada actuación.',
-    dentro: 'Aportación por evento, detalle de cada bolo y stock de merch.',
+    dentro:
+      'Dos pestañas: la caja de la noche concepto a concepto, con registro de ventas que sale por WhatsApp, y el cierre del mes con EBITDA, punto de equilibrio y el resultado de cada bolo.',
     archivo: 'eventos.html',
   },
   {
