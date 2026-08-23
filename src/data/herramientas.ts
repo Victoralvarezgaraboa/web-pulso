@@ -9,7 +9,7 @@
 
 export interface Herramienta {
   nombre: string;
-  familia: 'Generadores' | 'Operación' | 'Análisis';
+  familia: 'Automatización' | 'Análisis' | 'Compras' | 'Generadores';
   que: string;
   detalle: string;
   destacado?: string;
@@ -17,20 +17,12 @@ export interface Herramienta {
 
 export const herramientas: Herramienta[] = [
   {
-    nombre: 'Generador de presupuestos',
-    familia: 'Generadores',
-    que: 'Presupuestos terminados en minutos, sobre tu catálogo y tus precios de compra.',
+    nombre: 'Facturación mensual automatizada',
+    familia: 'Automatización',
+    que: 'Las facturas que se repiten cada mes se emiten y se envían solas.',
     detalle:
-      'Eliges las partidas, el generador aplica tu precio de compra actualizado y tu margen, y sale el presupuesto listo para enviar. Sobre la marcha, desde el móvil, sin pasar por el ordenador ni hacer cuentas a mano en el coche.',
-    destacado: 'Precios de compra al día',
-  },
-  {
-    nombre: 'Comparador de recambios · taller',
-    familia: 'Operación',
-    que: 'El precio de cada recambio, en todos tus proveedores a la vez.',
-    detalle:
-      'Compara al instante y compra siempre al mejor precio. Y como cada compra queda registrada, el cierre del mes deja de tener el agujero negro de «material varios».',
-    destacado: 'Compra al mejor precio',
+      'Cuotas, mantenimientos e iguales dejan de ser el trabajo de un sábado. Se emiten en su fecha, salen hacia el cliente y quedan registradas, así que el mes llega cerrado en vez de por cerrar.',
+    destacado: 'Se emiten y se envían solas',
   },
   {
     nombre: 'Paneles de cierre por sector',
@@ -38,6 +30,22 @@ export const herramientas: Herramienta[] = [
     que: 'La radiografía económica del negocio, en solo lectura.',
     detalle:
       'De la facturación al EBITDA, trimestre a trimestre, con punto de equilibrio y alertas de fuga. Un panel por sector, porque el motor de ingresos de un box no se parece en nada al de un grupo de música.',
+  },
+  {
+    nombre: 'Comparador de compras y proveedores',
+    familia: 'Compras',
+    que: 'El precio de cada artículo, en todos tus proveedores a la vez.',
+    detalle:
+      'Compara al instante y compra siempre al mejor precio. Y como cada compra queda registrada, el cierre del mes deja de tener el agujero negro de «material varios».',
+    destacado: 'Compra al mejor precio',
+  },
+  {
+    nombre: 'Generador de presupuestos',
+    familia: 'Generadores',
+    que: 'Presupuestos terminados en minutos, sobre tu catálogo y tus precios de compra.',
+    detalle:
+      'Eliges las partidas, el generador aplica tu precio de compra actualizado y tu margen, y sale el presupuesto listo para enviar. Sobre la marcha, desde el móvil, sin pasar por el ordenador ni hacer cuentas a mano en el coche.',
+    destacado: 'Precios de compra al día',
   },
 ];
 
