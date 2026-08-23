@@ -1,27 +1,37 @@
 ---
 import Latido from './Latido.astro';
 
+// v2: la nav ya no son anclas de una sola página larga, son páginas de verdad.
 const enlaces = [
-  { href: '#que-hacemos', texto: 'Qué hacemos' },
-  { href: '#metodo', texto: 'Cómo trabajamos' },
-  { href: '#soluciones', texto: 'Soluciones' },
-  { href: '#panel', texto: 'El panel' },
+  { href: '/', texto: 'Inicio' },
+  { href: '/que-hacemos', texto: 'Qué hacemos' },
+  { href: '/herramientas', texto: 'Herramientas' },
+  { href: '/contacto', texto: 'Contacto' },
 ];
+
+const actual = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 
-<header class="nav" data-nav>
+<header class="nav">
   <div class="wrap fila">
-    <a href="#" class="marca" aria-label="Pulso, inicio">
+    <a href="/" class="marca" aria-label="Pulso, inicio">
       <Latido tamano={26} />
       <span class="serif nombre">Pulso</span>
     </a>
 
     <nav class="enlaces" aria-label="Principal">
-      {enlaces.map((e) => <a href={e.href}>{e.texto}</a>)}
+      {
+        enlaces.map((e) => (
+          <a href={e.href} class:list={[{ activo: actual === e.href }]} aria-current={actual === e.href ? 'page' : undefined}>
+            {e.texto}
+          </a>
+        ))
+      }
     </nav>
 
-    <a href="#contacto" class="btn compacto">Hablemos</a>
+    <a href="/contacto" class="btn compacto">Hablemos</a>
   </div>
+  <div class="filo" aria-hidden="true"></div>
 </header>
 
 <style>
@@ -29,14 +39,14 @@ const enlaces = [
     position: sticky;
     top: 0;
     z-index: 50;
-    transition: background 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
-    border-bottom: 1px solid transparent;
-  }
-  /* La clase la pone GSAP al salir del hero */
-  .nav.pegada {
     background: rgba(7, 18, 13, 0.82);
     backdrop-filter: blur(14px);
-    border-bottom-color: var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .filo {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(92, 227, 163, 0.5), transparent);
   }
 
   .fila {
@@ -44,7 +54,7 @@ const enlaces = [
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    padding-block: 18px;
+    padding-block: 15px;
   }
 
   .marca {
@@ -52,52 +62,71 @@ const enlaces = [
     align-items: center;
     gap: 10px;
     text-decoration: none;
+    flex-shrink: 0;
   }
   .nombre {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   .enlaces {
     display: flex;
     align-items: center;
-    gap: 26px;
+    gap: 4px;
   }
   .enlaces a {
     color: var(--muted);
     text-decoration: none;
     font-size: 15px;
-    transition: color 0.2s ease;
+    font-weight: 500;
+    border-radius: 100px;
+    padding: 9px 16px;
+    white-space: nowrap;
+    transition: color 0.2s ease, background 0.2s ease;
   }
   .enlaces a:hover {
+    color: var(--ivory);
+  }
+  .enlaces a.activo {
     color: var(--pulso);
+    background: rgba(92, 227, 163, 0.12);
+    font-weight: 600;
   }
 
   .btn.compacto {
-    padding: 11px 22px;
-    font-size: 15px;
+    padding: 11px 20px;
+    font-size: 14px;
+    flex-shrink: 0;
   }
 
-  /* En móvil el menú central estorba: mandan el logo y el botón */
+  /* Pantalla intermedia: la fila sigue cabiendo, solo se aprieta. */
   @media (max-width: 1060px) {
-    .enlaces {
-      flex: 1;
-      min-width: 0;
-      overflow-x: auto;
-      justify-content: flex-start;
-      gap: 20px;
-      scrollbar-width: none;
-    }
-    .enlaces::-webkit-scrollbar {
-      display: none;
+    .fila {
+      gap: 16px;
     }
     .enlaces a {
-      flex: 0 0 auto;
       font-size: 14px;
+      padding-inline: 13px;
+    }
+  }
+
+  /* Movil: el menu pasa debajo del logo y se reparte en las lineas que haga
+     falta. Nada de desplazar a los lados para descubrir que habia mas enlaces.
+     El boton sobra: "Contacto" ya esta en el menu. */
+  @media (max-width: 700px) {
+    .fila {
+      flex-direction: column;
+      gap: 10px;
+      padding-block: 13px;
+    }
+    .enlaces {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px 6px;
     }
     .btn.compacto {
-      flex: 0 0 auto;
+      display: none;
     }
   }
 </style>

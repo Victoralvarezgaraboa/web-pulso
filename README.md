@@ -19,11 +19,16 @@ npm run preview  # ver el resultado de build antes de publicar
 
 ```
 src/
-  data/pulso.ts        ← precio, email y teléfono. EMPIEZA POR AQUÍ.
+  data/pulso.ts        ← email y teléfono. EMPIEZA POR AQUÍ.
+  data/herramientas.ts ← las herramientas y las demos del muro.
   styles/marca.css     ← colores y tipografías de marca. No inventar colores aquí.
   layouts/Base.astro   ← <head>, tipografías y todas las animaciones GSAP
-  components/          ← una sección de la landing por archivo
-  pages/index.astro    ← monta las secciones en orden
+  components/          ← Nav, Footer, Hero y una sección por página
+  pages/               ← cuatro páginas, una por destino de la nav:
+                          index.astro        /              (solo el Hero)
+                          que-hacemos.astro  /que-hacemos
+                          herramientas.astro /herramientas  (herramientas + demos)
+                          contacto.astro     /contacto
 public/                ← favicon y archivos que se sirven tal cual
 diseno/                ← archivos fuente del diseño en canvas (no afectan a la web)
 ```
@@ -46,16 +51,15 @@ Todo lo que aparece **entre corchetes** en la web es un hueco pendiente, a prop�
 se cuele sin rellenar:
 
 - [ ] `src/data/pulso.ts`: email y WhatsApp
-- [ ] Nombres reales de los casos en `src/components/Casos.astro` (ahora van anónimos)
 - [ ] Aviso legal y política de privacidad en `src/components/Footer.astro`
 - [ ] Imagen de Open Graph en `src/layouts/Base.astro` (lo que se ve al pegar el enlace)
 
-El precio (49 €/mes) va etiquetado como **precio de lanzamiento**. Esa etiqueta es lo que permite
-subirlo al ampliar cartera sin quedar mal con los primeros clientes: si lo subes, respeta el precio
-a quien ya entró o avísale con margen.
+**Casos y precio están retirados de la web**, no borrados de los datos: el precio de lanzamiento
+sigue en `src/data/pulso.ts` esperando a que se decida cómo se cuenta. Mientras no haya página que
+lo publique, nadie ve una cifra a medio explicar.
 
-Los números del panel de ejemplo son inventados y la propia sección lo dice. Si se cambian por
-datos reales de un cliente, hay que pedirle permiso antes.
+Las demos del muro llevan datos inventados y así se dice. Si alguna se cambia por datos reales de
+un cliente, hay que pedirle permiso antes.
 
 ## Accesibilidad
 

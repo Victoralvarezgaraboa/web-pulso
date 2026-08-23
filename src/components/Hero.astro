@@ -1,86 +1,70 @@
 ---
-// La apertura explica el servicio antes de entrar en métricas, demos o herramientas.
+// v2: la portada solo dice qué hacemos y qué vendemos. Nada más.
+// El resto del contenido vive en sus propias páginas, no apilado aquí debajo.
+const pasos = [
+  { n: '01', que: 'Escuchamos tu forma de trabajar' },
+  { n: '02', que: 'Ordenamos compras y ventas' },
+  { n: '03', que: 'Trabajamos tus albaranes' },
+  { n: '04', que: 'Te devolvemos una visión clara' },
+];
 ---
 
 <section class="hero">
   <div class="wrap">
-    <p class="kicker mono" data-hero-kicker>Control claro para negocios pequeños</p>
+    <p class="kicker mono">Control claro para negocios pequeños</p>
 
     <h1 class="titular">
-      <span class="linea" data-hero-linea>Tu negocio.</span>
-      <span class="linea ultima" data-hero-linea>
+      <span class="linea">Tu negocio.</span>
+      <span class="linea ultima">
         Tus datos, claros.
-        <span class="latido" data-hero-latido aria-hidden="true"></span>
+        <span class="latido" aria-hidden="true"></span>
       </span>
     </h1>
 
-    <svg
-      class="ecg"
-      viewBox="0 0 640 80"
-      fill="none"
-      preserveAspectRatio="xMinYMid meet"
-      aria-hidden="true"
-      data-hero-ecg
-    >
+    <svg class="ecg" viewBox="0 0 640 80" fill="none" preserveAspectRatio="xMinYMid meet" aria-hidden="true">
       <path
         d="M0 40 H150 L172 40 L190 12 L212 68 L236 26 L256 40 H392 L414 40 L430 20 L450 60 L468 40 H640"
         stroke="var(--pulso)"
         stroke-width="2.6"
         stroke-linecap="round"
-        stroke-linejoin="round"
-        data-trazo></path>
+        stroke-linejoin="round"></path>
     </svg>
 
-    <p class="entrada" data-hero-texto>
-      Escuchamos qué tareas repetitivas te roban tiempo y convertimos tus compras, ventas y albaranes
-      en una visión clara de cómo funciona tu negocio.
+    <p class="entrada">
+      Construimos la herramienta que tu oficio necesita y convertimos tus números en una visión clara
+      del negocio.
     </p>
-    <p class="matiz" data-hero-texto>
-      Tú nos cuentas el problema. Nosotros ordenamos el dato y te enseñamos qué está pasando.
+    <p class="matiz">
+      Tú nos cuentas el problema. Nosotros hacemos la pieza a medida, ordenamos el dato y te enseñamos
+      qué está pasando.
     </p>
 
-    <div class="acciones" data-hero-cta>
-      <a href="#contacto" class="btn">
+    <div class="acciones">
+      <a href="/contacto" class="btn">
         Cuéntanos tu problema
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M3 8h10M9 4l4 4-4 4"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"></path>
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
       </a>
-      <a href="#que-hacemos" class="btn ghost">Entender cómo lo hacemos</a>
+      <a href="/herramientas" class="btn ghost">Ver las herramientas</a>
     </div>
-  </div>
 
-  <!-- Franja de credibilidad: solo hechos comprobables. Nada de "+500 clientes". -->
-  <div class="franja">
-    <div class="wrap fila" data-anim-grupo>
-      <div class="hecho">
-        <span class="cifra mono">01</span>
-        <span class="que">escuchamos tu forma de trabajar</span>
-      </div>
-      <div class="hecho">
-        <span class="cifra mono">02</span>
-        <span class="que">ordenamos compras y ventas</span>
-      </div>
-      <div class="hecho">
-        <span class="cifra mono">03</span>
-        <span class="que">trabajamos tus albaranes</span>
-      </div>
-      <div class="hecho">
-        <span class="cifra mono">04</span>
-        <span class="que">te devolvemos una visión clara</span>
-      </div>
+    <div class="rejilla">
+      {
+        pasos.map((p) => (
+          <div class="paso">
+            <span class="cifra mono">{p.n}</span>
+            <span class="que">{p.que}</span>
+          </div>
+        ))
+      }
     </div>
   </div>
 </section>
 
 <style>
   .hero {
-    padding-block: clamp(70px, 11vw, 120px) clamp(60px, 9vw, 100px);
+    padding-block: clamp(56px, 9vw, 104px) clamp(80px, 10vw, 120px);
     border-top: none;
   }
 
@@ -89,15 +73,15 @@
     letter-spacing: 0.3em;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: 30px;
+    margin-bottom: 28px;
   }
 
   .titular {
-    font-size: clamp(52px, 10.5vw, 132px);
+    font-size: clamp(48px, 9.5vw, 116px);
     font-weight: 600;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.028em;
     line-height: 0.94;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
   .linea {
     display: block;
@@ -107,16 +91,14 @@
     display: inline-block;
   }
 
-  /* El punto que late junto al titular */
   .latido {
     display: inline-block;
-    width: 0.11em;
-    height: 0.11em;
+    width: 0.1em;
+    height: 0.1em;
     border-radius: 50%;
     background: var(--pulso);
     box-shadow: 0 0 26px var(--pulso);
-    margin-left: 0.06em;
-    vertical-align: baseline;
+    margin-left: 0.07em;
     animation: latir 2.2s ease-in-out infinite;
   }
   @keyframes latir {
@@ -126,8 +108,8 @@
       transform: scale(1);
     }
     50% {
-      opacity: 0.45;
-      transform: scale(0.82);
+      opacity: 0.4;
+      transform: scale(0.8);
     }
   }
 
@@ -135,57 +117,53 @@
     display: block;
     width: min(640px, 100%);
     height: auto;
-    margin-block: clamp(24px, 4vw, 34px) clamp(22px, 3vw, 30px);
+    margin-block: clamp(22px, 4vw, 34px) clamp(20px, 3vw, 30px);
   }
 
   .entrada {
-    font-size: clamp(18px, 2.4vw, 22px);
-    line-height: 1.55;
-    max-width: 40ch;
-    margin-bottom: 14px;
+    font-size: clamp(19px, 2.5vw, 24px);
+    line-height: 1.5;
+    max-width: 36ch;
+    margin-bottom: 16px;
     text-wrap: pretty;
-  }
-  .entrada strong {
-    color: var(--pulso);
-    font-weight: 600;
   }
 
   .matiz {
     font-size: 17px;
     color: var(--muted);
     max-width: 46ch;
-    margin-bottom: 40px;
+    margin-bottom: 34px;
+    text-wrap: pretty;
   }
 
   .acciones {
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
+    margin-bottom: clamp(64px, 9vw, 104px);
   }
 
-  /* ---------- franja de credibilidad ---------- */
-  .franja {
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    background: rgba(11, 26, 19, 0.5);
-    margin-top: clamp(50px, 8vw, 90px);
-  }
-
-  .fila {
+  /* Los cuatro pasos: una sola rejilla con borde, sin franja a sangre */
+  .rejilla {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 24px;
-    padding-block: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
   }
 
-  .hecho {
+  .paso {
+    background: var(--ink2);
+    padding: 26px 22px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
 
   .cifra {
-    font-size: clamp(24px, 3vw, 32px);
+    font-size: clamp(22px, 3vw, 30px);
     color: var(--pulso);
     line-height: 1;
   }
@@ -194,13 +172,6 @@
     font-size: 14px;
     color: var(--muted);
     line-height: 1.45;
-  }
-
-  @media (max-width: 760px) {
-    .fila {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 26px 20px;
-    }
   }
 
   @media (max-width: 520px) {

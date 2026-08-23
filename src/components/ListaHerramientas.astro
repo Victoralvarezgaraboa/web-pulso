@@ -1,0 +1,162 @@
+---
+import { herramientas, demos, enlaceDemo } from '../data/herramientas';
+---
+
+<section id="herramientas">
+  <div class="wrap">
+    <p class="sec-label">02 · Herramientas</p>
+    <h2>Construimos la herramienta que tu oficio necesita y nadie te vende.</h2>
+    <p class="bajada">
+      No adaptamos tu forma de trabajar a un software genérico: hacemos la pieza a medida. Todo lo de
+      abajo está construido y en producción, funcionando en negocios reales.
+    </p>
+
+    <div class="rejilla">
+      {
+        herramientas.map((h) => (
+          <article class="tarjeta">
+            <p class="familia mono">{h.familia}</p>
+            <h3>{h.nombre}</h3>
+            <p class="que">{h.que}</p>
+            <p class="detalle">{h.detalle}</p>
+            {h.destacado && <p class="destacado mono">{h.destacado}</p>}
+          </article>
+        ))
+      }
+    </div>
+
+    <p class="rotulo mono">Pruébalas · demos abiertas</p>
+    <div class="muro">
+      {
+        demos.map((d) => (
+          <a href={enlaceDemo(d)} target="_blank" rel="noopener" class="demo">
+            <span class="tipo mono">
+              {d.tipo === 'panel' ? 'Panel' : 'Herramienta'} · {d.sector}
+            </span>
+            <span class="nombre serif">{d.nombre} ↗</span>
+            <span class="gancho">{d.gancho}</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    border-top: none;
+  }
+
+  h2 {
+    max-width: 24ch;
+    margin-bottom: 20px;
+  }
+
+  .bajada {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 58ch;
+    margin-bottom: 52px;
+    text-wrap: pretty;
+  }
+
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 18px;
+    margin-bottom: clamp(56px, 8vw, 84px);
+  }
+
+  .tarjeta {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.25s ease, transform 0.25s ease;
+  }
+  .tarjeta:hover {
+    border-color: rgba(92, 227, 163, 0.35);
+    transform: translateY(-3px);
+  }
+
+  .familia {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--pulso);
+  }
+  .tarjeta h3 {
+    font-size: 22px;
+    line-height: 1.15;
+  }
+  .que {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .detalle {
+    font-size: 15px;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  .destacado {
+    margin-top: auto;
+    align-self: flex-start;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    border: 1px solid rgba(230, 181, 103, 0.35);
+    border-radius: 100px;
+    padding: 6px 12px;
+  }
+
+  .rotulo {
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .muro {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .demo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--ink2);
+    padding: 26px 24px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+  .demo:hover {
+    background: var(--card2);
+  }
+  .tipo {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted2);
+  }
+  .nombre {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--pulso);
+  }
+  .gancho {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+</style>
