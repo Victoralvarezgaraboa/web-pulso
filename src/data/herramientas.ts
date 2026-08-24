@@ -25,18 +25,19 @@ export const herramientas: Herramienta[] = [
     destacado: 'Se emiten y se envían solas',
   },
   {
-    nombre: 'Paneles de cierre por sector',
+    nombre: 'Paneles a medida por sector',
     familia: 'Análisis',
-    que: 'La radiografía económica del negocio, en solo lectura.',
+    que: 'El panel de una consulta de nutrición no se parece al de un grupo de música.',
     detalle:
-      'De la facturación al EBITDA, trimestre a trimestre, con punto de equilibrio y alertas de fuga. Un panel por sector, porque el motor de ingresos de un box no se parece en nada al de un grupo de música.',
+      'Cada oficio se mira con sus propios números. La consulta necesita la ficha del paciente con su evolución y su objetivo; el grupo, lo que deja cada bolo entre caché, gastos y merchandising. Mismo criterio de fondo, pantalla distinta.',
+    destacado: 'Uno por sector',
   },
   {
-    nombre: 'Comparador de compras y proveedores',
+    nombre: 'Compras y cierre del mes',
     familia: 'Compras',
-    que: 'El precio de cada artículo, en todos tus proveedores a la vez.',
+    que: 'El precio de cada artículo en todos tus proveedores, y el cierre que sale de ahí.',
     detalle:
-      'Compara al instante y compra siempre al mejor precio. Y como cada compra queda registrada, el cierre del mes deja de tener el agujero negro de «material varios».',
+      'Compara al instante y compra siempre al mejor precio. Y como cada compra queda registrada, el cierre deja de tener el agujero negro de «material varios»: de la facturación al EBITDA, trimestre a trimestre, con punto de equilibrio y alertas de fuga.',
     destacado: 'Compra al mejor precio',
   },
   {
