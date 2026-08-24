@@ -63,6 +63,14 @@ export interface Demo {
 
 export const demos: Demo[] = [
   {
+    nombre: 'Nutrición y entreno',
+    sector: 'Consultas y entrenadores',
+    tipo: 'herramienta',
+    gancho:
+      'Ficha del paciente con la evolución de cada medición, el progreso hacia el peso objetivo y el plan de dieta y entreno de la semana.',
+    archivo: 'medicion.html',
+  },
+  {
     nombre: 'Fitness y box',
     sector: 'Gimnasios',
     tipo: 'panel',
