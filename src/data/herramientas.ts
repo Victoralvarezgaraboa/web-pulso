@@ -17,12 +17,12 @@ export interface Herramienta {
 
 export const herramientas: Herramienta[] = [
   {
-    nombre: 'Facturación mensual automatizada',
+    nombre: 'Generador automático de facturas',
     familia: 'Automatización',
-    que: 'Las facturas que se repiten cada mes se emiten y se envían solas.',
+    que: 'El último día del mes las facturas salen solas hacia tus clientes.',
     detalle:
-      'Cuotas, mantenimientos e iguales dejan de ser el trabajo de un sábado. Se emiten en su fecha, salen hacia el cliente y quedan registradas, así que el mes llega cerrado en vez de por cerrar.',
-    destacado: 'Se emiten y se envían solas',
+      'Vas cargando los datos a lo largo del mes, o los dejas puestos de una vez. El último día se dispara solo: emite cada factura, la envía al correo de su cliente y te deja en el correo de la empresa el resumen de lo que ha mandado. Tu único trabajo es repasarlo. Y como corre en los servidores de Google, da igual que tu ordenador esté apagado.',
+    destacado: 'Se dispara sola cada mes',
   },
   {
     nombre: 'Paneles a medida por sector',
