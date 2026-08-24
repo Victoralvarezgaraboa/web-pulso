@@ -64,6 +64,14 @@ export interface Demo {
 
 export const demos: Demo[] = [
   {
+    nombre: 'Facturación automática',
+    sector: 'Cualquier oficio con cuotas',
+    tipo: 'panel',
+    gancho:
+      'Lee cada día tu hoja de clientes recurrentes y el último día del mes emite y envía las facturas solo. Ahí se ve el proceso entero, incluido el correo de resumen que te llega.',
+    archivo: 'facturas.html',
+  },
+  {
     nombre: 'Nutrición y entreno',
     sector: 'Consultas y entrenadores',
     tipo: 'herramienta',
