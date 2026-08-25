@@ -11,6 +11,12 @@ services:
     # npm ci respeta package-lock.json: mismas versiones que en local.
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
+    # Dominio propio, declarado aquí para que no dependa de acordarse de
+    # pincharlo en el panel. Render emite el certificado solo en cuanto el DNS
+    # apunte a él; hasta entonces figura como pendiente de verificar.
+    domains:
+      - pulsogestiona.es
+      - www.pulsogestiona.es
     # Solo se reconstruye si cambia algo que afecta al sitio.
     buildFilter:
       paths:
