@@ -1,43 +1,127 @@
 ---
 import { herramientas, demos, enlaceDemo } from '../data/herramientas';
+
+/**
+ * Dos pestañas, y no una página larga, por un motivo concreto: con las demos
+ * colgadas debajo de las tarjetas nadie llegaba a ellas. Se leían las cuatro
+ * tarjetas y se saltaba a contacto. Ahora la invitación a probarlas está
+ * arriba, a la altura de los ojos, antes de que se decida nada.
+ */
 ---
+
+<!-- Sin JavaScript no hay pestañas que valgan: se enseñan los dos bloques
+     seguidos. Ocultar las demos y que el botón no responda sería dejarlas
+     inalcanzables, que es justo el problema que venimos a resolver. -->
+<noscript>
+  <style is:inline>
+    #herramientas .pestanas { display: none; }
+    #herramientas #panel-demos.oculto { display: block; }
+    #herramientas #panel-demos { margin-top: 40px; }
+    #herramientas .puente button[data-panel] { display: none; }
+  </style>
+</noscript>
 
 <section id="herramientas">
   <div class="wrap">
     <p class="sec-label">02 · Herramientas</p>
     <h2>Construimos la herramienta que tu oficio necesita y nadie te vende.</h2>
     <p class="bajada">
-      No adaptamos tu forma de trabajar a un software genérico: hacemos la pieza a medida. Todo lo de
-      abajo está construido y en producción, funcionando en negocios reales.
+      No adaptamos tu forma de trabajar a un software genérico: hacemos la pieza a medida. Todo esto
+      está construido y en producción, funcionando en negocios reales. Y abierto, para que lo
+      compruebes tú.
     </p>
 
-    <div class="rejilla">
-      {
-        herramientas.map((h) => (
-          <article class="tarjeta">
-            <p class="familia mono">{h.familia}</p>
-            <h3>{h.nombre}</h3>
-            <p class="que">{h.que}</p>
-            <p class="detalle">{h.detalle}</p>
-            {h.destacado && <p class="destacado mono">{h.destacado}</p>}
-          </article>
-        ))
-      }
+    <div class="pestanas" role="tablist" aria-label="Herramientas y demos">
+      <button class="pestana activa" role="tab" aria-selected="true" aria-controls="panel-lista" id="tab-lista" data-panel="lista">
+        Lo que construimos
+      </button>
+      <button class="pestana llamada" role="tab" aria-selected="false" aria-controls="panel-demos" id="tab-demos" data-panel="demos">
+        <span class="punto" aria-hidden="true"></span>
+        Pruébalas
+        <span class="cuenta mono">{demos.length}</span>
+      </button>
     </div>
 
-    <p class="rotulo mono">Pruébalas · demos abiertas</p>
-    <div class="muro">
-      {
-        demos.map((d) => (
-          <a href={enlaceDemo(d)} target="_blank" rel="noopener" class="demo">
-            <span class="tipo mono">
-              {d.tipo === 'panel' ? 'Panel' : 'Herramienta'} · {d.sector}
-            </span>
-            <span class="nombre serif">{d.nombre} ↗</span>
-            <span class="gancho">{d.gancho}</span>
-          </a>
-        ))
-      }
+    <!-- ---------- las herramientas ---------- -->
+    <div class="panel" id="panel-lista" role="tabpanel" aria-labelledby="tab-lista">
+      <div class="rejilla">
+        {
+          herramientas.map((h) => (
+            <article class="tarjeta">
+              <p class="familia mono">{h.familia}</p>
+              <h3>{h.nombre}</h3>
+              <p class="que">{h.que}</p>
+              <p class="detalle">{h.detalle}</p>
+              {h.destacado && <p class="destacado mono">{h.destacado}</p>}
+            </article>
+          ))
+        }
+      </div>
+
+      <div class="puente">
+        <p>
+          Todas están abiertas con datos de ejemplo. No hace falta registrarse ni dejar el correo.
+        </p>
+        <button class="btn" data-panel="demos">
+          Probarlas ahora
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M3 8h10M9 4l4 4-4 4"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ---------- las demos ---------- -->
+    <div class="panel oculto" id="panel-demos" role="tabpanel" aria-labelledby="tab-demos">
+      <div class="cabecera-demos">
+        <h3 class="serif">No te fíes de nosotros. Ábrelas.</h3>
+        <ul class="sinfriccion">
+          <li>Sin registro</li>
+          <li>Sin dejar el correo</li>
+          <li>Sin instalar nada</li>
+        </ul>
+      </div>
+
+      <div class="muro">
+        {
+          demos.map((d) => (
+            <a href={enlaceDemo(d)} target="_blank" rel="noopener" class="demo">
+              <span class="fila-alta">
+                <span class="tipo mono">
+                  {d.tipo === 'panel' ? 'Panel' : 'Herramienta'} · {d.sector}
+                </span>
+                <span class="envivo mono">
+                  <span class="punto" aria-hidden="true" />
+                  en vivo
+                </span>
+              </span>
+              <span class="nombre serif">{d.nombre}</span>
+              <span class="gancho">{d.gancho}</span>
+              <span class="abrir">
+                Abrir demo
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M6 3h7v7M13 3L4 12"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"></path>
+                </svg>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="puente">
+        <p>Los datos son inventados; el funcionamiento, no. Si algo no te encaja, lo verás en dos minutos.</p>
+        <a href="/contacto" class="btn">Quiero la mía con mis datos</a>
+      </div>
     </div>
   </div>
 </section>
@@ -56,15 +140,114 @@ import { herramientas, demos, enlaceDemo } from '../data/herramientas';
     font-size: 18px;
     color: var(--muted);
     max-width: 58ch;
-    margin-bottom: 52px;
+    margin-bottom: 30px;
     text-wrap: pretty;
   }
 
+  /* ---------- pestañas ---------- */
+  .pestanas {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 34px;
+  }
+
+  .pestana {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 12px 22px;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .pestana:hover {
+    color: var(--ivory);
+  }
+
+  /* El filo: una línea clara dentro del propio botón, arriba. Da relieve y
+     pide el clic sin tener que gritar con un color. */
+  .pestana.llamada {
+    color: var(--ivory);
+    border-color: rgba(236, 239, 234, 0.34);
+    box-shadow:
+      inset 0 1px 0 rgba(236, 239, 234, 0.5),
+      0 0 0 3px rgba(236, 239, 234, 0.05);
+  }
+  /* El filo solo llama mientras la pestaña está cerrada. Ya abierta manda el
+     verde: si no, al pasar el ratón por encima volvería el borde blanco. */
+  .pestana.llamada:not(.activa):hover {
+    border-color: rgba(236, 239, 234, 0.6);
+    box-shadow:
+      inset 0 1px 0 rgba(236, 239, 234, 0.75),
+      0 0 0 4px rgba(236, 239, 234, 0.08);
+  }
+
+  .pestana.activa {
+    background: var(--pulso);
+    border-color: var(--pulso);
+    color: #062013;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+  .pestana.activa .cuenta {
+    background: rgba(6, 32, 19, 0.16);
+    color: #062013;
+  }
+  .pestana.activa .punto {
+    background: #062013;
+    box-shadow: none;
+  }
+
+  .punto {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--pulso);
+    box-shadow: 0 0 9px var(--pulso);
+    flex-shrink: 0;
+    animation: latir 2s ease-in-out infinite;
+  }
+  @keyframes latir {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.35;
+      transform: scale(0.72);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .punto {
+      animation: none;
+    }
+  }
+
+  .cuenta {
+    font-size: 12px;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 100px;
+    background: rgba(236, 239, 234, 0.1);
+    color: var(--muted);
+  }
+
+  .panel.oculto {
+    display: none;
+  }
+
+  /* ---------- tarjetas de herramienta ---------- */
   .rejilla {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 18px;
-    margin-bottom: clamp(56px, 8vw, 84px);
   }
 
   .tarjeta {
@@ -113,50 +296,206 @@ import { herramientas, demos, enlaceDemo } from '../data/herramientas';
     padding: 6px 12px;
   }
 
-  .rotulo {
-    font-size: 12px;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 20px;
+  /* ---------- cabecera de las demos ---------- */
+  .cabecera-demos {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .cabecera-demos h3 {
+    font-size: 27px;
+    max-width: 20ch;
   }
 
+  .sinfriccion {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    flex-shrink: 0;
+  }
+  .sinfriccion li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--ivory);
+    white-space: nowrap;
+  }
+  .sinfriccion li::before {
+    content: '';
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1.5px solid var(--pulso);
+    background:
+      linear-gradient(45deg, transparent 45%, var(--pulso) 45%, var(--pulso) 55%, transparent 55%),
+      linear-gradient(-45deg, transparent 45%, var(--pulso) 45%, var(--pulso) 55%, transparent 55%);
+    flex-shrink: 0;
+  }
+
+  /* ---------- tarjetas de demo ---------- */
   .muro {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1px;
-    background: var(--line);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    overflow: hidden;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
   }
 
   .demo {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    background: var(--ink2);
-    padding: 26px 24px;
+    gap: 9px;
+    background: var(--card);
+    /* El mismo filo claro de la pestaña: el borde de arriba se ve, y la
+       tarjeta deja de parecer un bloque de texto y parece un botón. */
+    border: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 rgba(236, 239, 234, 0.16);
+    border-radius: var(--radius);
+    padding: 24px;
     text-decoration: none;
-    transition: background 0.2s ease;
+    color: inherit;
+    transition: border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
   }
   .demo:hover {
-    background: var(--card2);
+    border-color: rgba(92, 227, 163, 0.45);
+    transform: translateY(-4px);
+    box-shadow:
+      inset 0 1px 0 rgba(236, 239, 234, 0.4),
+      0 20px 44px rgba(0, 0, 0, 0.34);
+  }
+
+  .fila-alta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
   }
   .tipo {
     font-size: 10px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted2);
   }
+  .envivo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .envivo .punto {
+    width: 6px;
+    height: 6px;
+  }
+
   .nombre {
-    font-size: 20px;
+    font-size: 21px;
     font-weight: 500;
+    line-height: 1.2;
     color: var(--pulso);
   }
   .gancho {
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 14.5px;
+    line-height: 1.55;
     color: var(--muted);
+    text-wrap: pretty;
+  }
+  .abrir {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ivory);
+  }
+  .demo:hover .abrir {
+    color: var(--pulso);
+  }
+  .demo:hover .abrir svg {
+    transform: translate(2px, -2px);
+  }
+  .abrir svg {
+    transition: transform 0.22s ease;
+  }
+
+  /* ---------- pie de cada panel ---------- */
+  .puente {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    background: var(--card2);
+    border: 1px solid rgba(92, 227, 163, 0.25);
+    border-radius: var(--radius);
+    padding: 26px 32px;
+    margin-top: 26px;
+  }
+  .puente p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 54ch;
+  }
+  .puente .btn {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  @media (max-width: 600px) {
+    .puente {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .puente :global(.btn) {
+      justify-content: center;
+    }
+    .pestana {
+      flex: 1;
+      justify-content: center;
+      padding-inline: 14px;
+    }
   }
 </style>
+
+<script>
+  /* Las pestañas se enganchan una sola vez: los paneles no se repintan, solo
+     se muestran y se ocultan. El botón del pie también cambia de pestaña,
+     porque quien llega hasta ahí leyendo ya está listo para probar. */
+  const tabs = document.querySelectorAll<HTMLButtonElement>('.pestana');
+  const paneles: Record<string, HTMLElement | null> = {
+    lista: document.getElementById('panel-lista'),
+    demos: document.getElementById('panel-demos'),
+  };
+
+  function abrir(cual: string, mover = false) {
+    if (!paneles[cual]) return;
+    Object.entries(paneles).forEach(([nombre, panel]) => {
+      panel?.classList.toggle('oculto', nombre !== cual);
+    });
+    tabs.forEach((t) => {
+      const suyo = t.dataset.panel === cual;
+      t.classList.toggle('activa', suyo);
+      t.setAttribute('aria-selected', String(suyo));
+    });
+    history.replaceState(null, '', cual === 'demos' ? '#demos' : location.pathname);
+    if (mover) {
+      document.getElementById('herramientas')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-panel]').forEach((el) => {
+    el.addEventListener('click', () => abrir(el.dataset.panel!, !el.classList.contains('pestana')));
+  });
+
+  /* Enlazable: /herramientas#demos abre directamente las demos. */
+  if (location.hash === '#demos') abrir('demos');
+</script>
