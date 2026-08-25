@@ -2,14 +2,25 @@
 import Latido from './Latido.astro';
 
 // v2: la nav ya no son anclas de una sola página larga, son páginas de verdad.
+//
+// «Pruébalas» es la excepción: no es una página, es la pestaña de demos de
+// /herramientas. Está aquí arriba a propósito. Metidas dentro de la página de
+// herramientas no las veía nadie, y son lo más convincente que tenemos porque
+// se comprueban solas. Marcada con el punto vivo para que se distinga de las
+// otras cuatro, que son secciones y no una invitación.
 const enlaces = [
   { href: '/', texto: 'Inicio' },
   { href: '/que-hacemos', texto: 'Qué hacemos' },
   { href: '/herramientas', texto: 'Herramientas' },
+  { href: '/herramientas#demos', texto: 'Pruébalas', vivo: true },
   { href: '/contacto', texto: 'Contacto' },
 ];
 
 const actual = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+// Los enlaces con ancla nunca se marcan como página actual: /herramientas y
+// /herramientas#demos comparten ruta, y se encenderían las dos a la vez.
+const esActual = (e: (typeof enlaces)[number]) => !e.vivo && actual === e.href;
 ---
 
 <header class="nav">
@@ -22,7 +33,12 @@ const actual = Astro.url.pathname.replace(/\/$/, '') || '/';
     <nav class="enlaces" aria-label="Principal">
       {
         enlaces.map((e) => (
-          <a href={e.href} class:list={[{ activo: actual === e.href }]} aria-current={actual === e.href ? 'page' : undefined}>
+          <a
+            href={e.href}
+            class:list={[{ activo: esActual(e), vivo: e.vivo }]}
+            aria-current={esActual(e) ? 'page' : undefined}
+          >
+            {e.vivo && <span class="punto" aria-hidden="true" />}
             {e.texto}
           </a>
         ))
@@ -92,6 +108,47 @@ const actual = Astro.url.pathname.replace(/\/$/, '') || '/';
     color: var(--pulso);
     background: rgba(92, 227, 163, 0.12);
     font-weight: 600;
+  }
+
+  /* El mismo filo claro que llevan la pestaña y las tarjetas de demo: pide
+     el clic con relieve, no con otro color más. */
+  .enlaces a.vivo {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ivory);
+    border: 1px solid rgba(236, 239, 234, 0.28);
+    box-shadow: inset 0 1px 0 rgba(236, 239, 234, 0.42);
+    padding-block: 8px;
+  }
+  .enlaces a.vivo:hover {
+    border-color: rgba(236, 239, 234, 0.55);
+    box-shadow: inset 0 1px 0 rgba(236, 239, 234, 0.7);
+  }
+  .punto {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pulso);
+    box-shadow: 0 0 8px var(--pulso);
+    flex-shrink: 0;
+    animation: latir 2s ease-in-out infinite;
+  }
+  @keyframes latir {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.35;
+      transform: scale(0.72);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .punto {
+      animation: none;
+    }
   }
 
   .btn.compacto {

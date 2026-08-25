@@ -498,4 +498,11 @@ import { herramientas, demos, enlaceDemo } from '../data/herramientas';
 
   /* Enlazable: /herramientas#demos abre directamente las demos. */
   if (location.hash === '#demos') abrir('demos');
+
+  /* Y estando ya en esta página, el enlace «Pruébalas» de la cabecera solo
+     cambia el ancla: no hay recarga, así que hay que escuchar el cambio o la
+     pestaña se quedaría quieta. */
+  window.addEventListener('hashchange', () => {
+    abrir(location.hash === '#demos' ? 'demos' : 'lista', true);
+  });
 </script>
