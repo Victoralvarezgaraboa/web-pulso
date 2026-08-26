@@ -18,28 +18,11 @@ const bloques = [
     texto:
       'Convertimos ese trabajo en paneles y controles que te dicen qué está pasando sin obligarte a descifrarlo.',
   },
-];
-
-/**
- * Puesta en marcha. No es un cuarto paso del proceso de arriba -ese es una
- * secuencia: escuchar, ordenar, mostrar- sino un servicio aparte, y por eso
- * va en su propio bloque y sin numerar.
- *
- * Lo contamos porque lo hacemos: Pulso monto su propio dominio y su correo,
- * firma incluida. Se vende mejor lo que uno ha hecho para si mismo.
- */
-const puestaEnMarcha = [
   {
-    titulo: 'Tu dominio',
-    texto: 'Tu nombre en internet, registrado a tu nombre y renovándose solo. No el de un tercero que un día te lo alquila.',
-  },
-  {
-    titulo: 'Correo con tu nombre',
-    texto: 'Las direcciones que necesites, y reenvíos para repartirlas entre quien haga falta sin pagar un buzón por cada una.',
-  },
-  {
-    titulo: 'Y que lo que mandes llegue',
-    texto: 'La firma que acredita que un correo sale de verdad de tu casa. Sin ella, tus facturas y presupuestos acaban en la carpeta de spam y no te enteras.',
+    n: '04',
+    titulo: 'Y te ponemos en marcha',
+    texto:
+      'Si aún trabajas desde un Gmail y sin dirección propia, te montamos el dominio, el correo con tu nombre y la firma que evita que tus facturas acaben en spam.',
   },
 ];
 
@@ -76,27 +59,6 @@ const noEs = [
           </article>
         ))
       }
-    </div>
-
-    <div class="marcha">
-      <div class="cabecera-marcha">
-        <p class="rotulo mono">Antes de todo esto</p>
-        <h3 class="serif">Si tu negocio aún no existe en internet, empezamos por ahí.</h3>
-        <p class="texto">
-          Muchos negocios pequeños trabajan desde una cuenta de Gmail y sin dirección propia. Se nota,
-          y resta. Te lo montamos nosotros, igual que nos lo montamos a nosotros mismos.
-        </p>
-      </div>
-      <div class="lista-marcha">
-        {
-          puestaEnMarcha.map((x) => (
-            <div class="item">
-              <h4>{x.titulo}</h4>
-              <p>{x.texto}</p>
-            </div>
-          ))
-        }
-      </div>
     </div>
 
     <div class="contraste">
@@ -160,75 +122,6 @@ const noEs = [
     font-size: 16px;
     color: var(--muted);
     text-wrap: pretty;
-  }
-
-  /* ---------- puesta en marcha ---------- */
-  .marcha {
-    background: var(--card2);
-    border: 1px solid rgba(92, 227, 163, 0.25);
-    border-radius: var(--radius);
-    padding: 32px;
-    margin-bottom: 18px;
-    display: grid;
-    grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.25fr);
-    gap: 32px;
-    align-items: start;
-  }
-
-  .cabecera-marcha .rotulo {
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--pulso);
-    margin-bottom: 14px;
-  }
-  .cabecera-marcha h3 {
-    font-size: 24px;
-    line-height: 1.2;
-    margin-bottom: 12px;
-    text-wrap: balance;
-  }
-  .cabecera-marcha .texto {
-    font-size: 15.5px;
-    color: var(--muted);
-    text-wrap: pretty;
-  }
-
-  .lista-marcha {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .lista-marcha .item {
-    padding: 14px 0;
-    border-top: 1px solid rgba(236, 239, 234, 0.1);
-  }
-  .lista-marcha .item:first-child {
-    padding-top: 0;
-    border-top: none;
-  }
-  .lista-marcha .item:last-child {
-    padding-bottom: 0;
-  }
-  .lista-marcha h4 {
-    font-family: var(--serif);
-    font-size: 17px;
-    font-weight: 500;
-    margin-bottom: 5px;
-  }
-  .lista-marcha p {
-    font-size: 14.5px;
-    color: var(--muted);
-    line-height: 1.55;
-    text-wrap: pretty;
-  }
-
-  @media (max-width: 760px) {
-    .marcha {
-      grid-template-columns: 1fr;
-      gap: 24px;
-      padding: 26px;
-    }
   }
 
   .contraste {
