@@ -44,8 +44,6 @@ const esActual = (e: (typeof enlaces)[number]) => !e.vivo && actual === e.href;
         ))
       }
     </nav>
-
-    <a href="/contacto" class="btn compacto">Contacta</a>
   </div>
   <div class="filo" aria-hidden="true"></div>
 </header>
@@ -65,6 +63,9 @@ const esActual = (e: (typeof enlaces)[number]) => !e.vivo && actual === e.href;
     background: linear-gradient(90deg, transparent, rgba(92, 227, 163, 0.5), transparent);
   }
 
+  /* Dos piezas, no tres: el logo a la izquierda y el menu pegado a la
+     derecha. Antes habia ademas un boton "Contacta" que llevaba al mismo
+     sitio que la pestaña "Contacto"; sobraba. */
   .fila {
     display: flex;
     align-items: center;
@@ -151,12 +152,6 @@ const esActual = (e: (typeof enlaces)[number]) => !e.vivo && actual === e.href;
     }
   }
 
-  .btn.compacto {
-    padding: 11px 20px;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-
   /* Pantalla intermedia: la fila sigue cabiendo, solo se aprieta. */
   @media (max-width: 1060px) {
     .fila {
@@ -168,8 +163,9 @@ const esActual = (e: (typeof enlaces)[number]) => !e.vivo && actual === e.href;
     }
   }
 
-  /* Movil: tres lineas. Logo, menu entero y boton. Nada de desplazar a los
-     lados para descubrir que habia mas enlaces. */
+  /* Movil: dos lineas, el logo arriba y el menu debajo repartido en las que
+     hagan falta. Nada de desplazar a los lados para descubrir que habia mas
+     enlaces. */
   @media (max-width: 700px) {
     .fila {
       flex-direction: column;
@@ -180,9 +176,6 @@ const esActual = (e: (typeof enlaces)[number]) => !e.vivo && actual === e.href;
       flex-wrap: wrap;
       justify-content: center;
       gap: 4px 6px;
-    }
-    .btn.compacto {
-      padding: 10px 26px;
     }
   }
 </style>
