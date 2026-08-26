@@ -5,8 +5,12 @@
  */
 
 export const contacto = {
-  /** Correo al que llegan las peticiones de primer cierre. */
-  email: 'pulso.gestiona@gmail.com',
+  /**
+   * Correo al que llegan las peticiones. Es un alias: entra en el buzon de
+   * comercial. Se usa "hola@" y no el buzon directo para poder redirigirlo
+   * el dia que conteste otra persona, sin tocar la web ni reimprimir nada.
+   */
+  email: 'hola@pulsogestiona.es',
   /** Teléfono en formato internacional y sin signos, para el enlace de wa.me */
   whatsapp: '34654103406',
   /** El mismo número, escrito como se lee en España. */
