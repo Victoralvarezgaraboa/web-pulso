@@ -32,11 +32,11 @@ import { contacto } from '../data/pulso';
       <h2>Quién responde de tus datos</h2>
       <dl>
         <dt>Responsable</dt>
-        <dd><span class="hueco">{titular.nombre}</span></dd>
+        <dd>{titular.nombre}</dd>
         <dt>NIF</dt>
-        <dd><span class="hueco">{titular.nif}</span></dd>
+        <dd>{titular.nif}</dd>
         <dt>Domicilio</dt>
-        <dd><span class="hueco">{titular.domicilio}</span></dd>
+        <dd>{titular.domicilio} <span class="hueco">{titular.domicilioIncompleto}</span></dd>
         <dt>Contacto</dt>
         <dd><a href={`mailto:${contacto.email}`}>{contacto.email}</a></dd>
       </dl>
@@ -133,8 +133,7 @@ import { contacto } from '../data/pulso';
         <p>
           Esta política está redactada sobre lo que realmente hace el sitio, comprobado en su código:
           qué se recoge, dónde se aloja y con quién habla. Pero <strong>no la ha revisado un
-          profesional de protección de datos</strong>, y los tres datos identificativos siguen sin
-          rellenar.
+          profesional de protección de datos</strong>, y al domicilio le falta la localidad.
         </p>
         <p>
           Antes de dar la web por publicada en serio, y sobre todo antes de tratar datos de clientes

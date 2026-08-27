@@ -2,10 +2,10 @@
  * Datos identificativos y de tratamiento para el aviso legal y la política de
  * privacidad.
  *
- * IMPORTANTE — todo lo que aparece entre corchetes es un hueco pendiente y se
- * ve en la web tal cual, a propósito, igual que en `pulso.ts`. Son datos que
- * solo puede rellenar el titular y sin los cuales el aviso legal no cumple:
- * la LSSI obliga a identificar quién está detrás de un sitio comercial.
+ * IMPORTANTE — lo que aparece entre corchetes es un hueco pendiente y se ve en
+ * la web tal cual, a propósito, igual que en `pulso.ts`. Queda uno: al
+ * domicilio le faltan localidad, código postal y provincia. Una calle y un
+ * número sueltos no identifican un sitio, y la LSSI exige domicilio.
  *
  * Y una advertencia que conviene no borrar: estos textos están redactados con
  * lo que se ha comprobado del propio sitio (qué se recoge, dónde se aloja, qué
@@ -17,14 +17,16 @@
 export const actualizado = '27 de agosto de 2026';
 
 export const titular = {
-  /** Razón social si hay sociedad, o nombre y apellidos si se opera como autónomo. */
-  nombre: '[RAZÓN SOCIAL O NOMBRE Y APELLIDOS]',
-  /** NIF o CIF. Obligatorio: la LSSI lo exige expresamente. */
-  nif: '[NIF]',
-  /** Domicilio fiscal completo, con código postal y provincia. */
-  domicilio: '[DOMICILIO FISCAL]',
-  /** Si se opera como sociedad, sus datos registrales. Un autónomo no los tiene. */
-  registro: '[DATOS REGISTRALES · dejar vacío si se opera como autónomo]',
+  /** Se opera como persona física, así que aquí van nombre y apellidos. */
+  nombre: 'Víctor Álvarez Garaboa',
+  /** NIF. Obligatorio: la LSSI lo exige expresamente. Letra comprobada. */
+  nif: '74893207D',
+  /**
+   * Domicilio. INCOMPLETO: falta localidad, código postal y provincia, y sin
+   * eso no identifica un sitio. Se muestra el hueco al lado para que se vea.
+   */
+  domicilio: 'Osario, 7',
+  domicilioIncompleto: '[LOCALIDAD, CÓDIGO POSTAL Y PROVINCIA]',
   nombreComercial: 'Pulso',
   web: 'pulsogestiona.es',
 };

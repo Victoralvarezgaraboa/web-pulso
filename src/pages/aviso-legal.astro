@@ -26,11 +26,11 @@ import { contacto } from '../data/pulso';
       </p>
       <dl>
         <dt>Titular</dt>
-        <dd><span class="hueco">{titular.nombre}</span></dd>
+        <dd>{titular.nombre}</dd>
         <dt>NIF</dt>
-        <dd><span class="hueco">{titular.nif}</span></dd>
+        <dd>{titular.nif}</dd>
         <dt>Domicilio</dt>
-        <dd><span class="hueco">{titular.domicilio}</span></dd>
+        <dd>{titular.domicilio} <span class="hueco">{titular.domicilioIncompleto}</span></dd>
         <dt>Nombre comercial</dt>
         <dd>{titular.nombreComercial}</dd>
         <dt>Sitio web</dt>
@@ -44,9 +44,9 @@ import { contacto } from '../data/pulso';
       <div class="aviso">
         <p class="rotulo">Pendiente</p>
         <p>
-          Los tres datos en ámbar están sin rellenar. Se ven así a propósito, para que no se cuelen sin
-          poner. Hasta que estén, este aviso legal <strong>no cumple</strong>: la ley obliga a
-          identificar con nombre y NIF a quien hay detrás de un sitio comercial.
+          Al domicilio le faltan <strong>localidad, código postal y provincia</strong>. Una calle y un
+          número sueltos no identifican un sitio, y la ley pide domicilio. El hueco se ve en ámbar a
+          propósito, para que no se cuele sin completar.
         </p>
       </div>
 

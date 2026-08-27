@@ -58,8 +58,9 @@ se cuele sin rellenar:
 
 - [x] `src/data/pulso.ts`: email y WhatsApp
 - [x] Aviso legal y política de privacidad, en `/aviso-legal` y `/privacidad`
-- [ ] **`src/data/legal.ts`: razón social, NIF y domicilio.** Salen en ámbar en las dos
-      páginas hasta que se rellenen. Sin ellos el aviso legal no cumple la LSSI
+- [x] `src/data/legal.ts`: titular y NIF
+- [ ] **Completar el domicilio en `src/data/legal.ts`**: falta localidad, código postal y
+      provincia. El hueco sale en ámbar en las dos páginas hasta que se rellene
 - [ ] Que un profesional de protección de datos revise los dos textos
 - [ ] Imagen de Open Graph en `src/layouts/Base.astro` (lo que se ve al pegar el enlace)
 
