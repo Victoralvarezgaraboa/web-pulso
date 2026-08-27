@@ -21,6 +21,7 @@ npm run preview  # ver el resultado de build antes de publicar
 src/
   data/pulso.ts        ← email y teléfono. EMPIEZA POR AQUÍ.
   data/herramientas.ts ← las herramientas y las demos del muro.
+  data/legal.ts        ← titular, NIF y domicilio. TIENE HUECOS SIN RELLENAR.
   styles/marca.css     ← colores y tipografías de marca. No inventar colores aquí.
   layouts/Base.astro   ← <head>, tipografías y todas las animaciones GSAP
   components/          ← Nav, Footer, Hero y una sección por página
@@ -29,7 +30,11 @@ src/
                           que-hacemos.astro  /que-hacemos
                           herramientas.astro /herramientas  (herramientas + demos)
                           contacto.astro     /contacto
-public/                ← favicon y archivos que se sirven tal cual
+                          aviso-legal.astro  /aviso-legal
+                          privacidad.astro   /privacidad
+public/                ← favicon, tipografías y archivos que se sirven tal cual
+  fuentes/             ← las 3 familias de marca. NO cargar de Google: manda
+                         la IP del visitante a un tercero sin su consentimiento
 diseno/                ← archivos fuente del diseño en canvas (no afectan a la web)
 ```
 
@@ -41,17 +46,21 @@ El repositorio incluye `render.yaml`, así que Render lo configura solo:
 2. Render lee `render.yaml`, ejecuta `npm ci && npm run build` y publica `dist/`.
 3. Cada push a `main` vuelve a desplegar.
 
-Es un sitio estático: sin servidor ni base de datos, entra en el plan gratuito. El primer dominio
-es `https://web-pulso.onrender.com`; cuando conectes uno propio, cámbialo en `astro.config.mjs`
-(campo `site`), que es de donde salen los enlaces canónicos.
+Es un sitio estático: sin servidor ni base de datos, entra en el plan gratuito. El sitio se sirve en `https://pulsogestiona.es`, declarado en `render.yaml` y en el campo
+`site` de `astro.config.mjs`, que es de donde salen los enlaces canónicos. El subdominio
+`web-pulso.onrender.com` sigue activo como red de seguridad y conviene apagarlo cuando el
+dominio propio lleve unos días sin sobresaltos.
 
 ## Antes de publicar
 
 Todo lo que aparece **entre corchetes** en la web es un hueco pendiente, a propósito, para que no
 se cuele sin rellenar:
 
-- [ ] `src/data/pulso.ts`: email y WhatsApp
-- [ ] Aviso legal y política de privacidad en `src/components/Footer.astro`
+- [x] `src/data/pulso.ts`: email y WhatsApp
+- [x] Aviso legal y política de privacidad, en `/aviso-legal` y `/privacidad`
+- [ ] **`src/data/legal.ts`: razón social, NIF y domicilio.** Salen en ámbar en las dos
+      páginas hasta que se rellenen. Sin ellos el aviso legal no cumple la LSSI
+- [ ] Que un profesional de protección de datos revise los dos textos
 - [ ] Imagen de Open Graph en `src/layouts/Base.astro` (lo que se ve al pegar el enlace)
 
 **Casos y precio están retirados de la web**, no borrados de los datos: el precio de lanzamiento
