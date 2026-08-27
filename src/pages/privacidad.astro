@@ -1,0 +1,148 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import LatidoPuntero from '../components/LatidoPuntero.astro';
+import TextoLegal from '../components/TextoLegal.astro';
+import { titular, encargados, noHacemos, aepd, actualizado } from '../data/legal';
+import { contacto } from '../data/pulso';
+---
+
+<Base
+  titulo="Privacidad · Pulso"
+  descripcion="Qué datos tratamos, para qué, con quién y qué puedes exigirnos. Esta web no usa cookies ni analítica."
+>
+  <Nav />
+  <main>
+    <TextoLegal
+      titulo="Política de privacidad"
+      entradilla="Qué datos tratamos, para qué, quién más los ve y qué puedes exigirnos. Escrito para entenderse a la primera, que para eso está."
+      actualizado={actualizado}
+    >
+      <h2>Lo primero, porque suele ser la duda</h2>
+      <p>
+        <strong>Esta web no te vigila.</strong> No hay cookies, ni analítica, ni píxeles, ni
+        formularios. Puedes leerla entera sin que quede rastro de ti en ninguna parte. Por eso tampoco
+        verás un aviso de cookies: no hay ninguna que consentir.
+      </p>
+      <ul>
+        {noHacemos.map((x) => <li>{x}</li>)}
+      </ul>
+
+      <h2>Quién responde de tus datos</h2>
+      <dl>
+        <dt>Responsable</dt>
+        <dd><span class="hueco">{titular.nombre}</span></dd>
+        <dt>NIF</dt>
+        <dd><span class="hueco">{titular.nif}</span></dd>
+        <dt>Domicilio</dt>
+        <dd><span class="hueco">{titular.domicilio}</span></dd>
+        <dt>Contacto</dt>
+        <dd><a href={`mailto:${contacto.email}`}>{contacto.email}</a></dd>
+      </dl>
+
+      <h2>Qué datos tenemos y de dónde salen</h2>
+      <p>
+        Solo los que nos das tú al escribirnos. Si nos mandas un correo o un mensaje de WhatsApp,
+        tendremos tu nombre, tu dirección o tu teléfono y lo que nos cuentes. Nada más, y nada que no
+        hayas escrito a conciencia.
+      </p>
+      <p>
+        Si acabas siendo cliente, trataremos además los datos necesarios para prestarte el servicio y
+        para facturarte.
+      </p>
+
+      <h2>Para qué los usamos</h2>
+      <ul>
+        <li><strong>Contestarte.</strong> La base es tu propio consentimiento: nos escribes, te respondemos.</li>
+        <li><strong>Prestar el servicio contratado</strong> y facturarlo, si llegamos a trabajar juntos. La base es el contrato entre las partes.</li>
+        <li><strong>Cumplir obligaciones legales</strong>, sobre todo las fiscales y contables.</li>
+      </ul>
+      <p>
+        No hacemos perfilado, ni decisiones automatizadas, ni te mandamos publicidad. No tenemos lista
+        de correo.
+      </p>
+
+      <h2>Cuánto tiempo los guardamos</h2>
+      <p>
+        Si nos escribiste y no llegamos a trabajar juntos, el tiempo necesario para atender el asunto y
+        poco más. Si eres cliente, mientras dure la relación y después durante los plazos que exigen
+        las obligaciones fiscales y contables.
+      </p>
+
+      <h2>Quién más los ve</h2>
+      <p>
+        No vendemos ni cedemos datos a nadie. Sí hay dos proveedores que, por hacer su trabajo, pueden
+        tratarlos por cuenta nuestra:
+      </p>
+      <ul>
+        {
+          encargados.map((e) => (
+            <li>
+              <strong>{e.nombre}</strong> — {e.papel} {e.detalle}
+            </li>
+          ))
+        }
+      </ul>
+      <p>
+        Además, si nos escribes por WhatsApp, esa conversación pasa por los sistemas de quien presta
+        ese servicio y se rige por sus propias condiciones. Si prefieres evitarlo, escríbenos por
+        correo.
+      </p>
+
+      <div class="aviso">
+        <p class="rotulo">Si eres cliente, esto te interesa</p>
+        <p>
+          Cuando trabajamos con las herramientas de tu negocio, tratamos datos que son
+          <strong>tuyos y de tus clientes</strong>. En esa relación tú eres el responsable y nosotros
+          actuamos como encargados del tratamiento.
+        </p>
+        <p>
+          Eso exige un <strong>contrato de encargo firmado antes</strong> de que toquemos ningún dato,
+          donde queda por escrito qué podemos hacer con ellos y qué no. Sin ese contrato no empezamos.
+        </p>
+      </div>
+
+      <h2>Qué puedes exigirnos</h2>
+      <p>
+        Puedes pedirnos <strong>acceder</strong> a tus datos, <strong>rectificarlos</strong> si están
+        mal, <strong>suprimirlos</strong>, <strong>limitar</strong> su uso,
+        <strong>oponerte</strong> a él y pedir la <strong>portabilidad</strong> de lo que nos hayas
+        dado. También puedes retirar tu consentimiento cuando quieras.
+      </p>
+      <p>
+        Se pide escribiendo a <a href={`mailto:${contacto.email}`}>{contacto.email}</a>. Te
+        contestaremos, y puede que te pidamos acreditar que eres quien dices, precisamente para
+        proteger tus datos de quien no lo sea.
+      </p>
+      <p>
+        Si crees que no lo hemos hecho bien, puedes reclamar ante la{' '}
+        <a href={aepd.web} target="_blank" rel="noopener">{aepd.nombre}</a>.
+      </p>
+
+      <h2>Las demos</h2>
+      <p>
+        Las herramientas abiertas de este sitio guardan lo que escribes
+        <strong> en tu propio navegador</strong>, y nada de eso viaja a ningún servidor. Ni lo vemos,
+        ni lo recibimos, ni podríamos recuperarlo. Si vacías los datos de navegación, se borra.
+      </p>
+      <p>Llevan datos inventados y no deben usarse con información real de un negocio.</p>
+
+      <div class="aviso">
+        <p class="rotulo">Honestidad sobre este texto</p>
+        <p>
+          Esta política está redactada sobre lo que realmente hace el sitio, comprobado en su código:
+          qué se recoge, dónde se aloja y con quién habla. Pero <strong>no la ha revisado un
+          profesional de protección de datos</strong>, y los tres datos identificativos siguen sin
+          rellenar.
+        </p>
+        <p>
+          Antes de dar la web por publicada en serio, y sobre todo antes de tratar datos de clientes
+          reales, esto tiene que pasar por manos de alguien del ramo.
+        </p>
+      </div>
+    </TextoLegal>
+  </main>
+  <Footer />
+  <LatidoPuntero />
+</Base>

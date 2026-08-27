@@ -1,0 +1,115 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import LatidoPuntero from '../components/LatidoPuntero.astro';
+import TextoLegal from '../components/TextoLegal.astro';
+import { titular, actualizado } from '../data/legal';
+import { contacto } from '../data/pulso';
+---
+
+<Base
+  titulo="Aviso legal · Pulso"
+  descripcion="Quién está detrás de pulsogestiona.es, condiciones de uso del sitio y de las demos abiertas."
+>
+  <Nav />
+  <main>
+    <TextoLegal
+      titulo="Aviso legal"
+      entradilla="Quién está detrás de este sitio y en qué condiciones se usa. La ley obliga a contarlo, y además es lo justo: si te vamos a pedir que nos confíes tus números, lo mínimo es decirte quiénes somos."
+      actualizado={actualizado}
+    >
+      <h2>Quiénes somos</h2>
+      <p>
+        En cumplimiento de la Ley 34/2002, de servicios de la sociedad de la información y de comercio
+        electrónico, estos son los datos del titular de este sitio:
+      </p>
+      <dl>
+        <dt>Titular</dt>
+        <dd><span class="hueco">{titular.nombre}</span></dd>
+        <dt>NIF</dt>
+        <dd><span class="hueco">{titular.nif}</span></dd>
+        <dt>Domicilio</dt>
+        <dd><span class="hueco">{titular.domicilio}</span></dd>
+        <dt>Nombre comercial</dt>
+        <dd>{titular.nombreComercial}</dd>
+        <dt>Sitio web</dt>
+        <dd>{titular.web}</dd>
+        <dt>Correo</dt>
+        <dd><a href={`mailto:${contacto.email}`}>{contacto.email}</a></dd>
+        <dt>Teléfono</dt>
+        <dd>{contacto.telefonoVisible}</dd>
+      </dl>
+
+      <div class="aviso">
+        <p class="rotulo">Pendiente</p>
+        <p>
+          Los tres datos en ámbar están sin rellenar. Se ven así a propósito, para que no se cuelen sin
+          poner. Hasta que estén, este aviso legal <strong>no cumple</strong>: la ley obliga a
+          identificar con nombre y NIF a quien hay detrás de un sitio comercial.
+        </p>
+      </div>
+
+      <h2>Para qué es este sitio</h2>
+      <p>
+        Es la web de presentación de Pulso: explica el servicio, enseña las herramientas que hemos
+        construido y da una vía para ponerse en contacto. No se vende nada desde aquí ni hay proceso de
+        compra: todo empieza con una conversación.
+      </p>
+
+      <h2>Las demos</h2>
+      <p>
+        Las herramientas que puedes abrir desde <a href="/herramientas">Herramientas</a> son
+        <strong>demostraciones con datos inventados</strong>. Ni los clientes, ni los importes, ni los
+        nombres que aparecen en ellas corresponden a nadie real.
+      </p>
+      <p>
+        Funcionan de verdad, pero son escaparate: lo que escribas dentro se guarda únicamente en tu
+        propio navegador y no llega a ningún servidor nuestro. Si vacías los datos del navegador,
+        desaparece. No las uses para trabajar con información real de tu negocio.
+      </p>
+
+      <h2>De quién es lo que ves</h2>
+      <p>
+        El diseño, los textos, el código y las herramientas de este sitio son de su titular, salvo lo
+        que se indique. Puedes leerlo, enseñarlo y enlazarlo con libertad; no puedes copiarlo para
+        montar un servicio equivalente.
+      </p>
+      <p>
+        Las tipografías que usa el sitio se distribuyen bajo licencia SIL Open Font y se sirven desde
+        este mismo dominio.
+      </p>
+
+      <h2>Enlaces que salen de aquí</h2>
+      <p>
+        Algunos enlaces te llevan fuera: las demos están alojadas en otro dominio nuestro, y el botón
+        de WhatsApp abre esa aplicación, que es de un tercero. Cuando sales de este sitio se aplican
+        las condiciones de quien esté al otro lado, no las nuestras.
+      </p>
+
+      <h2>Responsabilidad</h2>
+      <p>
+        Ponemos cuidado en que lo que se cuenta aquí sea cierto y esté al día, pero un sitio web no es
+        un contrato. Las condiciones concretas de cada servicio se acuerdan por escrito antes de
+        empezar a trabajar.
+      </p>
+      <p>
+        Tampoco respondemos de interrupciones del servicio ajenas a nosotros, aunque procuramos que la
+        web esté disponible siempre.
+      </p>
+
+      <h2>Qué ley se aplica</h2>
+      <p>
+        La española. Para cualquier discrepancia, las partes se someten a los juzgados y tribunales que
+        correspondan conforme a derecho.
+      </p>
+
+      <p>
+        Sobre el tratamiento de datos personales, lo tienes detallado en la
+        <a href="/privacidad">política de privacidad</a>.
+      </p>
+    </TextoLegal>
+  </main>
+  <Footer />
+  <LatidoPuntero />
+</Base>
