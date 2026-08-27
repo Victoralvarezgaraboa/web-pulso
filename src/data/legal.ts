@@ -2,10 +2,9 @@
  * Datos identificativos y de tratamiento para el aviso legal y la política de
  * privacidad.
  *
- * IMPORTANTE — lo que aparece entre corchetes es un hueco pendiente y se ve en
- * la web tal cual, a propósito, igual que en `pulso.ts`. Queda uno: al
- * domicilio le faltan localidad, código postal y provincia. Una calle y un
- * número sueltos no identifican un sitio, y la LSSI exige domicilio.
+ * Los datos identificativos están completos. Si alguno cambia -domicilio,
+ * forma jurídica- hay que tocarlo aquí y en ningún sitio más: las dos páginas
+ * legales leen de este archivo.
  *
  * Y una advertencia que conviene no borrar: estos textos están redactados con
  * lo que se ha comprobado del propio sitio (qué se recoge, dónde se aloja, qué
@@ -21,12 +20,8 @@ export const titular = {
   nombre: 'Víctor Álvarez Garaboa',
   /** NIF. Obligatorio: la LSSI lo exige expresamente. Letra comprobada. */
   nif: '74893207D',
-  /**
-   * Domicilio. INCOMPLETO: falta localidad, código postal y provincia, y sin
-   * eso no identifica un sitio. Se muestra el hueco al lado para que se vea.
-   */
-  domicilio: 'Osario, 7',
-  domicilioIncompleto: '[LOCALIDAD, CÓDIGO POSTAL Y PROVINCIA]',
+  /** Domicilio completo, como pide la LSSI: vía, número, CP, localidad y provincia. */
+  domicilio: 'Calle Osario, 7 · 29738 Rincón de la Victoria (Málaga)',
   nombreComercial: 'Pulso',
   web: 'pulsogestiona.es',
 };

@@ -30,7 +30,7 @@ import { contacto } from '../data/pulso';
         <dt>NIF</dt>
         <dd>{titular.nif}</dd>
         <dt>Domicilio</dt>
-        <dd>{titular.domicilio} <span class="hueco">{titular.domicilioIncompleto}</span></dd>
+        <dd>{titular.domicilio}</dd>
         <dt>Nombre comercial</dt>
         <dd>{titular.nombreComercial}</dd>
         <dt>Sitio web</dt>
@@ -40,15 +40,6 @@ import { contacto } from '../data/pulso';
         <dt>Teléfono</dt>
         <dd>{contacto.telefonoVisible}</dd>
       </dl>
-
-      <div class="aviso">
-        <p class="rotulo">Pendiente</p>
-        <p>
-          Al domicilio le faltan <strong>localidad, código postal y provincia</strong>. Una calle y un
-          número sueltos no identifican un sitio, y la ley pide domicilio. El hueco se ve en ámbar a
-          propósito, para que no se cuele sin completar.
-        </p>
-      </div>
 
       <h2>Para qué es este sitio</h2>
       <p>

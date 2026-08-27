@@ -58,9 +58,7 @@ se cuele sin rellenar:
 
 - [x] `src/data/pulso.ts`: email y WhatsApp
 - [x] Aviso legal y política de privacidad, en `/aviso-legal` y `/privacidad`
-- [x] `src/data/legal.ts`: titular y NIF
-- [ ] **Completar el domicilio en `src/data/legal.ts`**: falta localidad, código postal y
-      provincia. El hueco sale en ámbar en las dos páginas hasta que se rellene
+- [x] `src/data/legal.ts`: titular, NIF y domicilio
 - [ ] Que un profesional de protección de datos revise los dos textos
 - [ ] Imagen de Open Graph en `src/layouts/Base.astro` (lo que se ve al pegar el enlace)
 
