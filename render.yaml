@@ -32,6 +32,12 @@ services:
       - path: /_astro/*
         name: Cache-Control
         value: public, max-age=31536000, immutable
+      # Las tipografías no llevan hash en el nombre, así que no pueden ser
+      # inmutables: si algún día se cambia una, hay que poder reemplazarla. Un
+      # mes es de sobra para que un visitante habitual no las vuelva a pedir.
+      - path: /fuentes/*
+        name: Cache-Control
+        value: public, max-age=2592000
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
