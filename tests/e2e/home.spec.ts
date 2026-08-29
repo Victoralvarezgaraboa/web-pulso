@@ -15,3 +15,16 @@ test('muestra el mensaje principal sin esperas y ofrece demos y WhatsApp', async
   await expect(page.getByRole('link', { name: /Ver demos/ }).first()).toBeVisible();
   await expect(page.getByRole('link', { name: /WhatsApp/ })).toHaveAttribute('href', /^https:\/\/wa\.me\//);
 });
+
+test('permite a los buscadores descubrir e indexar las páginas públicas', async ({ request }) => {
+  const robots = await request.get('/robots.txt');
+  expect(robots.ok()).toBe(true);
+  expect(await robots.text()).toContain('Sitemap: https://pulsogestiona.es/sitemap.xml');
+
+  const sitemap = await request.get('/sitemap.xml');
+  expect(sitemap.ok()).toBe(true);
+  const xml = await sitemap.text();
+  expect(xml).toContain('<loc>https://pulsogestiona.es/</loc>');
+  expect(xml).toContain('<loc>https://pulsogestiona.es/herramientas</loc>');
+  expect(xml).not.toContain('/404');
+});
