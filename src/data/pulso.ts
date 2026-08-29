@@ -75,8 +75,8 @@ export const enlaceEmail = contacto.email.includes('@')
  * la web y el correo digan cosas distintas es peor que no tener eslogan.
  */
 export const eslogan = {
-  primera: 'Claridad financiera para avanzar.',
-  segunda: 'Herramientas a medida para mejorar.',
+  primera: 'Claridad financiera para avanzar,',
+  segunda: 'herramientas a medida para mejorar.',
   /** La versión de una línea, para atributos y metadatos. */
-  completo: 'Pulso: claridad financiera para avanzar. Herramientas a medida para mejorar.',
+  completo: 'Pulso: claridad financiera para avanzar, herramientas a medida para mejorar.',
 };
