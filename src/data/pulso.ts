@@ -17,6 +17,27 @@ export const contacto = {
   telefonoVisible: '654 10 34 06',
 };
 
+export const siteMeta = { title: 'Pulso | Sistemas a medida para tu negocio', description: 'Diseñamos soluciones a medida para automatizar tareas, ordenar la información y dar control real a tu negocio.' } as const;
+export const navigation = [{ href:'#soluciones',label:'Soluciones'},{ href:'#casos',label:'Casos'},{ href:'#metodo',label:'Cómo trabajamos'}] as const;
+export const problems = [
+  { number:'01',title:'Presupuestos lentos o repetitivos',text:'Creamos una herramienta para generarlos con rapidez, coherencia y tu forma real de trabajar.' },
+  { number:'02',title:'Compras, albaranes y facturas dispersos',text:'Centralizamos documentos y preparamos su lectura, clasificación y control.' },
+  { number:'03',title:'Correos que se acumulan sin criterio',text:'Separamos lo importante y llevamos cada dato al lugar donde realmente sirve.' },
+  { number:'04',title:'Un catálogo que no vende porque no está conectado',text:'Conectamos producto, web y procesos para convertir el catálogo en una herramienta comercial.' },
+  { number:'05',title:'Datos que existen, pero no ayudan a decidir',text:'Transformamos la actividad diaria en una lectura útil de ventas, compras, facturación y márgenes.' },
+] as const;
+export const useCases = [
+  { sector:'Oficio · Electricista',title:'Del aviso al presupuesto, sin volver a escribirlo todo.',problem:'Notas, mediciones y precios viven en sitios distintos.',solution:'Un generador adaptado a sus partidas crea presupuestos claros y reutilizables.',result:'Menos administración entre trabajos y respuestas más rápidas.' },
+  { sector:'Administración',title:'Facturas y correos que llegan ya ordenados.',problem:'El equipo abre, renombra y clasifica cada documento a mano.',solution:'Un flujo identifica la información útil y prepara su revisión.',result:'Menos tareas repetitivas y más control sobre lo pendiente.' },
+  { sector:'Comercio · Catálogo',title:'La web y la operación hablan el mismo idioma.',problem:'El catálogo online queda separado del producto y la gestión diaria.',solution:'Diseñamos la presencia digital alrededor del catálogo y su flujo real.',result:'Una herramienta comercial conectada, no un escaparate aislado.' },
+] as const;
+export const methodSteps = [
+  {number:'01',title:'Entendemos el flujo',text:'Vemos cómo trabaja hoy tu equipo, dónde repite tareas y qué información se pierde.'},
+  {number:'02',title:'Diseñamos el sistema',text:'Convertimos ese recorrido en una herramienta concreta, simple y reconocible.'},
+  {number:'03',title:'Lo conectamos',text:'Unimos documentos, canales y datos sin obligarte a empezar de cero.'},
+  {number:'04',title:'Te acompañamos',text:'Ajustamos la herramienta con el uso real para que el equipo la haga suya.'},
+] as const;
+
 export const precio = {
   /**
    * Precio de entrada mientras se hace cartera. La etiqueta de lanzamiento no
