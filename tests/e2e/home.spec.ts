@@ -28,3 +28,9 @@ test('permite a los buscadores descubrir e indexar las páginas públicas', asyn
   expect(xml).toContain('<loc>https://pulsogestiona.es/herramientas</loc>');
   expect(xml).not.toContain('/404');
 });
+
+test('expone el archivo de verificación de Bing', async ({ request }) => {
+  const verification = await request.get('/BingSiteAuth.xml');
+  expect(verification.ok()).toBe(true);
+  expect(await verification.text()).toContain('<users>');
+});
