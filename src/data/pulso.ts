@@ -64,3 +64,19 @@ export const enlaceWhatsapp = /^\d{8,15}$/.test(contacto.whatsapp)
 export const enlaceEmail = contacto.email.includes('@')
   ? `mailto:${contacto.email}?subject=${encodeURIComponent('Quiero mi primer cierre de Pulso')}`
   : null;
+
+/**
+ * El eslogan de la casa. Cierra el pie de la web y, palabra por palabra, cierra
+ * también todos los correos comerciales que salen (rutina de las 09:35, en
+ * `agentes/prompts/09-35-redaccion.md`). Va en dos mitades porque se compone en
+ * dos líneas: es una promesa doble, el diagnóstico y la herramienta.
+ *
+ * Si se cambia aquí, hay que cambiarlo también en el prompt del comercial: que
+ * la web y el correo digan cosas distintas es peor que no tener eslogan.
+ */
+export const eslogan = {
+  primera: 'Claridad financiera para avanzar.',
+  segunda: 'Herramientas a medida para mejorar.',
+  /** La versión de una línea, para atributos y metadatos. */
+  completo: 'Pulso: claridad financiera para avanzar. Herramientas a medida para mejorar.',
+};

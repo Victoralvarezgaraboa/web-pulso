@@ -1,15 +1,26 @@
 ---
 import Latido from './Latido.astro';
+import { eslogan } from '../data/pulso';
 
 const anio = new Date().getFullYear();
 ---
 
 <footer>
-  <div class="wrap fila">
-    <p class="marca">
-      <Latido tamano={18} color="var(--muted2)" />
-      <span>Pulso · el pulso de tu negocio</span>
-    </p>
+  <div class="wrap">
+    <!--
+      El eslogan cierra la página, y cierra igual todos los correos que salen.
+      Va con el latido delante porque es la firma de la marca: lo último que se
+      lee tiene que ser lo que hacemos, no un aviso legal.
+    -->
+    <div class="firma">
+      <Latido tamano={30} />
+      <p class="eslogan">
+        <span class="nombre">Pulso</span>
+        <span class="linea">{eslogan.primera}</span>
+        <span class="linea">{eslogan.segunda}</span>
+      </p>
+    </div>
+
     <p class="legal mono">
       <a href="/aviso-legal">Aviso legal</a> · <a href="/privacidad">Privacidad</a> · {anio}
     </p>
@@ -19,26 +30,38 @@ const anio = new Date().getFullYear();
 <style>
   footer {
     border-top: 1px solid var(--line);
-    padding-block: 34px;
+    padding-block: 52px 34px;
   }
 
-  .fila {
+  .firma {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
   }
 
-  .marca {
+  .eslogan {
     display: flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 14px;
-    color: var(--muted2);
+    flex-direction: column;
+    font-family: var(--serif);
+    font-size: clamp(19px, 2.6vw, 26px);
+    line-height: 1.32;
+    color: var(--ivory);
+    text-wrap: balance;
+  }
+
+  /* El nombre va con el verde señal: es el único acento del pie. */
+  .nombre {
+    color: var(--pulso);
+    font-weight: 600;
+  }
+
+  /* La segunda mitad, un punto más apagada: son dos promesas, no dos gritos. */
+  .linea:last-child {
+    color: var(--muted);
   }
 
   .legal {
+    margin-top: 30px;
     font-size: 12px;
     color: var(--muted2);
   }
@@ -48,5 +71,19 @@ const anio = new Date().getFullYear();
   }
   .legal a:hover {
     color: var(--muted);
+  }
+
+  /* A partir de tableta el pie se abre: firma a la izquierda, legal a la derecha. */
+  @media (min-width: 720px) {
+    .wrap {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .legal {
+      margin-top: 0;
+    }
   }
 </style>
