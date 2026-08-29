@@ -20,7 +20,7 @@ export const contacto = {
 };
 
 export const siteMeta = { title: 'Pulso | Sistemas a medida para tu negocio', description: 'Diseñamos soluciones a medida para automatizar tareas, ordenar la información y dar control real a tu negocio.' } as const;
-export const navigation = [{ href:'#soluciones',label:'Soluciones'},{ href:'#casos',label:'Casos'},{ href:'/herramientas#demos',label:'Demos'},{ href:'#metodo',label:'Cómo trabajamos'}] as const;
+export const navigation = [{ href:'#soluciones',label:'Soluciones'},{ href:'#casos',label:'Casos'},{ href:'/herramientas#demos',label:'Ver demos'},{ href:'#metodo',label:'Cómo trabajamos'}] as const;
 export const problems = [
   { number:'01',title:'Presupuestos lentos o repetitivos',text:'Creamos una herramienta para generarlos con rapidez, coherencia y tu forma real de trabajar.' },
   { number:'02',title:'Compras, albaranes y facturas dispersos',text:'Centralizamos documentos y preparamos su lectura, clasificación y control.' },

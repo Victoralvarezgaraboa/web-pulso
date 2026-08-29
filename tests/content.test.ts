@@ -4,7 +4,7 @@ describe('contenido aprobado',()=>{it('mantiene el posicionamiento',()=>{expect(
 
 it('ofrece demos desde la cabecera y desde cada caso sin añadir otra sección', async () => {
   const { navigation, useCases } = await import('../src/data/pulso');
-  expect(navigation).toContainEqual({ href: '/herramientas#demos', label: 'Demos' });
+  expect(navigation).toContainEqual({ href: '/herramientas#demos', label: 'Ver demos' });
   expect(useCases.every((item) => 'demoHref' in item && 'demoLabel' in item)).toBe(true);
   expect(useCases[0].demoHref).toContain('generador.html');
   expect(useCases[1].demoHref).toContain('facturas.html');
