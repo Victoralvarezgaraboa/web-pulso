@@ -9,7 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "check": "astro check",
-    "test": "vitest run tests/content.test.ts",
+    "test": "vitest run tests/content.test.ts tests/demo-navigation.test.js",
     "test:e2e": "playwright test",
     "preview": "astro preview",
     "astro": "astro"
