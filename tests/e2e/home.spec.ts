@@ -16,6 +16,15 @@ test('muestra el mensaje principal sin esperas y ofrece demos y WhatsApp', async
   await expect(page.getByRole('link', { name: /WhatsApp/ })).toHaveAttribute('href', /^https:\/\/wa\.me\//);
 });
 
+test('cierra la portada con el eslogan aprobado y su coma', async ({ page }) => {
+  await page.goto('/');
+  const footer = page.getByRole('contentinfo');
+
+  await expect(footer).toContainText(
+    'Pulso: claridad financiera para avanzar, herramientas a medida para mejorar.',
+  );
+});
+
 test('permite a los buscadores descubrir e indexar las páginas públicas', async ({ request }) => {
   const robots = await request.get('/robots.txt');
   expect(robots.ok()).toBe(true);
