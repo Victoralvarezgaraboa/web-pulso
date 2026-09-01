@@ -37,7 +37,7 @@ export const herramientas: Herramienta[] = [
     familia: 'Compras',
     que: 'El precio de cada artículo en todos tus proveedores, y el cierre que sale de ahí.',
     detalle:
-      'Compara al instante y compra siempre al mejor precio. Y como cada compra queda registrada, el cierre deja de tener el agujero negro de «material varios»: de la facturación al EBITDA, trimestre a trimestre, con punto de equilibrio y alertas de fuga.',
+      'Compara al instante y compra siempre al mejor precio. Fotografías el albarán que entra y sus líneas se registran solas, con un aviso cuando el proveedor te ha subido una referencia desde la última compra: esas subidas no las anuncia nadie y se repiten en cada pedido del año. Y como cada compra queda registrada, el cierre deja de tener el agujero negro de «material varios»: de la facturación al EBITDA, trimestre a trimestre, con punto de equilibrio y alertas de fuga.',
     destacado: 'Compra al mejor precio',
   },
   {
@@ -99,6 +99,14 @@ export const demos: Demo[] = [
     tipo: 'herramienta',
     gancho: 'Compara al instante el precio de cada recambio entre tus proveedores.',
     archivo: 'taller.html',
+  },
+  {
+    nombre: 'Albaranes · lector',
+    sector: 'Talleres, ferreterías y almacenes',
+    tipo: 'herramienta',
+    gancho:
+      'Fotografías el albarán y salen sus líneas solas, con aviso de las referencias que el proveedor te ha subido de precio desde la última compra.',
+    archivo: 'albaranes.html',
   },
   {
     nombre: 'Electricidad',
