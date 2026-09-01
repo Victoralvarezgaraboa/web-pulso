@@ -35,9 +35,9 @@ export const herramientas: Herramienta[] = [
   {
     nombre: 'Compras y cierre del mes',
     familia: 'Compras',
-    que: 'El precio de cada artículo en todos tus proveedores, y el cierre que sale de ahí.',
+    que: 'El precio real de cada artículo en tus proveedores, alimentado por tus propios albaranes.',
     detalle:
-      'Compara al instante y compra siempre al mejor precio. Fotografías el albarán que entra y sus líneas se registran solas, con un aviso cuando el proveedor te ha subido una referencia desde la última compra: esas subidas no las anuncia nadie y se repiten en cada pedido del año. Y como cada compra queda registrada, el cierre deja de tener el agujero negro de «material varios»: de la facturación al EBITDA, trimestre a trimestre, con punto de equilibrio y alertas de fuga.',
+      'Fotografías cada albarán que entra y sus líneas se registran solas. Eso alimenta tu base de precios con lo que pagas de verdad, y cuando vas a comprar el sistema te propone proveedor con tus datos, no con una tarifa de catálogo que nadie ha actualizado. De paso te avisa de las referencias que te han subido sin decírtelo. Y como cada compra queda registrada, el cierre deja de tener el agujero negro de «material varios»: de la facturación al EBITDA, trimestre a trimestre, con punto de equilibrio y alertas de fuga.',
     destacado: 'Compra al mejor precio',
   },
   {
@@ -105,7 +105,7 @@ export const demos: Demo[] = [
     sector: 'Talleres, ferreterías y almacenes',
     tipo: 'herramienta',
     gancho:
-      'Fotografías el albarán y salen sus líneas solas, con aviso de las referencias que el proveedor te ha subido de precio desde la última compra.',
+      'Registras el albarán y sus precios pasan a mandar sobre las tarifas: cuando vayas a comprar esa pieza, el sistema te dirá a quién con lo que pagas tú de verdad.',
     archivo: 'albaranes.html',
   },
   {
