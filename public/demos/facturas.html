@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pulso · Facturación automática · panel</title>
+<meta name="description" content="Demostración de Pulso del generador automático de facturas: lee cada día la hoja de clientes recurrentes, muestra lo que saldrá el último día del mes y envía el resumen al correo de la empresa.">
+<link rel="icon" href="pulso.svg">
+<link rel="stylesheet" href="fuentes.css">
+<link rel="stylesheet" href="demo-navigation.css">
+<script src="demo-navigation.js" defer></script>
+<style>
+  :root{
+    --ink:#07120D; --ink2:#0B1A13; --card:#10231A; --card2:#16301F;
+    --line:rgba(236,239,234,.10);
+    --signal:#5CE3A3; --signal-deep:#2FA873;
+    --ivory:#ECEFEA; --muted:#8A988F; --muted2:#5C695F;
+    --amber:#E6B567; --coral:#D08468; --hoja:#7FB0FF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--ivory);font-family:'Hanken Grotesk',sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:70px}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .wrap{max-width:900px;margin:0 auto;padding:0 18px}
+  ::selection{background:var(--signal);color:#062013}
+  button{font-family:inherit;cursor:pointer}
+  input{font-family:inherit}
+
+  /* cabecera */
+  .top{position:sticky;top:0;z-index:40;background:rgba(7,18,13,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .top .wrap{display:flex;align-items:center;gap:12px;padding-block:13px}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-size:20px;font-weight:500}
+  .brand small{display:block;font-family:'Hanken Grotesk',sans-serif;font-weight:500;font-size:11px;letter-spacing:.06em;color:var(--muted)}
+  .top .sp{flex:1}
+  .ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:7px 13px;font-size:12.5px}
+  .ghost:hover{color:var(--ivory);border-color:var(--signal)}
+
+  h2.sec{font-family:'Fraunces',serif;font-weight:500;font-size:24px;letter-spacing:-.01em;margin-bottom:4px}
+  .lead{color:var(--muted);font-size:14px;margin-bottom:14px;max-width:70ch}
+  section{margin-top:34px}
+  .paso{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--signal-deep);margin-bottom:7px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+
+  /* estado del automatismo */
+  .estado{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .est{background:var(--ink2);padding:16px 17px}
+  .est .k{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .est .v{font-family:'Fraunces',serif;font-size:23px;font-weight:600;line-height:1.1}
+  .est .s{font-size:12px;color:var(--muted2);margin-top:3px}
+  .est .v.on{color:var(--signal)}
+  .latido{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--signal);margin-right:7px;box-shadow:0 0 9px var(--signal);animation:latir 1.9s infinite;vertical-align:middle}
+  @keyframes latir{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* la hoja */
+  .hojacab{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid var(--line)}
+  .hojacab .ic{width:26px;height:26px;border-radius:7px;background:rgba(127,176,255,.14);color:var(--hoja);display:grid;place-items:center;flex:0 0 auto}
+  .hojacab .nom{font-weight:600;font-size:14.5px}
+  .hojacab .ruta{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted2)}
+  .scroller{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:660px}
+  th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:500;padding:0 8px 9px}
+  th.n,td.n{text-align:right}
+  td{padding:7px 8px;border-top:1px solid var(--line);vertical-align:middle}
+  tr.off td{opacity:.42}
+  td input{width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:8px;color:var(--ivory);font-size:13.5px;padding:8px 9px;outline:none}
+  td input:focus{border-color:var(--signal)}
+  td input.n{text-align:right}
+  td input.mal{border-color:var(--coral)}
+  .fila-x{background:transparent;border:none;color:var(--muted2);font-size:14px;padding:4px 6px}
+  .fila-x:hover{color:var(--coral)}
+  .interruptor{width:38px;height:22px;border-radius:999px;border:1px solid var(--line);background:var(--ink2);position:relative;padding:0}
+  .interruptor i{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted2);transition:left .16s ease,background .16s ease}
+  .interruptor.on{border-color:var(--signal);background:rgba(92,227,163,.16)}
+  .interruptor.on i{left:18px;background:var(--signal)}
+  .anadir{width:100%;background:transparent;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:10px;font-size:13px;margin-top:11px}
+  .anadir:hover{border-color:var(--signal);color:var(--signal)}
+
+  /* previsto */
+  .aviso{display:flex;gap:10px;align-items:flex-start;background:rgba(208,132,104,.09);border:1px solid rgba(208,132,104,.32);border-radius:12px;padding:12px 14px;margin-bottom:11px;font-size:13.5px}
+  .aviso b{color:var(--coral);font-weight:600}
+  .aviso.ok{background:rgba(92,227,163,.07);border-color:rgba(92,227,163,.3)}
+  .aviso.ok b{color:var(--signal)}
+  .totales{display:flex;justify-content:flex-end;gap:26px;flex-wrap:wrap;padding-top:13px;margin-top:4px;border-top:1px solid var(--line)}
+  .tot{text-align:right}
+  .tot .k{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .tot .v{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin-top:2px}
+  .tot.grande .v{font-size:27px;color:var(--signal)}
+  .num{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--muted)}
+
+  /* ejecutar */
+  .btn{background:var(--signal);color:#052014;border:none;border-radius:12px;padding:13px 20px;font-weight:700;font-size:15px}
+  .btn:hover{background:var(--signal-deep)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .consola{background:#050D09;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.75;max-height:230px;overflow-y:auto}
+  .consola .l{color:var(--muted)}
+  .consola .l .h{color:var(--muted2)}
+  .consola .l.ok{color:var(--signal)}
+  .consola .l.warn{color:var(--amber)}
+  .consola .l.fin{color:var(--ivory)}
+
+  /* correo */
+  .correo{border:1px solid rgba(92,227,163,.3);border-radius:14px;overflow:hidden;margin-top:14px}
+  .correo .cab{background:var(--card2);padding:13px 16px;border-bottom:1px solid var(--line)}
+  .correo .cab .de{font-size:12.5px;color:var(--muted)}
+  .correo .cab .as{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin-top:3px}
+  .correo .cue{padding:16px;font-size:13.5px}
+  .correo .cue p{margin-bottom:9px}
+  .correo .cue ul{list-style:none;margin:11px 0}
+  .correo .cue li{display:flex;justify-content:space-between;gap:14px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}
+  .correo .cue li .e{font-family:'JetBrains Mono',monospace;color:var(--muted)}
+  .firma{color:var(--muted2);font-size:12px;margin-top:12px}
+
+  /* registro */
+  .reg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .lect{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+  .lect .f{font-family:'JetBrains Mono',monospace;color:var(--muted)}
+  .lect .r{color:var(--muted2);font-size:12.5px;text-align:right}
+  .cierre{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+  .cierre .m{font-weight:600;font-size:14px}
+  .cierre .d{font-size:12px;color:var(--muted2)}
+  .cierre .t{font-family:'JetBrains Mono',monospace;font-size:14px;text-align:right}
+  .lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+  .pie{color:var(--muted2);font-size:12px;margin-top:30px;line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+  .hidden{display:none}
+  @media(max-width:620px){
+    .totales{justify-content:space-between;gap:14px}
+    h2.sec{font-size:21px}
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="wrap">
+    <span class="brand">
+      <svg width="21" height="21" viewBox="0 0 26 26" aria-hidden="true"><path d="M2 13 H7 L9.5 5 L13 21 L16 9 L18.5 13 H24" stroke="#5CE3A3" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Pulso<small>Facturación automática</small></span>
+    </span>
+    <span class="sp"></span>
+    <button class="ghost" data-accion="restaurar">Restaurar el ejemplo</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <p class="paso">Estado</p>
+    <h2 class="sec">Está funcionando ahora mismo</h2>
+    <p class="lead">No hay que arrancarlo ni acordarse de nada. Lee la hoja todos los días y espera al último del mes.</p>
+    <div class="estado" id="estado"></div>
+  </section>
+
+  <section>
+    <p class="paso">Paso 1 · de dónde saca los datos</p>
+    <h2 class="sec">La hoja que lee cada día</h2>
+    <p class="lead">Una hoja de cálculo de Google normal y corriente. La rellenas tú, o la va rellenando tu gente durante el mes. Cada fila es un cliente al que hay que facturar todos los meses. Cambia algo aquí abajo y mira cómo cambia lo que va a salir.</p>
+    <div class="card">
+      <div class="hojacab">
+        <span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg></span>
+        <span class="nom" id="hojaNombre">—</span>
+        <span class="ruta mono" id="hojaRuta">—</span>
+      </div>
+      <div class="scroller">
+        <table>
+          <thead><tr>
+            <th style="width:22%">Cliente</th><th style="width:26%">Correo</th><th style="width:24%">Concepto</th>
+            <th class="n" style="width:12%">Base</th><th class="n" style="width:8%">IVA</th><th style="width:8%">Activa</th><th></th>
+          </tr></thead>
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+      <button class="anadir" data-accion="anadir">+ añadir un cliente a la hoja</button>
+    </div>
+  </section>
+
+  <section>
+    <p class="paso">Paso 2 · lo que va a pasar</p>
+    <h2 class="sec" id="tituloPrevisto">Facturas previstas</h2>
+    <p class="lead">Esto es lo que se emitirá y se enviará solo, sin que nadie entre a hacer nada. Cada línea lleva ya reservado su número de factura.</p>
+    <div id="avisos"></div>
+    <div class="card">
+      <div class="scroller">
+        <table>
+          <thead><tr>
+            <th style="width:16%">Nº factura</th><th style="width:30%">Cliente</th><th style="width:30%">Concepto</th>
+            <th class="n" style="width:12%">Base</th><th class="n" style="width:12%">Total</th>
+          </tr></thead>
+          <tbody id="previstas"></tbody>
+        </table>
+      </div>
+      <div class="totales" id="totales"></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="paso">Paso 3 · el último día del mes</p>
+    <h2 class="sec">Y esto es lo que hace sin ti</h2>
+    <p class="lead">El día del cierre se despierta solo. Aquí puedes adelantarlo para verlo: es una demostración, no se envía ningún correo de verdad.</p>
+    <button class="btn" id="botonCierre" data-accion="ejecutar">Adelantar el cierre y verlo</button>
+    <div class="consola hidden" id="consola"></div>
+    <div id="correo"></div>
+  </section>
+
+  <section>
+    <p class="paso">Paso 4 · lo que queda registrado</p>
+    <h2 class="sec">Registro</h2>
+    <p class="lead">Cada lectura diaria y cada cierre quedan anotados. Si algún mes falla algo, se ve aquí y en el correo del aviso.</p>
+    <div class="reg">
+      <div class="card">
+        <p class="lbl">Últimas lecturas de la hoja</p>
+        <div id="lecturas"></div>
+      </div>
+      <div class="card">
+        <p class="lbl">Cierres anteriores</p>
+        <div id="cierres"></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="pie">
+    Demostración con datos inventados: los clientes, los correos y los importes no son de nadie.
+    Ningún correo sale de esta página, y lo que edites se guarda solo en este navegador.
+  </p>
+
+</div>
+
+<script>
+/* ================= DATOS DE EJEMPLO ================= */
+var SEED = {
+  empresa: {
+    nombre: 'Instalaciones Ribera',
+    aviso: 'administracion@instalacionesribera.es',
+    serie: 2026,
+    siguiente: 84
+  },
+  hoja: { nombre: 'Facturacion recurrente 2026', ruta: 'Drive / Pulso / Facturacion', hora: '06:00' },
+  filas: [
+    {id:'f1', cliente:'Comunidad Vega del Ebro', email:'admin@vegadelebro.es',       concepto:'Mantenimiento mensual ascensor', base:145, iva:21, activa:true},
+    {id:'f2', cliente:'Panaderia Sanz',          email:'sanz@panaderiasanz.com',     concepto:'Iguala electrica',               base:90,  iva:21, activa:true},
+    {id:'f3', cliente:'Gimnasio Cauce',          email:'hola@gimnasiocauce.es',      concepto:'Revision de climatizacion',      base:120, iva:21, activa:true},
+    {id:'f4', cliente:'Bar El Repecho',          email:'elrepecho@correo.es',        concepto:'Mantenimiento de camaras',       base:75,  iva:21, activa:true},
+    {id:'f5', cliente:'Talleres Mino',           email:'taller@talleresmino.es',     concepto:'Iguala de mantenimiento',        base:210, iva:21, activa:true},
+    {id:'f6', cliente:'Clinica Dental Aran',     email:'citas@dentalaran.es',        concepto:'Mantenimiento de equipos',       base:160, iva:21, activa:true},
+    {id:'f7', cliente:'Colegio San Roque',       email:'secretaria@sanroque.edu.es', concepto:'Mantenimiento de instalaciones', base:320, iva:21, activa:true},
+    {id:'f8', cliente:'Asesoria Lombo',          email:'info@asesorialombo.es',      concepto:'Iguala informatica',             base:180, iva:21, activa:true},
+    {id:'f9', cliente:'Peluqueria Nara',         email:'',                           concepto:'Mantenimiento de climatizacion', base:55,  iva:21, activa:true},
+    {id:'f10',cliente:'Hotel Puente Viejo',      email:'reservas@puenteviejo.es',    concepto:'Iguala de mantenimiento',        base:275, iva:21, activa:false}
+  ],
+  cierres: [
+    {mes:'2026-07', facturas:8, total:1573, incidencias:1},
+    {mes:'2026-06', facturas:8, total:1573, incidencias:0},
+    {mes:'2026-05', facturas:7, total:1240.85, incidencias:0}
+  ]
+};
+
+/* ================= CALCULO (funciones puras) ================= */
+/* El ultimo dia del mes es el dia 0 del mes siguiente. Asi no hay que saberse
+   cuantos dias tiene cada mes ni acordarse de los bisiestos. */
+function ultimoDiaMes(hoy){ return new Date(hoy.getFullYear(), hoy.getMonth()+1, 0); }
+function diasHasta(desde, hasta){
+  var a = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate());
+  var b = new Date(hasta.getFullYear(), hasta.getMonth(), hasta.getDate());
+  return Math.round((b-a)/86400000);
+}
+function correoValido(e){ return /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(String(e==null?'':e).trim()); }
+
+/* Una fila sale si esta activa y esta completa. El motivo se devuelve para
+   poder decirlo, no solo para descartarla en silencio. */
+function revisarFila(f){
+  if(!f.activa) return {sale:false, motivo:'pausada'};
+  if(!String(f.cliente==null?'':f.cliente).trim()) return {sale:false, motivo:'sin nombre de cliente'};
+  if(!correoValido(f.email)) return {sale:false, motivo:'sin correo valido'};
+  if(!(parseFloat(f.base)>0)) return {sale:false, motivo:'sin importe'};
+  return {sale:true, motivo:''};
+}
+function totalFila(f){
+  var base = parseFloat(f.base)||0, iva = parseFloat(f.iva)||0;
+  return base*(1+iva/100);
+}
+/* Reparte los numeros de factura en el mismo orden en que se van a emitir:
+   solo gastan numero las filas que salen de verdad. */
+function prevision(filas, serie, siguiente){
+  var salen=[], paradas=[], n=siguiente;
+  (filas||[]).forEach(function(f){
+    var r = revisarFila(f);
+    if(r.sale){ salen.push({fila:f, numero:serie+'/'+String(n).padStart(4,'0'), total:totalFila(f)}); n++; }
+    else paradas.push({fila:f, motivo:r.motivo});
+  });
+  var base = salen.reduce(function(s,x){ return s+(parseFloat(x.fila.base)||0); },0);
+  var total = salen.reduce(function(s,x){ return s+x.total; },0);
+  return {salen:salen, paradas:paradas, base:base, iva:total-base, total:total};
+}
+
+/* ================= ESTADO ================= */
+var STORE='pulso_fact_v1';
+var DB=null, corriendo=false;
+
+function clonar(o){ return JSON.parse(JSON.stringify(o)); }
+function cargar(){
+  try{ var r=localStorage.getItem(STORE); if(r) DB=JSON.parse(r); }catch(e){}
+  if(!DB || !DB.filas) DB=clonar(SEED);
+}
+function salvar(){ try{ localStorage.setItem(STORE, JSON.stringify(DB)); }catch(e){} }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function eur(n){ return (Number(n)||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+function fechaLarga(d){ return d.toLocaleDateString('es-ES',{day:'numeric',month:'long'}); }
+function fechaCorta(d){ return d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'}); }
+function mesLargo(iso){
+  var p=String(iso).split('-'); var d=new Date(+p[0], +p[1]-1, 1);
+  return d.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+}
+
+/* ================= PINTAR ================= */
+function pintarEstado(){
+  var hoy=new Date(), fin=ultimoDiaMes(hoy), quedan=diasHasta(hoy,fin);
+  var pv=prevision(DB.filas, DB.empresa.serie, DB.empresa.siguiente);
+  var cuando = quedan===0 ? 'Hoy' : (quedan===1 ? 'Mañana' : 'En '+quedan+' días');
+  document.getElementById('estado').innerHTML=''
+    +'<div class="est"><div class="k">Automatismo</div><div class="v on"><span class="latido"></span>Activo</div>'
+      +'<div class="s">Lectura diaria a las '+esc(DB.hoja.hora)+'</div></div>'
+    +'<div class="est"><div class="k">Próximo envío</div><div class="v">'+cuando+'</div>'
+      +'<div class="s">'+fechaLarga(fin)+', último día del mes</div></div>'
+    +'<div class="est"><div class="k">Facturas listas</div><div class="v">'+pv.salen.length+'</div>'
+      +'<div class="s">de '+DB.filas.length+' filas en la hoja</div></div>'
+    +'<div class="est"><div class="k">Importe del mes</div><div class="v">'+eur(pv.total)+'</div>'
+      +'<div class="s">IVA incluido</div></div>';
+}
+
+function pintarFilas(){
+  var t=document.getElementById('filas'), h='';
+  DB.filas.forEach(function(f,i){
+    var mal = f.activa && !correoValido(f.email);
+    h+='<tr class="'+(f.activa?'':'off')+'">'
+      +'<td><input data-i="'+i+'" data-c="cliente" value="'+esc(f.cliente)+'" placeholder="Cliente"></td>'
+      +'<td><input data-i="'+i+'" data-c="email" class="'+(mal?'mal':'')+'" value="'+esc(f.email)+'" placeholder="correo@cliente.es"></td>'
+      +'<td><input data-i="'+i+'" data-c="concepto" value="'+esc(f.concepto)+'" placeholder="Concepto"></td>'
+      +'<td class="n"><input data-i="'+i+'" data-c="base" class="n" type="number" inputmode="decimal" value="'+esc(f.base)+'"></td>'
+      +'<td class="n"><input data-i="'+i+'" data-c="iva" class="n" type="number" inputmode="decimal" value="'+esc(f.iva)+'"></td>'
+      +'<td><button class="interruptor '+(f.activa?'on':'')+'" data-accion="alternar" data-i="'+i+'" aria-label="Activar o pausar"><i></i></button></td>'
+      +'<td><button class="fila-x" data-accion="borrar" data-i="'+i+'" aria-label="Quitar fila">✕</button></td>'
+      +'</tr>';
+  });
+  t.innerHTML = h || '<tr><td colspan="7" style="color:var(--muted2);text-align:center;padding:20px 0">La hoja está vacía. Añade un cliente.</td></tr>';
+  document.getElementById('hojaNombre').textContent=DB.hoja.nombre;
+  document.getElementById('hojaRuta').textContent=DB.hoja.ruta+' · leída hoy a las '+DB.hoja.hora;
+}
+
+function pintarPrevistas(){
+  var pv=prevision(DB.filas, DB.empresa.serie, DB.empresa.siguiente);
+  var fin=ultimoDiaMes(new Date());
+  document.getElementById('tituloPrevisto').textContent='Lo que saldrá el '+fechaLarga(fin);
+
+  var a='';
+  pv.paradas.forEach(function(x){
+    var cola = x.motivo==='sin correo valido'
+      ? 'Se avisa hoy y no el día del cierre, que ya sería tarde.'
+      : 'Sigue en la hoja, pero fuera del envío.';
+    a+='<div class="aviso"><b>·</b><span><b>'+esc(x.fila.cliente||'Fila sin nombre')+'</b> no se factura este mes: '
+      +esc(x.motivo)+'. '+cola+'</span></div>';
+  });
+  if(!pv.paradas.length && pv.salen.length){
+    a='<div class="aviso ok"><b>·</b><span>Las '+pv.salen.length+' filas de la hoja están completas. No hay nada que revisar.</span></div>';
+  }
+  document.getElementById('avisos').innerHTML=a;
+
+  var h='';
+  pv.salen.forEach(function(x){
+    h+='<tr><td class="num">'+x.numero+'</td>'
+      +'<td>'+esc(x.fila.cliente)+'<div class="num">'+esc(x.fila.email)+'</div></td>'
+      +'<td style="font-size:13.5px;color:var(--muted)">'+esc(x.fila.concepto)+'</td>'
+      +'<td class="n">'+eur(x.fila.base)+'</td><td class="n">'+eur(x.total)+'</td></tr>';
+  });
+  document.getElementById('previstas').innerHTML = h || '<tr><td colspan="5" style="color:var(--muted2);text-align:center;padding:20px 0">Ninguna fila cumple para facturar.</td></tr>';
+
+  document.getElementById('totales').innerHTML=''
+    +'<div class="tot"><div class="k">Facturas</div><div class="v">'+pv.salen.length+'</div></div>'
+    +'<div class="tot"><div class="k">Base</div><div class="v">'+eur(pv.base)+'</div></div>'
+    +'<div class="tot"><div class="k">IVA</div><div class="v">'+eur(pv.iva)+'</div></div>'
+    +'<div class="tot grande"><div class="k">Total</div><div class="v">'+eur(pv.total)+'</div></div>';
+}
+
+function pintarRegistro(){
+  var hoy=new Date(), h='';
+  var pv=prevision(DB.filas, DB.empresa.serie, DB.empresa.siguiente);
+  for(var i=0;i<6;i++){
+    var d=new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-i);
+    h+='<div class="lect"><span class="f">'+fechaCorta(d)+' · '+esc(DB.hoja.hora)+'</span>'
+      +'<span class="r">'+DB.filas.length+' filas leídas · '+pv.salen.length+' listas'
+      +(pv.paradas.length?' · '+pv.paradas.length+' con aviso':'')+'</span></div>';
+  }
+  document.getElementById('lecturas').innerHTML=h;
+
+  var c='';
+  (DB.cierres||[]).forEach(function(x){
+    c+='<div class="cierre"><div><div class="m">'+esc(mesLargo(x.mes))+'</div>'
+      +'<div class="d">'+x.facturas+' facturas enviadas'+(x.incidencias?' · '+x.incidencias+' aviso':'')+'</div></div>'
+      +'<div class="t">'+eur(x.total)+'</div></div>';
+  });
+  document.getElementById('cierres').innerHTML=c || '<div class="lect"><span class="r">Todavía no hay cierres.</span></div>';
+}
+
+function pintar(){ pintarEstado(); pintarFilas(); pintarPrevistas(); pintarRegistro(); }
+
+/* ================= EL CIERRE, PASO A PASO ================= */
+function ejecutarCierre(){
+  if(corriendo) return;
+  var pv=prevision(DB.filas, DB.empresa.serie, DB.empresa.siguiente);
+  if(!pv.salen.length) return;
+  corriendo=true;
+  var boton=document.getElementById('botonCierre');
+  boton.disabled=true; boton.textContent='Ejecutando…';
+  document.getElementById('correo').innerHTML='';
+  var con=document.getElementById('consola');
+  con.classList.remove('hidden'); con.innerHTML='';
+
+  var fin=ultimoDiaMes(new Date());
+  var pasos=[];
+  pasos.push({t:'Disparador de fin de mes · '+fechaLarga(fin)+', 23:00', c:''});
+  pasos.push({t:'Leyendo '+DB.hoja.nombre+'… '+DB.filas.length+' filas', c:''});
+  pv.paradas.forEach(function(x){
+    pasos.push({t:'Saltada: '+(x.fila.cliente||'fila sin nombre')+' — '+x.motivo, c:'warn'});
+  });
+  pv.salen.forEach(function(x){
+    pasos.push({t:'Factura '+x.numero+' · '+x.fila.cliente+' · '+eur(x.total)+' → '+x.fila.email, c:'ok'});
+  });
+  pasos.push({t:pv.salen.length+' facturas emitidas y enviadas · '+eur(pv.total), c:'fin'});
+  pasos.push({t:'Resumen enviado a '+DB.empresa.aviso, c:'fin'});
+
+  var i=0;
+  (function siguiente(){
+    if(i>=pasos.length){ terminar(pv); return; }
+    var p=pasos[i++];
+    var l=document.createElement('div');
+    l.className='l '+(p.c||'');
+    l.innerHTML='<span class="h">'+String(i).padStart(2,'0')+'</span>  '+esc(p.t);
+    con.appendChild(l); con.scrollTop=con.scrollHeight;
+    setTimeout(siguiente, i<3 ? 420 : 190);
+  })();
+}
+
+function terminar(pv){
+  var fin=ultimoDiaMes(new Date());
+  var iso=fin.getFullYear()+'-'+String(fin.getMonth()+1).padStart(2,'0');
+  var li='';
+  pv.salen.forEach(function(x){
+    li+='<li><span>'+esc(x.fila.cliente)+' <span class="e">'+x.numero+'</span></span><span class="e">'+eur(x.total)+'</span></li>';
+  });
+  var incid='';
+  if(pv.paradas.length){
+    incid='<p style="color:var(--amber)">Sin facturar, para que lo mires: '
+      +pv.paradas.map(function(x){ return esc(x.fila.cliente||'fila sin nombre')+' ('+esc(x.motivo)+')'; }).join(', ')+'.</p>';
+  }
+  document.getElementById('correo').innerHTML=''
+    +'<div class="correo"><div class="cab">'
+      +'<div class="de">De <b>Pulso</b> · para '+esc(DB.empresa.aviso)+' · '+fechaLarga(fin)+', 23:04</div>'
+      +'<div class="as">Facturación de '+esc(mesLargo(iso))+': '+pv.salen.length+' facturas enviadas</div>'
+    +'</div><div class="cue">'
+      +'<p>Hecho. Se han emitido y enviado '+pv.salen.length+' facturas por un total de <b>'+eur(pv.total)+'</b>, IVA incluido.</p>'
+      +'<ul>'+li+'</ul>'
+      +incid
+      +'<p>Las tienes todas en PDF en la carpeta del mes. Si algo no cuadra, responde a este correo.</p>'
+      +'<div class="firma">Este es el único correo que recibes del proceso. Si un mes no llega, es que algo ha fallado: esa es la señal.</div>'
+    +'</div></div>';
+
+  var boton=document.getElementById('botonCierre');
+  boton.disabled=false; boton.textContent='Volver a verlo';
+  corriendo=false;
+}
+
+/* ================= UN SOLO OYENTE ================= */
+/* El panel se repinta entero, asi que no se pueden enganchar oyentes a cada
+   boton: se perderian en el siguiente repintado. */
+function engancharOyentes(){
+document.addEventListener('click', function(ev){
+  var b=ev.target.closest('[data-accion]'); if(!b) return;
+  var i=parseInt(b.getAttribute('data-i'),10);
+  var a=b.getAttribute('data-accion');
+  if(a==='alternar'){ DB.filas[i].activa=!DB.filas[i].activa; salvar(); pintar(); }
+  else if(a==='borrar'){ DB.filas.splice(i,1); salvar(); pintar(); }
+  else if(a==='anadir'){
+    DB.filas.push({id:'f'+Date.now(), cliente:'', email:'', concepto:'', base:'', iva:21, activa:true});
+    salvar(); pintar();
+    var ult=document.querySelectorAll('#filas input[data-c="cliente"]');
+    if(ult.length) ult[ult.length-1].focus();
+  }
+  else if(a==='ejecutar'){ ejecutarCierre(); }
+  else if(a==='restaurar'){
+    if(!confirm('Se descarta lo que hayas cambiado y vuelve el ejemplo. ¿Continuar?')) return;
+    DB=clonar(SEED); salvar(); pintar();
+    document.getElementById('consola').classList.add('hidden');
+    document.getElementById('correo').innerHTML='';
+  }
+});
+
+/* Al escribir se repinta todo menos la tabla: repintarla robaria el foco. */
+var reloj=null;
+document.addEventListener('input', function(ev){
+  var el=ev.target.closest('#filas [data-i]'); if(!el) return;
+  var i=parseInt(el.getAttribute('data-i'),10), c=el.getAttribute('data-c');
+  if(!DB.filas[i]) return;
+  DB.filas[i][c] = (c==='base'||c==='iva') ? (parseFloat(el.value)||'') : el.value;
+  if(c==='email') el.classList.toggle('mal', DB.filas[i].activa && !correoValido(el.value));
+  salvar();
+  clearTimeout(reloj);
+  reloj=setTimeout(function(){ pintarEstado(); pintarPrevistas(); pintarRegistro(); }, 350);
+});
+}
+
+/* ================= ARRANQUE (siempre al final) ================= */
+/* Fuera del navegador el archivo se puede cargar como modulo y comprobar el
+   calculo sin tocar la pagina. */
+if(typeof document!=='undefined' && document.getElementById('filas')){
+  cargar(); pintar(); engancharOyentes();
+}
+
+if(typeof module!=='undefined' && module.exports){
+  module.exports={ultimoDiaMes,diasHasta,correoValido,revisarFila,totalFila,prevision,SEED};
+}
+</script>
+</body>
+</html>

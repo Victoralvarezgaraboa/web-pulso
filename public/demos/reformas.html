@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reformas · generador de presupuestos</title>
+<link rel="stylesheet" href="fuentes.css">
+<link rel="stylesheet" href="demo-navigation.css">
+<script src="demo-navigation.js" defer></script>
+<style>
+  :root{--brand:#2b2620;--acc:#B4531F;--tint:#f6ece4;--ink:#221d18;--muted:#8a7d70;--line:#e6ded5;--app:#f4f0ec;--paper:#fff;--radius:14px;--shadow:0 1px 2px rgba(43,38,32,.06),0 8px 24px rgba(43,38,32,.07)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--app);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Archivo',sans-serif}
+  .topbar{position:sticky;top:0;z-index:30;background:var(--brand);color:#fff;display:flex;align-items:center;gap:12px;padding:12px 16px}
+  .logo{width:36px;height:36px;border-radius:9px;background:var(--acc);color:#fff;display:grid;place-items:center;flex:0 0 auto}
+  .topbar .name{font-family:'Archivo';font-weight:700;font-size:16px}
+  .topbar .sub{font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.3px}
+  .topbar .spacer{flex:1}
+  .btn{font-weight:600;font-size:13.5px;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;font-family:inherit}
+  .btn-ghost{background:rgba(255,255,255,.15);color:#fff}
+  .btn-primary{background:#fff;color:var(--brand)}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 16px 40px}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:980px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}.doc-col{position:sticky;top:76px}}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .pad{padding:16px}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .field{display:flex;flex-direction:column;gap:4px}.field.full{grid-column:1/-1}
+  label.lab{font-size:11.5px;font-weight:600;color:var(--muted)}
+  input.in,select.in{font-size:14px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:inherit;width:100%}
+  input.in:focus,select.in:focus{outline:2px solid var(--tint);border-color:var(--acc)}
+  .chap{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .chap.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--tint)}
+  .chap-head{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer}
+  .chap-head:hover{background:#faf6f2}
+  .chap-title{flex:1;font-family:'Archivo';font-weight:600;font-size:15px}
+  .chap-count{font-size:12px;font-weight:600;color:var(--acc);background:var(--tint);border-radius:999px;padding:2px 9px;min-width:22px;text-align:center}
+  .chap-count.zero{color:var(--muted);background:#f0ece7}
+  .caret{color:var(--muted);transition:transform .18s}.chap.open .caret{transform:rotate(90deg)}
+  .chap-body{display:none;padding:2px 14px 12px;border-top:1px solid var(--line)}.chap.open .chap-body{display:block}
+  .line{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 2px;border-bottom:1px dashed var(--line)}
+  .line:last-child{border-bottom:0}
+  .line .nm{font-size:13.5px}.line.sel .nm{font-weight:600}
+  .line .u{font-size:11px;color:var(--muted)}
+  .line-in{display:flex;gap:6px;align-items:center;justify-self:end}
+  .qty,.prc{font-size:13px;border:1px solid var(--line);border-radius:8px;padding:7px 8px;text-align:right;font-family:inherit}
+  .qty{width:60px}.prc{width:74px}
+  .imp{font-family:'Archivo';font-weight:700;font-size:13.5px;color:var(--brand);min-width:80px;text-align:right}
+  .imp.zero{color:#cabfb4;font-weight:500}
+  .cfg{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:6px 0}
+  .paper2{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:26px 24px}
+  .doc-head{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--brand);padding-bottom:12px;margin-bottom:14px}
+  .doc-logo{width:42px;height:42px;border-radius:9px;background:var(--acc);color:#fff;display:grid;place-items:center}
+  .doc-head .wm{font-family:'Archivo';font-weight:700;font-size:19px;color:#3a332b;flex:1}
+  .doc-head .num{font-family:'Archivo';font-weight:700;font-size:15px;color:#3a332b}
+  .doc-meta{font-size:12px;line-height:1.7;margin-bottom:10px}.doc-meta b{color:#3a332b}
+  .doc-title{font-family:'Archivo';font-weight:700;font-size:13px;text-transform:uppercase;color:var(--acc);margin:8px 0 10px}
+  table.dt{width:100%;border-collapse:collapse;font-size:12px}
+  table.dt th{text-align:left;color:var(--muted);border-bottom:1.5px solid var(--line);padding:6px 4px;font-size:10px;text-transform:uppercase}
+  table.dt th.r,table.dt td.r{text-align:right}
+  table.dt .sec td{background:#f7f1ec;font-family:'Archivo';font-weight:700;font-size:11px;color:var(--acc);text-transform:uppercase;padding:6px 4px}
+  table.dt td{padding:5px 4px;border-bottom:1px solid #f1ece7}
+  table.dt td.imp{font-family:'Archivo';font-weight:700;color:#3a332b}
+  .tot{border-top:2px solid var(--brand);margin-top:12px;padding-top:10px}
+  .tr{display:flex;justify-content:space-between;padding:3px 0;font-size:12.5px}
+  .tr.big{font-family:'Archivo';font-weight:800;font-size:16px;color:var(--brand);border-top:1px dashed var(--line);margin-top:4px;padding-top:8px}
+  .empty{color:var(--muted);text-align:center;padding:34px 10px;font-size:13.5px}
+  .resumen{background:var(--brand);color:#fff;border-radius:12px;padding:15px;margin-bottom:14px}
+  .resumen h3{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#f0c9b2;margin-bottom:7px}
+  .resumen pre{white-space:pre-wrap;font-family:'Inter';font-size:12.5px;line-height:1.6}
+  .cp{margin-top:9px;background:#f0c9b2;color:var(--brand);border:0;border-radius:8px;padding:8px 13px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit}
+  .tabs{display:none}
+  @media(max-width:979px){.tabs{display:flex;gap:8px;position:sticky;top:60px;z-index:25;background:var(--app);padding:10px 0 4px}.tab{flex:1;text-align:center;font-weight:700;font-size:13.5px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted)}.tab.on{background:var(--brand);color:#fff;border-color:var(--brand)}.doc-col{display:none}body.vd .build-col{display:none}body.vd .doc-col{display:block}.topbar .btn .bt{display:none}}
+  @media print{.topbar,.tabs,.build-col,.no-print,.resumen{display:none!important}body{background:#fff}.wrap{padding:0;max-width:none}.grid{display:block}.doc-col{position:static}.paper2{border:0;box-shadow:none;padding:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{margin:14mm 12mm}table.dt tr{break-inside:avoid}.tot{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></div>
+  <div><div class="name">Reformas</div><div class="sub">Generador de presupuestos</div></div>
+  <div class="spacer"></div>
+  <button class="btn btn-ghost no-print" onclick="resetAll()"><span class="bt">Limpiar</span></button>
+  <button class="btn btn-primary no-print" onclick="window.print()">PDF</button>
+</div>
+<div class="wrap">
+  <div class="tabs no-print"><div class="tab on" id="tb" onclick="setV('b')">Construir</div><div class="tab" id="td" onclick="setV('d')">Presupuesto</div></div>
+  <div class="grid">
+    <div class="build-col">
+      <div class="card pad" style="margin-bottom:16px">
+        <div class="eyebrow">Datos del presupuesto</div>
+        <div class="fields">
+          <div class="field"><label class="lab">Nº presupuesto</label><input class="in" id="f_num" placeholder="0001" oninput="render()"></div>
+          <div class="field"><label class="lab">Fecha</label><input class="in" id="f_fecha" oninput="render()"></div>
+          <div class="field"><label class="lab">Cliente</label><input class="in" id="f_cli" placeholder="Nombre" oninput="render()"></div>
+          <div class="field"><label class="lab">Concepto</label><input class="in" id="f_tit" placeholder="Reforma integral de vivienda" oninput="render()"></div>
+          <div class="field full"><label class="lab">Dirección</label><input class="in" id="f_dir" placeholder="Calle, número, piso" oninput="render()"></div>
+        </div>
+      </div>
+      <div class="card pad" style="margin-bottom:16px">
+        <div class="eyebrow">Capítulos y partidas</div>
+        <div id="chaps"></div>
+      </div>
+      <div class="card pad">
+        <div class="eyebrow">Impuestos</div>
+        <div class="cfg"><div>IVA <span style="display:block;font-size:11px;color:var(--muted)">10% reforma vivienda &gt;2 años · 21% resto</span></div>
+          <select class="in" style="width:110px" id="f_iva" onchange="render()"><option value="0.10">10%</option><option value="0.21">21%</option></select></div>
+      </div>
+    </div>
+    <div class="doc-col">
+      <div class="resumen no-print" id="resumen"></div>
+      <div class="paper2" id="paper"></div>
+    </div>
+  </div>
+</div>
+<script>
+const CH=[
+ {id:'alba',t:'Albañilería',lines:[
+   {id:'a1',n:'Picado de alicatado',u:'m²',p:12},{id:'a2',n:'Levantado de solado',u:'m²',p:10},
+   {id:'a3',n:'Tabique de pladur',u:'m²',p:32},{id:'a4',n:'Recibido de rozas',u:'ml',p:8},{id:'a5',n:'Formación de peldaño',u:'ud',p:45}]},
+ {id:'font',t:'Fontanería',lines:[
+   {id:'f1',n:'Punto de agua nuevo',u:'ud',p:55},{id:'f2',n:'Sustitución de bajante',u:'ml',p:40},
+   {id:'f3',n:'Instalación de inodoro',u:'ud',p:90},{id:'f4',n:'Instalación de lavabo',u:'ud',p:85},{id:'f5',n:'Toma para lavadora',u:'ud',p:60}]},
+ {id:'elec',t:'Electricidad',lines:[
+   {id:'e1',n:'Punto de luz',u:'ud',p:35},{id:'e2',n:'Punto de enchufe',u:'ud',p:30},
+   {id:'e3',n:'Cuadro eléctrico',u:'ud',p:350},{id:'e4',n:'Sustitución de mecanismo',u:'ud',p:18}]},
+ {id:'sol',t:'Alicatado y solado',lines:[
+   {id:'s1',n:'Alicatado de azulejo',u:'m²',p:28},{id:'s2',n:'Solado de gres',u:'m²',p:30},{id:'s3',n:'Rodapié',u:'ml',p:9}]},
+ {id:'pint',t:'Pintura',lines:[
+   {id:'p1',n:'Pintura plástica en paredes',u:'m²',p:8},{id:'p2',n:'Alisado de paredes',u:'m²',p:12},{id:'p3',n:'Esmalte en carpintería',u:'ud',p:45}]},
+ {id:'carp',t:'Carpintería',lines:[
+   {id:'c1',n:'Puerta de paso',u:'ud',p:190},{id:'c2',n:'Frente de armario',u:'ml',p:220},{id:'c3',n:'Ventana de PVC',u:'ud',p:320}]},
+];
+const DEMO={num:'0001',cli:'Cliente de ejemplo',dir:'Av. de la Reforma 12, 3ºB',tit:'Reforma integral de baño y cocina',
+ qty:{a1:18,a2:22,f3:1,f4:1,s1:18,s2:22,s3:14,p1:60,e2:6,e4:5,c1:2}};
+const state={qty:{},price:{},open:new Set(['alba']),iva:0.10};
+function num(v){const n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:0}
+function fmt(n){n=Math.round(n*100)/100;const s=n.toFixed(2).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return s[0]+','+s[1]}
+function eur(n){return fmt(n)+' \u20AC'}
+function lineById(id){for(const c of CH){const l=c.lines.find(x=>x.id===id);if(l)return l}return null}
+function priceOf(id){const o=state.price[id];return(o!==undefined&&o!=='')?num(o):lineById(id).p}
+function compute(){const groups=[];let base=0;
+ CH.forEach(c=>{const rows=[];c.lines.forEach(l=>{const q=num(state.qty[l.id]);if(q>0){const p=priceOf(l.id);const im=Math.round(q*p*100)/100;rows.push({n:l.n,u:l.u,q,p,im});base+=im}});if(rows.length)groups.push({t:c.t,rows})});
+ base=Math.round(base*100)/100;const iva=Math.round(base*state.iva*100)/100;return{groups,base,iva,total:Math.round((base+iva)*100)/100}}
+function buildChaps(){const host=document.getElementById('chaps');host.innerHTML='';
+ CH.forEach(c=>{const cnt=c.lines.filter(l=>num(state.qty[l.id])>0).length;const op=state.open.has(c.id);
+  const s=document.createElement('div');s.className='chap'+(op?' open':'')+(cnt?' on':'');
+  const h=document.createElement('div');h.className='chap-head';h.onclick=()=>{state.open.has(c.id)?state.open.delete(c.id):state.open.add(c.id);buildChaps()};
+  h.innerHTML=`<span class="caret"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></span><span class="chap-title">${c.t}</span><span class="chap-count ${cnt?'':'zero'}">${cnt}</span>`;
+  s.appendChild(h);const b=document.createElement('div');b.className='chap-body';
+  c.lines.forEach(l=>{const q=num(state.qty[l.id]),p=priceOf(l.id);const r=document.createElement('div');r.className='line'+(q>0?' sel':'');
+    r.innerHTML=`<div><div class="nm">${l.n}</div><div class="u">${l.u} · ${eur(l.p)}/${l.u}</div></div><div class="line-in"><input class="qty" type="number" min="0" step="any" placeholder="0" value="${q>0?q:''}" data-q><input class="prc" type="number" min="0" step="any" value="${p}" data-p><span class="imp ${q>0?'':'zero'}" data-i>${eur(q*p)}</span></div>`;
+    const qi=r.querySelector('[data-q]'),pi=r.querySelector('[data-p]');
+    qi.oninput=()=>{state.qty[l.id]=qi.value;upd(l.id,r)};pi.oninput=()=>{state.price[l.id]=pi.value;upd(l.id,r)};
+    b.appendChild(r)});
+  s.appendChild(b);host.appendChild(s)})}
+function upd(id,r){const q=num(state.qty[id]),p=priceOf(id);const i=r.querySelector('[data-i]');i.textContent=eur(q*p);i.classList.toggle('zero',!(q>0));r.classList.toggle('sel',q>0);
+ const c=CH.find(x=>x.lines.some(l=>l.id===id));const head=r.closest('.chap');const cnt=c.lines.filter(l=>num(state.qty[l.id])>0).length;const bd=head.querySelector('.chap-count');bd.textContent=cnt;bd.classList.toggle('zero',!cnt);head.classList.toggle('on',cnt>0);render()}
+function g(id){const e=document.getElementById(id);return e?String(e.value||'').trim():''}
+function render(){state.iva=Number(document.getElementById('f_iva').value);const t=compute();
+ const nm=g('f_num')||'—',cli=g('f_cli'),dir=g('f_dir'),fe=g('f_fecha')||'—',ti=g('f_tit'),iv=Math.round(state.iva*100);
+ let h=`<div class="doc-head"><span class="doc-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span><span class="wm">PRESUPUESTO</span><span class="num">Nº ${nm}</span></div>`;
+ h+=`<div class="doc-meta"><div><b>CLIENTE:</b> ${cli||'—'}</div>${dir?`<div><b>DIRECCIÓN:</b> ${dir}</div>`:''}<div style="text-align:right;font-weight:700">FECHA: ${fe}</div></div>`;
+ if(ti)h+=`<div class="doc-title">${ti}</div>`;
+ if(!t.groups.length){h+=`<div class="empty">Añade cantidades en los capítulos.<br>El presupuesto se calcula aquí solo.</div>`}
+ else{h+=`<table class="dt"><thead><tr><th>Concepto</th><th class="r">Uds.</th><th class="r">Precio</th><th class="r">Importe</th></tr></thead><tbody>`;
+  t.groups.forEach(gr=>{h+=`<tr class="sec"><td colspan="4">${gr.t}</td></tr>`;gr.rows.forEach(r=>{h+=`<tr><td>${r.n}</td><td class="r">${fmt(r.q)} ${r.u}</td><td class="r">${eur(r.p)}</td><td class="r imp">${eur(r.im)}</td></tr>`})});
+  h+=`</tbody></table><div class="tot"><div class="tr"><span>Base imponible</span><span>${eur(t.base)}</span></div><div class="tr"><span>IVA ${iv}%</span><span>${eur(t.iva)}</span></div><div class="tr big"><span>TOTAL</span><span>${eur(t.total)}</span></div></div>`}
+ document.getElementById('paper').innerHTML=h;
+ const rl=[`PRESUPUESTO Nº ${nm}`,`CLIENTE: ${cli||'—'}`,dir?`DIRECCIÓN: ${dir}`:null,`FECHA: ${fe}`,ti?`CONCEPTO: ${ti}`:null,t.groups.length?`IMPORTE: ${eur(t.base)} + IVA ${iv}% = ${eur(t.total)}`:null].filter(Boolean);
+ document.getElementById('resumen').innerHTML=`<h3>Cabecera del presupuesto</h3><pre id="rtx">${rl.join('\n')}</pre><button class="cp" onclick="cpz()">Copiar cabecera</button>`}
+function cpz(){const t=document.getElementById('rtx').textContent;const d=()=>{const b=document.querySelector('.cp');const o=b.textContent;b.textContent='Copiado';setTimeout(()=>b.textContent=o,1300)};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(d).catch(()=>{});else d()}
+function setV(v){document.body.classList.toggle('vd',v==='d');document.getElementById('tb').classList.toggle('on',v==='b');document.getElementById('td').classList.toggle('on',v==='d')}
+function setToday(){const d=new Date(),m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];document.getElementById('f_fecha').value=String(d.getDate()).padStart(2,'0')+'-'+m[d.getMonth()]+'-'+d.getFullYear()}
+function loadDemo(){document.getElementById('f_num').value=DEMO.num;document.getElementById('f_cli').value=DEMO.cli;document.getElementById('f_dir').value=DEMO.dir;document.getElementById('f_tit').value=DEMO.tit;state.qty=Object.assign({},DEMO.qty);CH.forEach(c=>{if(c.lines.some(l=>state.qty[l.id]>0))state.open.add(c.id)});buildChaps();render()}
+function resetAll(){state.qty={};state.price={};state.open=new Set(['alba']);['f_num','f_cli','f_dir','f_tit'].forEach(id=>document.getElementById(id).value='');document.getElementById('f_iva').value='0.10';state.iva=0.10;setToday();buildChaps();render()}
+setToday();buildChaps();loadDemo();
+</script>
+</body>
+</html>

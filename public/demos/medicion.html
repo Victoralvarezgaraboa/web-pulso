@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Pulso · Nutrición y entreno · ficha del paciente</title>
+<meta name="description" content="Herramienta de demostración de Pulso para consultas de nutrición y entrenamiento personal: ficha del paciente, historial de mediciones con evolución, progreso hacia el peso objetivo, plan de alimentación con balance calórico y plan de entrenamiento semanal.">
+<link rel="icon" href="pulso.svg">
+<link rel="stylesheet" href="fuentes.css">
+<link rel="stylesheet" href="demo-navigation.css">
+<script src="demo-navigation.js" defer></script>
+<style>
+  :root{
+    --ink:#07120D; --ink2:#0B1A13; --card:#10231A; --card2:#16301F;
+    --line:rgba(236,239,234,.10);
+    --signal:#5CE3A3; --signal-deep:#2FA873;
+    --ivory:#ECEFEA; --muted:#8A988F; --muted2:#5C695F;
+    --amber:#E6B567; --coral:#D08468;
+    --accent:var(--signal); --accent-deep:var(--signal-deep);
+  }
+  body.tema-cliente{ --accent:#7FB0FF; --accent-deep:#4E82D8; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--ivory);font-family:'Hanken Grotesk',sans-serif;-webkit-font-smoothing:antialiased;line-height:1.45;padding-bottom:60px}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .wrap{max-width:580px;margin:0 auto;padding:16px 16px 0}
+  ::selection{background:var(--accent);color:#062013}
+
+  .top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px 14px}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px}
+  .brand small{display:block;font-weight:500;font-size:11px;letter-spacing:.06em;color:var(--muted)}
+  .themebtn{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 11px;font-size:11.5px;cursor:pointer;font-family:inherit}
+  .themebtn:hover{color:var(--ivory);border-color:var(--accent)}
+
+  .consulta{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .consulta input{flex:1;background:transparent;border:none;border-bottom:1px dashed var(--line);color:var(--ivory);font-family:'Fraunces',serif;font-size:19px;font-weight:500;padding:4px 2px;outline:none}
+  .consulta input:focus{border-bottom-color:var(--accent)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+  .card h2{font-family:'Fraunces',serif;font-weight:500;font-size:22px;letter-spacing:-.01em;margin-bottom:2px}
+  .card h3{font-family:'Fraunces',serif;font-weight:500;font-size:16px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .card h3 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+  .sub{color:var(--muted);font-size:12.5px;margin-bottom:4px}
+  .lbl{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:16px 2px 8px}
+  label.fl{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 5px}
+  input,select,textarea{width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:10px;color:var(--ivory);font-family:inherit;font-size:15px;padding:11px 12px;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4 L6 8 L10 4' stroke='%238A988F' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center}
+  textarea{resize:vertical;min-height:56px;line-height:1.5}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .btn{background:var(--accent);color:#052014;border:none;border-radius:12px;padding:13px 16px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+  .btn:hover{background:var(--accent-deep)}
+  .btn.wide{width:100%}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ivory)}
+  .btn.ghost:hover{border-color:var(--accent)}
+  .btn.sm{padding:9px 13px;font-size:13px}
+  .rowbtns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+
+  .pac{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:9px;cursor:pointer}
+  .pac:hover{border-color:var(--accent)}
+  .pac .n{font-weight:600;font-size:15px}
+  .pac .s{font-size:12px;color:var(--muted);margin-top:2px}
+  .pac .go{color:var(--accent);font-size:20px;line-height:1}
+  .empty{color:var(--muted2);font-size:13.5px;text-align:center;padding:18px 0}
+
+  /* datos nutricionales */
+  .nutriwrap{display:flex;gap:16px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .figura{flex:0 0 118px}
+  .figura svg{width:118px;height:auto;display:block}
+  .kpis{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:9px;min-width:180px}
+  .kpi{background:var(--ink2);border:1px solid var(--line);border-radius:12px;padding:11px}
+  .kpi .k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .kpi .v{font-family:'Fraunces',serif;font-size:23px;font-weight:600;margin-top:2px}
+  .kpi .u{font-size:11px;color:var(--muted);font-weight:400}
+  .kpi .t{font-size:11.5px;margin-top:2px}
+  .t.ok{color:var(--signal)} .t.warn{color:var(--amber)} .t.bad{color:var(--coral)}
+  .nota{font-size:11.5px;color:var(--muted2);margin-top:11px;line-height:1.5}
+  .nota b{color:var(--muted)}
+
+  .med{background:var(--ink2);border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:8px}
+  .med .mf{display:flex;justify-content:space-between;align-items:baseline}
+  .med .fecha{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--muted)}
+  .med .peso{font-family:'Fraunces',serif;font-size:18px;font-weight:600}
+  .med .det{font-size:12px;color:var(--muted);margin-top:4px}
+  .med .notas{font-size:12.5px;color:var(--ivory);margin-top:6px;opacity:.85}
+
+  /* selector de día */
+  .diasbar{display:flex;gap:6px;margin:2px 0 4px}
+  .diatab{flex:1;text-align:center;background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:9px 0;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;font-family:inherit}
+  .diatab.on{background:var(--accent);color:#052014;border-color:var(--accent)}
+  .diatab .day{display:block;font-size:9px;font-weight:500;letter-spacing:.05em;margin-top:1px;opacity:.8}
+  .diahead{font-family:'Fraunces',serif;font-size:15px;color:var(--ivory);margin:4px 2px 2px}
+
+  /* dieta */
+  .toma{background:var(--ink2);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px}
+  .toma .th{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .toma .th input.tit{flex:1;background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;font-weight:600;font-size:13.5px;color:var(--accent);padding:3px 2px}
+  .toma .th .tk{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .item{display:grid;grid-template-columns:1fr 46px 42px 50px 18px;gap:5px;align-items:center;margin-bottom:6px}
+  .item input,.item select{padding:8px 7px;font-size:12.5px;border-radius:8px}
+  .item .g,.item .k{text-align:right}
+  .item .del{padding:0;font-size:13px}
+  .additem{width:100%;background:transparent;border:1px dashed var(--line);color:var(--muted);border-radius:8px;padding:7px;font-size:12px;cursor:pointer;font-family:inherit;margin-top:2px}
+  .additem:hover{border-color:var(--accent);color:var(--accent)}
+  .balance{background:var(--ink2);border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:12px}
+  .balance .row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:var(--muted)}
+  .balance .row b{font-family:'JetBrains Mono',monospace;color:var(--ivory)}
+  .balance .bar{position:relative;height:9px;border-radius:6px;background:var(--card2);margin:10px 0 8px}
+  .balance .bar i{display:block;height:100%;border-radius:6px}
+  .balance .bar i.ok{background:var(--signal)} .balance .bar i.warn{background:var(--amber)} .balance .bar i.bad{background:var(--coral)}
+  .balance .bar .mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ivory);opacity:.55}
+  .balance .bar .mark.obj{background:var(--amber);opacity:.95;width:2px}
+  .balance .fase{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-top:2px}
+  .balance .fase.ok{color:var(--signal)} .balance .fase.warn{color:var(--amber)} .balance .fase.bad{color:var(--coral)}
+  .balance .mant{font-size:11px;color:var(--muted2);margin-top:4px}
+
+  /* entreno */
+  .focusinp{font-family:'Fraunces',serif;font-size:14px}
+  .bloque{background:var(--ink2);border:1px solid var(--line);border-radius:11px;padding:11px 12px;margin-bottom:8px}
+  .bloque .bh{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .bloque input.cat{flex:0 0 auto;width:150px;background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:var(--muted);padding:3px 2px;text-transform:uppercase}
+  .bloque input.tit{flex:1;background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;font-weight:600;font-size:14px;padding:3px 2px}
+  .bloque textarea{font-size:13px;color:var(--ivory);opacity:.92;min-height:44px}
+  .hechobar{display:flex;gap:10px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .check{flex:0 0 auto;width:34px;height:34px;border-radius:9px;border:1.5px solid var(--line);background:transparent;color:var(--accent);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .check.on{background:var(--accent);color:#052014;border-color:var(--accent)}
+  .estado{font-size:12.5px}
+  .estado.on{color:var(--signal)} .estado.off{color:var(--muted2)}
+
+  /* evolucion: grafico de peso e hitos del historial */
+  .spark{background:var(--ink2);border:1px solid var(--line);border-radius:12px;padding:12px 12px 8px;margin-bottom:10px}
+  .spark svg{display:block;width:100%;height:auto}
+  .spark .cab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+  .spark .cab .t{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .spark .cab .r{font-family:'JetBrains Mono',monospace;font-size:12.5px}
+  .med .delta{font-family:'JetBrains Mono',monospace;font-size:12px;margin-left:8px}
+  .delta.ok{color:var(--signal)} .delta.bad{color:var(--coral)}
+  .delta.warn{color:var(--amber)} .delta.muted{color:var(--muted2)}
+
+  /* progreso hacia el peso objetivo */
+  .prog{background:var(--ink2);border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:11px}
+  .prog .ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:9px}
+  .prog .ph .t{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .prog .ph .q{font-family:'Fraunces',serif;font-size:17px;font-weight:600}
+  .prog .rail{height:9px;border-radius:6px;background:var(--card2);overflow:hidden}
+  .prog .rail i{display:block;height:100%;border-radius:6px;background:var(--accent)}
+  .prog .hitos{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:7px}
+
+  .del{background:transparent;border:none;color:var(--muted2);font-size:12px;cursor:pointer;padding:4px}
+  .del:hover{color:var(--coral)}
+  .backlink{background:transparent;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:6px 2px;font-family:inherit;margin-bottom:6px}
+  .backlink:hover{color:var(--accent)}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <span class="brand">
+      <svg width="22" height="22" viewBox="0 0 26 26"><path d="M2 13 H7 L9.5 5 L13 21 L16 9 L18.5 13 H24" stroke="#5CE3A3" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Pulso<small>Ficha del paciente</small></span>
+    </span>
+    <button class="themebtn" id="themeBtn" onclick="toggleTema()">Tema cliente</button>
+  </div>
+
+  <div class="consulta">
+    <input id="consultaNombre" placeholder="Nombre de la consulta" onchange="guardarConsulta()">
+  </div>
+
+  <!-- ===== INICIO ===== -->
+  <div id="inicioView">
+    <div class="card">
+      <h2>Pacientes</h2>
+      <p class="sub">Ficha, mediciones, dieta y entrenamiento semanal.</p>
+    </div>
+    <button class="btn wide" onclick="nuevoPaciente()">Nuevo paciente</button>
+    <div class="rowbtns"><button class="btn ghost sm" onclick="restaurarEjemplo()">Restaurar el ejemplo</button>
+      <span style="font-size:11.5px;color:var(--muted2)">Los datos se guardan en este navegador. Nada sale de aquí.</span></div>
+    <div class="lbl">Listado</div>
+    <div id="listaPacientes"></div>
+  </div>
+
+  <!-- ===== FICHA COMPLETA ===== -->
+  <div id="pacienteView" class="hidden">
+    <button class="backlink" onclick="verInicio()">← Pacientes</button>
+
+    <!-- 1 · datos personales -->
+    <div class="card">
+      <h2 id="pacTitulo">Paciente</h2>
+      <h3 style="margin-top:10px"><span class="dot"></span>Datos personales</h3>
+      <div class="grid2">
+        <div><label class="fl">Nombre</label><input id="fNombre"></div>
+        <div><label class="fl">Género</label><select id="fGenero"><option value="H">Hombre</option><option value="M">Mujer</option></select></div>
+        <div><label class="fl">Fecha de nacimiento</label><input id="fNac" type="date"></div>
+        <div><label class="fl">Teléfono <span style="color:var(--muted2)">(opc.)</span></label><input id="fTel" type="tel"></div>
+        <div style="grid-column:1/3"><label class="fl">Email <span style="color:var(--muted2)">(opc.)</span></label><input id="fEmail" type="email"></div>
+        <div><label class="fl">Objetivo</label>
+          <select id="fObjetivo"><option value="perdida">Pérdida de grasa</option><option value="mant">Mantenimiento</option><option value="ganancia">Ganancia muscular</option><option value="rend">Rendimiento</option></select></div>
+        <div><label class="fl">Nivel de actividad</label>
+          <select id="fActividad"><option value="sed">Sedentario</option><option value="lig">Actividad ligera</option><option value="mod">Actividad moderada</option><option value="alta">Actividad alta</option><option value="muy">Actividad muy alta</option></select></div>
+        <div><label class="fl">Peso objetivo (kg) <span style="color:var(--muted2)">(opc.)</span></label><input id="fPesoObj" type="number" inputmode="decimal" placeholder="—"></div>
+      </div>
+      <div class="rowbtns">
+        <button class="btn sm" onclick="guardarFicha()">Guardar ficha</button>
+        <button class="btn ghost sm" onclick="borrarPaciente()">Eliminar paciente</button>
+        <span id="fichaAviso" style="font-size:12px;color:var(--accent)"></span>
+      </div>
+    </div>
+
+    <!-- 2 · datos nutricionales -->
+    <div class="card">
+      <h3><span class="dot"></span>Datos nutricionales</h3>
+      <label class="fl">Estatura (cm)</label>
+      <input id="fAltura" type="number" inputmode="decimal" placeholder="175" onchange="guardarAltura()" style="max-width:160px">
+      <div class="nutriwrap">
+        <div class="figura" id="figura"></div>
+        <div class="kpis" id="kpis"></div>
+      </div>
+      <div id="progresoObj"></div>
+      <p class="nota" id="resumenNota"></p>
+      <div class="rowbtns"><button class="btn sm" onclick="nuevaMedicion()">Nueva medición</button></div>
+      <div class="lbl">Historial de visitas</div>
+      <div id="evolucion"></div>
+      <div id="listaMediciones"></div>
+    </div>
+
+    <!-- selector de día -->
+    <div class="diasbar" id="diasbar"></div>
+
+    <!-- 3 · dieta del día -->
+    <div class="card">
+      <h3><span class="dot"></span>Plan de alimentación</h3>
+      <div class="diahead" id="dietaDiaHead">—</div>
+      <p class="sub">Lo define la consulta; el paciente lo consulta.</p>
+      <div id="listaDieta" style="margin-top:8px"></div>
+      <button class="additem" onclick="addToma()" style="margin-top:6px">+ toma</button>
+      <div class="balance" id="balanceDia"></div>
+      <div class="rowbtns">
+        <button class="btn sm" onclick="guardarDia()">Guardar día</button>
+      </div>
+    </div>
+
+    <!-- 4 · entreno del día -->
+    <div class="card">
+      <h3><span class="dot"></span>Plan de entrenamiento</h3>
+      <div class="diahead" id="entrenoDiaHead">—</div>
+      <label class="fl">Focus del día</label>
+      <input id="focusDia" class="focusinp" placeholder="Foco de la sesión…">
+      <div class="lbl" style="margin-top:12px">Bloques</div>
+      <div id="listaEntreno"></div>
+      <div class="rowbtns">
+        <button class="btn ghost sm" onclick="addBloque()">Añadir bloque</button>
+        <button class="btn sm" onclick="guardarDia()">Guardar día</button>
+      </div>
+      <div class="hechobar">
+        <button class="check" id="checkDia" onclick="toggleHechoDia()"></button>
+        <div><div class="estado" id="estadoDia"></div>
+          <input id="comentarioDia" placeholder="Comentario / resultado del atleta…" style="margin-top:6px;font-size:13px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NUEVA MEDICIÓN ===== -->
+  <div id="medicionView" class="hidden">
+    <button class="backlink" onclick="verPaciente(pacActual)">← Ficha</button>
+    <div class="card">
+      <h2>Nueva medición</h2>
+      <p class="sub" id="medPacNombre"></p>
+      <label class="fl">Fecha de la visita</label>
+      <input id="mFecha" type="date">
+      <div class="grid2" style="margin-top:2px">
+        <div><label class="fl">Peso (kg)</label><input id="mPeso" type="number" inputmode="decimal" placeholder="80"></div>
+        <div><label class="fl">% graso <span style="color:var(--muted2)">(opc.)</span></label><input id="mGraso" type="number" inputmode="decimal" placeholder="—"></div>
+        <div><label class="fl">Cintura cm <span style="color:var(--muted2)">(opc.)</span></label><input id="mCintura" type="number" inputmode="decimal" placeholder="—"></div>
+        <div><label class="fl">Cadera cm <span style="color:var(--muted2)">(opc.)</span></label><input id="mCadera" type="number" inputmode="decimal" placeholder="—"></div>
+        <div><label class="fl">Brazo cm <span style="color:var(--muted2)">(opc.)</span></label><input id="mBrazo" type="number" inputmode="decimal" placeholder="—"></div>
+        <div><label class="fl">Pierna cm <span style="color:var(--muted2)">(opc.)</span></label><input id="mPierna" type="number" inputmode="decimal" placeholder="—"></div>
+      </div>
+      <label class="fl">Notas de la visita</label>
+      <textarea id="mNotas" placeholder="Observaciones, adherencia, incidencias…"></textarea>
+      <div class="rowbtns">
+        <button class="btn sm" onclick="guardarMedicion()">Guardar visita</button>
+        <button class="btn ghost sm" onclick="verPaciente(pacActual)">Cancelar</button>
+        <span id="medAviso" style="font-size:12px;color:var(--coral)"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var SEED = {"tomasDef": ["Pre-entreno", "Post-entreno", "Desayuno", "Comida", "Merienda", "Cena"], "dias": [{"k": "lun", "n": "Lunes", "ab": "L"}, {"k": "mar", "n": "Martes", "ab": "M"}, {"k": "mie", "n": "Miércoles", "ab": "X"}, {"k": "jue", "n": "Jueves", "ab": "J"}, {"k": "vie", "n": "Viernes", "ab": "V"}, {"k": "sab", "n": "Sábado", "ab": "S"}, {"k": "dom", "n": "Domingo", "ab": "D"}], "unidades": ["g", "ml", "ud"], "semanaVacia": {"lun": {"focus": "", "comidas": [{"n": "Pre-entreno", "items": []}, {"n": "Post-entreno", "items": []}, {"n": "Desayuno", "items": []}, {"n": "Comida", "items": []}, {"n": "Merienda", "items": []}, {"n": "Cena", "items": []}], "bloques": [], "hecho": false, "comentario": ""}, "mar": {"focus": "", "comidas": [{"n": "Pre-entreno", "items": []}, {"n": "Post-entreno", "items": []}, {"n": "Desayuno", "items": []}, {"n": "Comida", "items": []}, {"n": "Merienda", "items": []}, {"n": "Cena", "items": []}], "bloques": [], "hecho": false, "comentario": ""}, "mie": {"focus": "", "comidas": [{"n": "Pre-entreno", "items": []}, {"n": "Post-entreno", "items": []}, {"n": "Desayuno", "items": []}, {"n": "Comida", "items": []}, {"n": "Merienda", "items": []}, {"n": "Cena", "items": []}], "bloques": [], "hecho": false, "comentario": ""}, "jue": {"focus": "", "comidas": [{"n": "Pre-entreno", "items": []}, {"n": "Post-entreno", "items": []}, {"n": "Desayuno", "items": []}, {"n": "Comida", "items": []}, {"n": "Merienda", "items": []}, {"n": "Cena", "items": []}], "bloques": [], "hecho": false, "comentario": ""}, "vie": {"focus": "", "comidas": [{"n": "Pre-entreno", "items": []}, {"n": "Post-entreno", "items": []}, {"n": "Desayuno", "items": []}, {"n": "Comida", "items": []}, {"n": "Merienda", "items": []}, {"n": "Cena", "items": []}], "bloques": [], "hecho": false, "comentario": ""}, "sab": {"focus": "", "comidas": [{"n": "Pre-entreno", "items": []}, {"n": "Post-entreno", "items": []}, {"n": "Desayuno", "items": []}, {"n": "Comida", "items": []}, {"n": "Merienda", "items": []}, {"n": "Cena", "items": []}], "bloques": [], "hecho": false, "comentario": ""}, "dom": {"focus": "", "comidas": [{"n": "Pre-entreno", "items": []}, {"n": "Post-entreno", "items": []}, {"n": "Desayuno", "items": []}, {"n": "Comida", "items": []}, {"n": "Merienda", "items": []}, {"n": "Cena", "items": []}], "bloques": [], "hecho": false, "comentario": ""}}, "pacienteEjemplo": {"id": "p_ejemplo", "nombre": "Atleta ejemplo", "genero": "H", "fnac": "1994-05-12", "tel": "", "email": "", "altura": 178, "objetivo": "perdida", "actividad": "alta", "pesoObjetivo": 78, "mediciones": [{"id": "m1", "fecha": "2026-08-24", "peso": 82.4, "graso": 16, "cintura": 86, "cadera": 100, "brazo": 36.5, "pierna": 58, "notas": "Semana 35. Buena adherencia."}, {"id": "m0", "fecha": "2026-07-20", "peso": 85.1, "graso": 18, "cintura": 90, "cadera": 102, "brazo": 36, "pierna": 57, "notas": "Medición inicial."}], "semana": {"lun": {"focus": "Clean & Jerk waves · Ring MU · DB engine", "comidas": [{"n": "Pre-entreno", "items": [{"nombre": "Café solo", "cant": 1, "uni": "ud", "kcal": 2}, {"nombre": "Agua con sal", "cant": 250, "uni": "ml", "kcal": 0}]}, {"n": "Post-entreno", "items": [{"nombre": "Batido de proteína", "cant": 1, "uni": "ud", "kcal": 130}, {"nombre": "Plátano", "cant": 1, "uni": "ud", "kcal": 105}, {"nombre": "Avena", "cant": 40, "uni": "g", "kcal": 152}]}, {"n": "Desayuno", "items": [{"nombre": "Huevos", "cant": 3, "uni": "ud", "kcal": 225}, {"nombre": "Manzana", "cant": 1, "uni": "ud", "kcal": 80}, {"nombre": "Pan integral", "cant": 100, "uni": "g", "kcal": 250}]}, {"n": "Comida", "items": [{"nombre": "Lentejas cocidas", "cant": 350, "uni": "g", "kcal": 400}, {"nombre": "Arroz cocido", "cant": 100, "uni": "g", "kcal": 130}, {"nombre": "Ensalada con aceite", "cant": 200, "uni": "g", "kcal": 150}]}, {"n": "Merienda", "items": [{"nombre": "Yogur natural", "cant": 200, "uni": "g", "kcal": 120}, {"nombre": "Fruta", "cant": 1, "uni": "ud", "kcal": 80}, {"nombre": "Frutos secos", "cant": 20, "uni": "g", "kcal": 120}]}, {"n": "Cena", "items": [{"nombre": "Pechuga de pollo", "cant": 220, "uni": "g", "kcal": 363}, {"nombre": "Arroz cocido", "cant": 150, "uni": "g", "kcal": 195}, {"nombre": "Verduras salteadas", "cant": 250, "uni": "g", "kcal": 160}]}], "bloques": [{"id": "blun0", "cat": "A · WEIGHTLIFTING", "tit": "Clean & Jerk waves", "det": "Acumula 2 oleadas, cada una en el menor tiempo posible · 5→4→3→2→1 (15 reps/oleada), 60→80%.\n5@60% · 4@65% · 3@70% · 2@75% · 1@80% (%1RM C&J). Descansa 5' entre oleadas. Cualquier clean (power/squat)."}, {"id": "blun1", "cat": "B · GYMNASTICS", "tit": "Ring Muscle Up stamina", "det": "Cada 30\" durante 5' (10 rondas) · 1 serie de RMU. Elige 1-5 reps que puedas mantener constantes toda la pieza."}, {"id": "blun2", "cat": "C · CONDITIONING", "tit": "DB Hang C&J + Lateral Burpees", "det": "3 ventanas en 2': 20/20/10 Single-arm alt DB Hang C&J + máx Lateral Burpees over DB (60\" rest entre A y B).\nScore: burpees totales. #Elite 32,5/22,5 · #Rx 25/17,5 · Target +40 burpees."}, {"id": "blun3", "cat": "D · ACCESSORIES", "tit": "Shoulder accessories", "det": "Superset 2-3 rondas por calidad: 12 Seated Alt Top-Down DB Arnold Press (tempo 2\" bajada) + 15 DB/plate Reverse Snow Angels (lento, ligero)."}], "hecho": false, "comentario": ""}, "mar": {"focus": "Back squat waves · Snatch complex · Grippy", "comidas": [{"n": "Pre-entreno", "items": [{"nombre": "Café", "cant": 1, "uni": "ud", "kcal": 2}]}, {"n": "Post-entreno", "items": [{"nombre": "Yogur proteico", "cant": 1, "uni": "ud", "kcal": 90}, {"nombre": "Miel", "cant": 15, "uni": "g", "kcal": 45}, {"nombre": "Plátano", "cant": 1, "uni": "ud", "kcal": 105}]}, {"n": "Desayuno", "items": [{"nombre": "Avena", "cant": 80, "uni": "g", "kcal": 304}, {"nombre": "Yogur natural", "cant": 125, "uni": "g", "kcal": 75}, {"nombre": "Arándanos", "cant": 60, "uni": "g", "kcal": 34}, {"nombre": "Nueces", "cant": 15, "uni": "g", "kcal": 98}]}, {"n": "Comida", "items": [{"nombre": "Pollo al horno", "cant": 220, "uni": "g", "kcal": 363}, {"nombre": "Patata", "cant": 300, "uni": "g", "kcal": 255}, {"nombre": "Verduras", "cant": 200, "uni": "g", "kcal": 70}, {"nombre": "Pan integral", "cant": 60, "uni": "g", "kcal": 150}]}, {"n": "Merienda", "items": [{"nombre": "Frutos secos", "cant": 30, "uni": "g", "kcal": 180}, {"nombre": "Manzana", "cant": 1, "uni": "ud", "kcal": 80}]}, {"n": "Cena", "items": [{"nombre": "Pescado blanco", "cant": 220, "uni": "g", "kcal": 220}, {"nombre": "Arroz cocido", "cant": 180, "uni": "g", "kcal": 234}, {"nombre": "Ensalada con aceite", "cant": 200, "uni": "g", "kcal": 150}]}], "bloques": [{"id": "bmar0", "cat": "A · STRENGTH", "tit": "Back Squat waves", "det": "EMOM dinámico, velocidad concéntrica. A1 EMOM 3': 9@55% (RPE5) — 2' rest · A2: 6@65% (RPE6) — 2' rest · A3: 3@75% (RPE7). No sobrepases los % de hoy."}, {"id": "bmar1", "cat": "B · WEIGHTLIFTING", "tit": "Snatch complex", "det": "Cada 90\" durante 15' (10 rondas): 1 lift-off + 1 pull + 1 power-squat snatch. Manos en la barra todo el complex. Progresa de RPE6/65% a pesado y sólido."}, {"id": "bmar2", "cat": "C · CONDITIONING", "tit": "\"Grippy\" · Snatch + C2B", "det": "Couplet · 10 rondas for time: snatch pesado (singles) + 10 Chest to Bar (100 C2B totales).\n#Elite 80/55 · #Rx 70/45 · Sub 8'/10'."}, {"id": "bmar3", "cat": "D · FINISHER", "tit": "Row intervals", "det": "4 × 3' on / 90\" off. Máxima media cal/h sostenible las 4 rondas. #Elite +70/50 · #Rx +55/40 cal/int."}], "hecho": false, "comentario": ""}, "mie": {"focus": "Triple jump · AMRAP escalera · rope climb  —  \"Controlar la respiración es controlar el WOD\"", "comidas": [{"n": "Pre-entreno", "items": [{"nombre": "Café", "cant": 1, "uni": "ud", "kcal": 2}]}, {"n": "Post-entreno", "items": [{"nombre": "Batido de proteína", "cant": 1, "uni": "ud", "kcal": 130}, {"nombre": "Plátano", "cant": 1, "uni": "ud", "kcal": 105}, {"nombre": "Tortita de arroz", "cant": 2, "uni": "ud", "kcal": 60}]}, {"n": "Desayuno", "items": [{"nombre": "Tortilla de claras", "cant": 4, "uni": "ud", "kcal": 100}, {"nombre": "Aguacate", "cant": 70, "uni": "g", "kcal": 112}, {"nombre": "Pan integral", "cant": 100, "uni": "g", "kcal": 250}]}, {"n": "Comida", "items": [{"nombre": "Pasta cocida", "cant": 320, "uni": "g", "kcal": 416}, {"nombre": "Atún al natural", "cant": 120, "uni": "g", "kcal": 135}, {"nombre": "Ensalada con aceite", "cant": 150, "uni": "g", "kcal": 120}, {"nombre": "Pan integral", "cant": 50, "uni": "g", "kcal": 125}]}, {"n": "Merienda", "items": [{"nombre": "Hummus", "cant": 80, "uni": "g", "kcal": 136}, {"nombre": "Verduras", "cant": 120, "uni": "g", "kcal": 30}, {"nombre": "Pan integral", "cant": 50, "uni": "g", "kcal": 125}, {"nombre": "Fruta", "cant": 1, "uni": "ud", "kcal": 80}]}, {"n": "Cena", "items": [{"nombre": "Tortilla (3 huevos)", "cant": 3, "uni": "ud", "kcal": 225}, {"nombre": "Espinacas salteadas", "cant": 200, "uni": "g", "kcal": 100}, {"nombre": "Arroz cocido", "cant": 150, "uni": "g", "kcal": 195}, {"nombre": "Pan integral", "cant": 40, "uni": "g", "kcal": 100}]}], "bloques": [{"id": "bmie0", "cat": "A · PLYOMETRICS", "tit": "Standing triple jump", "det": "Acumula 4-6 series efectivas de triple jump exigente, descanso el necesario. Cada serie es un intento máximo con el sistema fresco. Calent. obligatorio (movilidad dinámica + pogos + broad jumps)."}, {"id": "bmie1", "cat": "B · CONDITIONING", "tit": "AMRAP 16' · escalera ascendente", "det": "3 T2B + 3 Wall Balls + 200 m Run; +3/+3 gimnástico y WB por ronda (run fijo). Rondas 1-4 unbroken.\nMedball #Elite 12/9 · #Rx 9/6. Score: rondas+reps."}, {"id": "bmie2", "cat": "C · GYMNASTICS", "tit": "Rope climb (opcional)", "det": "En el menor tiempo posible · 10' cap: 10/8 Legless Rope Climbs (4,5 m). Alternativa: 12 Rope Climbs regular. Sin llegar al fallo."}], "hecho": false, "comentario": ""}, "jue": {"focus": "Endurance (elige modelo) + movilidad  —  \"El resultado es consecuencia, no objetivo\"", "comidas": [{"n": "Pre-entreno", "items": [{"nombre": "Café", "cant": 1, "uni": "ud", "kcal": 2}]}, {"n": "Post-entreno", "items": [{"nombre": "Yogur proteico", "cant": 1, "uni": "ud", "kcal": 90}, {"nombre": "Kiwi", "cant": 1, "uni": "ud", "kcal": 50}, {"nombre": "Miel", "cant": 15, "uni": "g", "kcal": 45}]}, {"n": "Desayuno", "items": [{"nombre": "Sándwich integral de atún", "cant": 1, "uni": "ud", "kcal": 340}, {"nombre": "Fruta", "cant": 1, "uni": "ud", "kcal": 80}, {"nombre": "Avena", "cant": 40, "uni": "g", "kcal": 152}]}, {"n": "Comida", "items": [{"nombre": "Guiso de carne magra", "cant": 200, "uni": "g", "kcal": 320}, {"nombre": "Verduras", "cant": 200, "uni": "g", "kcal": 70}, {"nombre": "Patata", "cant": 300, "uni": "g", "kcal": 255}, {"nombre": "Pan integral", "cant": 40, "uni": "g", "kcal": 100}]}, {"n": "Merienda", "items": [{"nombre": "Batido de proteína", "cant": 1, "uni": "ud", "kcal": 130}, {"nombre": "Plátano", "cant": 1, "uni": "ud", "kcal": 105}, {"nombre": "Frutos secos", "cant": 20, "uni": "g", "kcal": 120}, {"nombre": "Fruta", "cant": 1, "uni": "ud", "kcal": 80}]}, {"n": "Cena", "items": [{"nombre": "Salmón", "cant": 180, "uni": "g", "kcal": 360}, {"nombre": "Brócoli", "cant": 200, "uni": "g", "kcal": 70}, {"nombre": "Arroz cocido", "cant": 150, "uni": "g", "kcal": 195}]}], "bloques": [{"id": "bjue0", "cat": "A · CONDITIONING", "tit": "Endurance — elige un modelo", "det": "Opción A carrera: 8 series de 400 m @ Hard (RPE7-8) + 200 m @ Aerobic (RPE4-5), 30\" rest.\nOpción B piscina 1.500 m polarizado (sprint 25 m tras cada 75 m)."}, {"id": "bjue1", "cat": "B · MOBILITY", "tit": "Mobility flow", "det": "Sesión de movilidad/estiramientos tras A, o aparte. Elige el grupo que más necesites: cadera · tren superior · tren inferior · columna."}], "hecho": false, "comentario": ""}, "vie": {"focus": "Elige · Fuerza (A) / Engine (B)", "comidas": [{"n": "Pre-entreno", "items": [{"nombre": "Café", "cant": 1, "uni": "ud", "kcal": 2}]}, {"n": "Post-entreno", "items": [{"nombre": "Batido de proteína", "cant": 1, "uni": "ud", "kcal": 130}, {"nombre": "Plátano", "cant": 1, "uni": "ud", "kcal": 105}]}, {"n": "Desayuno", "items": [{"nombre": "Huevos", "cant": 3, "uni": "ud", "kcal": 225}, {"nombre": "Tostada integral", "cant": 2, "uni": "ud", "kcal": 150}, {"nombre": "Aguacate", "cant": 50, "uni": "g", "kcal": 80}]}, {"n": "Comida", "items": [{"nombre": "Arroz cocido", "cant": 250, "uni": "g", "kcal": 325}, {"nombre": "Pollo", "cant": 180, "uni": "g", "kcal": 297}, {"nombre": "Ensalada con aceite", "cant": 150, "uni": "g", "kcal": 120}, {"nombre": "Pan integral", "cant": 60, "uni": "g", "kcal": 150}]}, {"n": "Merienda", "items": [{"nombre": "Yogur natural", "cant": 200, "uni": "g", "kcal": 120}, {"nombre": "Frutos rojos", "cant": 80, "uni": "g", "kcal": 40}, {"nombre": "Frutos secos", "cant": 25, "uni": "g", "kcal": 150}]}, {"n": "Cena", "items": [{"nombre": "Pescado blanco", "cant": 220, "uni": "g", "kcal": 220}, {"nombre": "Patata", "cant": 250, "uni": "g", "kcal": 213}, {"nombre": "Verduras", "cant": 250, "uni": "g", "kcal": 90}, {"nombre": "Arroz cocido", "cant": 120, "uni": "g", "kcal": 156}]}], "bloques": [{"id": "bvie0", "cat": "A · STRENGTH", "tit": "Mixed strength · Deadlift + Wall-facing HSPU", "det": "Reloj corrido. 0-12': 3RM pesado de ambos (4-5 series). Al 15:00 EMOM 12': 3 DL@80%/3 HSPU@80% → 6@70-75% → 9@60-65%. Sin fallo."}, {"id": "bvie1", "cat": "B · ENGINE", "tit": "Power intervals", "det": "6 × 90\" on / 2' off, alternando A-B (3 de cada). A: 12/8 Ski + 5 Sandbag Cleans + máx carry. B: 12/8 Echo Bike + 5 Double DB Devil Press + máx Wall Walks.\n#Elite 90/60 sandbag · 2×30/20 DB · #Rx 70/45 · 2×22,5/15."}, {"id": "bvie2", "cat": "C · ACCESSORIES", "tit": "Chest / upper-arm", "det": "Superset 2-3 rondas: 10 Double DB Bench Press + 10 Double DB Chest-Supported Row. Luego 10 DB French Press + Dumbbell 21s."}, {"id": "bvie3", "cat": "D · ENGINE (opción B)", "tit": "Engine intervals", "det": "4 × (4' on/2' off): 40/30 Row + 60 Heavy Double Unders + AMRAP Bike-erg. 10' rest → 4 × (4'/2'): 40/30 Ski + 30 Box Jump Overs 60/50 + AMRAP Bike-erg. Target bici #Elite >25/17 · #Rx >15/11."}], "hecho": false, "comentario": ""}, "sab": {"focus": "Jerk cluster · Mixed intervals (BMU) · acc.  —  \"El atleta maduro abraza el dolor y lo transforma en dato\"", "comidas": [{"n": "Desayuno", "items": [{"nombre": "Tostada integral", "cant": 2, "uni": "ud", "kcal": 150}, {"nombre": "Huevos", "cant": 2, "uni": "ud", "kcal": 150}, {"nombre": "Aguacate", "cant": 70, "uni": "g", "kcal": 112}, {"nombre": "Avena", "cant": 40, "uni": "g", "kcal": 152}, {"nombre": "Fruta", "cant": 1, "uni": "ud", "kcal": 80}]}, {"n": "Comida", "items": [{"nombre": "Garbanzos cocidos", "cant": 300, "uni": "g", "kcal": 420}, {"nombre": "Pollo", "cant": 120, "uni": "g", "kcal": 198}, {"nombre": "Verduras", "cant": 200, "uni": "g", "kcal": 70}, {"nombre": "Pan integral", "cant": 50, "uni": "g", "kcal": 125}]}, {"n": "Merienda", "items": [{"nombre": "Frutos secos", "cant": 30, "uni": "g", "kcal": 180}, {"nombre": "Yogur natural", "cant": 150, "uni": "g", "kcal": 90}, {"nombre": "Fruta", "cant": 1, "uni": "ud", "kcal": 80}, {"nombre": "Plátano", "cant": 1, "uni": "ud", "kcal": 105}]}, {"n": "Cena", "items": [{"nombre": "Pavo a la plancha", "cant": 220, "uni": "g", "kcal": 330}, {"nombre": "Arroz cocido", "cant": 180, "uni": "g", "kcal": 234}, {"nombre": "Verduras", "cant": 250, "uni": "g", "kcal": 90}]}], "bloques": [{"id": "bsab0", "cat": "A · WEIGHTLIFTING", "tit": "Split / Push Jerk · cluster", "det": "4 × (1+1+1) cluster · RPE ≤ 8/10, descanso el necesario. Con bloques o barra al rack 5\" entre repes."}, {"id": "bsab1", "cat": "B · CONDITIONING", "tit": "Mixed intervals · BMU", "det": "Mismo buy-in, ventanas crecientes: AMRAP 2'/3'/4' (1' rest): 15/11 Row + 15 Barbell Thrusters + máx Bar Muscle-Ups.\n#Elite 60/40 · 20-30+ BMU · #Rx 50/35 · 10-20 BMU. Score: BMU totales."}, {"id": "bsab2", "cat": "C · ACCESSORIES", "tit": "Accesorios", "det": "Superset 2-3 rondas: 8/8 Bulgarian Split Squats (tempo 113, RPE6) + 10 Rower Hamstring Curls (tempo 113)."}], "hecho": false, "comentario": ""}, "dom": {"focus": "Descanso", "comidas": [{"n": "Desayuno", "items": [{"nombre": "Huevos", "cant": 3, "uni": "ud", "kcal": 225}, {"nombre": "Fruta", "cant": 1, "uni": "ud", "kcal": 80}, {"nombre": "Pan integral", "cant": 80, "uni": "g", "kcal": 200}, {"nombre": "Aguacate", "cant": 60, "uni": "g", "kcal": 96}, {"nombre": "Yogur natural", "cant": 150, "uni": "g", "kcal": 90}]}, {"n": "Comida", "items": [{"nombre": "Comida libre moderada (1 ración)", "cant": 1, "uni": "ud", "kcal": 850}]}, {"n": "Merienda", "items": [{"nombre": "Yogur natural", "cant": 150, "uni": "g", "kcal": 90}, {"nombre": "Frutos secos", "cant": 25, "uni": "g", "kcal": 150}, {"nombre": "Fruta", "cant": 1, "uni": "ud", "kcal": 80}, {"nombre": "Pan integral", "cant": 40, "uni": "g", "kcal": 100}]}, {"n": "Cena", "items": [{"nombre": "Caldo", "cant": 300, "uni": "ml", "kcal": 30}, {"nombre": "Tortilla (3 huevos)", "cant": 3, "uni": "ud", "kcal": 225}, {"nombre": "Ensalada con aceite", "cant": 150, "uni": "g", "kcal": 120}, {"nombre": "Arroz cocido", "cant": 150, "uni": "g", "kcal": 195}]}], "bloques": [], "hecho": false, "comentario": ""}}}};
+
+/* ================= CÁLCULO (funciones puras) ================= */
+var FACTOR = {sed:1.2, lig:1.375, mod:1.55, alta:1.725, muy:1.9};
+function edadDe(fnac){
+  if(!fnac) return null;
+  var n = new Date(fnac), h = new Date();
+  var e = h.getFullYear()-n.getFullYear(), m = h.getMonth()-n.getMonth();
+  if(m<0 || (m===0 && h.getDate()<n.getDate())) e--;
+  return e;
+}
+function calcIMC(peso, alturaCm){ if(!peso || !alturaCm) return null; var m=alturaCm/100; return peso/(m*m); }
+function catIMC(v){ if(v==null) return {t:'',cls:''}; if(v<18.5) return {t:'Bajo peso',cls:'warn'}; if(v<25) return {t:'Normalidad',cls:'ok'}; if(v<30) return {t:'Sobrepeso',cls:'warn'}; return {t:'Obesidad',cls:'bad'}; }
+function calcTMB(peso, alturaCm, edad, genero){ if(!peso || !alturaCm || edad==null) return null; var base=10*peso+6.25*alturaCm-5*edad; return genero==='H'?base+5:base-161; }
+function calcGET(tmb, actividad){ if(tmb==null) return null; return tmb*(FACTOR[actividad]||FACTOR.mod); }
+function calcICC(cintura, cadera){ if(!cintura || !cadera) return null; return cintura/cadera; }
+function sumaKcalItems(items){ if(!items || !items.length) return 0; return items.reduce(function(s,it){ var k=parseFloat(it.kcal); return s+(isNaN(k)?0:k); },0); }
+function sumaDia(dia){ if(!dia || !dia.comidas) return 0; return dia.comidas.reduce(function(s,c){ return s+sumaKcalItems(c.items); },0); }
+function balanceDia(planKcal, get){
+  if(get==null) return {estado:'—', delta:null};
+  var delta=Math.round(planKcal-get);
+  var estado = delta<-50 ? 'Déficit' : (delta>50 ? 'Superávit' : 'Mantenimiento');
+  return {estado:estado, delta:delta};
+}
+function colorBalance(objetivo, estado){
+  var o=objetivo||'mant';
+  if(o==='perdida')  return estado==='Déficit'    ? 'ok' : (estado==='Mantenimiento' ? 'warn' : 'bad');
+  if(o==='ganancia') return estado==='Superávit'  ? 'ok' : (estado==='Mantenimiento' ? 'warn' : 'bad');
+  if(o==='rend')     return (estado==='Mantenimiento' || estado==='Superávit') ? 'ok' : 'warn';
+  return estado==='Mantenimiento' ? 'ok' : 'warn';
+}
+
+/* El objetivo deja de ser una etiqueta de color: fija cuantas kcal buscamos.
+   Son ajustes orientativos sobre el gasto total, no una pauta clinica. */
+var AJUSTE = {perdida:-0.20, mant:0, ganancia:0.10, rend:0.05};
+var OBJ_NOMBRE = {perdida:'Pérdida de grasa', mant:'Mantenimiento', ganancia:'Ganancia muscular', rend:'Rendimiento'};
+
+function kcalObjetivo(get, objetivo){
+  if(get==null) return null;
+  var a = AJUSTE[objetivo||'mant']; if(a==null) a=0;
+  return get*(1+a);
+}
+/* Compara el plan del dia con la diana del objetivo, con una banda de
+   tolerancia: pasarse 30 kcal no es fallar. */
+function evaluarPlan(plan, get, objetivo){
+  var diana = kcalObjetivo(get, objetivo);
+  if(diana==null) return null;
+  var tol = Math.max(100, get*0.05), d = plan-diana, abs = Math.abs(d);
+  return {diana:diana, delta:Math.round(d), dentro:abs<=tol,
+          cls: abs<=tol ? 'ok' : (abs<=tol*2 ? 'warn' : 'bad')};
+}
+/* Mediciones de mas antigua a mas reciente. Todo lo que mira evolucion parte de aqui. */
+function medsOrdenadas(p){
+  if(!p || !p.mediciones) return [];
+  return p.mediciones.slice().filter(function(m){ return m && m.peso; })
+    .sort(function(a,b){ return (a.fecha||'').localeCompare(b.fecha||''); });
+}
+/* Camino recorrido entre el peso de la primera visita y el peso objetivo. */
+function progresoObjetivo(p){
+  var meds = medsOrdenadas(p), meta = parseFloat(p && p.pesoObjetivo);
+  if(meds.length<1 || !meta) return null;
+  var inicio = parseFloat(meds[0].peso), actual = parseFloat(meds[meds.length-1].peso);
+  var total = meta-inicio;
+  if(Math.abs(total)<0.05) return null;
+  var pct = Math.max(0, Math.min(100, (actual-inicio)/total*100));
+  return {inicio:inicio, actual:actual, meta:meta, restante:meta-actual, pct:pct};
+}
+/* Un kilo arriba o abajo solo es bueno o malo segun lo que se busque. */
+function claseDelta(d, objetivo){
+  if(d==null || Math.abs(d)<0.1) return 'muted';
+  var o = objetivo||'mant';
+  if(o==='perdida')  return d<0 ? 'ok' : 'bad';
+  if(o==='ganancia') return d>0 ? 'ok' : 'bad';
+  return Math.abs(d)<=1 ? 'ok' : 'warn';
+}
+function diasEntre(a, b){
+  if(!a || !b) return null;
+  var d = (new Date(b)-new Date(a))/86400000;
+  return isNaN(d) ? null : Math.round(d);
+}
+
+/* ================= ESTADO ================= */
+var STORE = 'pulso_fm_v4';
+var DB = {consulta:'', pacientes:[]};
+var pacActual = null;
+var diaActivo = 'lun';
+var DIAS = SEED.dias;
+
+function cargar(){ try{ var raw=localStorage.getItem(STORE); if(raw) DB=JSON.parse(raw); }catch(e){} if(!DB.pacientes) DB.pacientes=[]; }
+function salvar(){ try{ localStorage.setItem(STORE, JSON.stringify(DB)); }catch(e){} }
+function pacById(id){ for(var i=0;i<DB.pacientes.length;i++){ if(DB.pacientes[i].id===id) return DB.pacientes[i]; } return null; }
+function ultimaMed(p){ if(!p.mediciones || !p.mediciones.length) return null; return p.mediciones.slice().sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); })[0]; }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function diaNombre(k){ for(var i=0;i<DIAS.length;i++){ if(DIAS[i].k===k) return DIAS[i].n; } return k; }
+
+/* ================= VISTAS ================= */
+function mostrar(id){ ['inicioView','pacienteView','medicionView'].forEach(function(v){ document.getElementById(v).classList.toggle('hidden', v!==id); }); }
+function verInicio(){ mostrar('inicioView'); renderPacientes(); }
+
+function renderPacientes(){
+  var cont=document.getElementById('listaPacientes');
+  if(!DB.pacientes.length){ cont.innerHTML='<div class="empty">Aún no hay pacientes. Crea el primero.</div>'; return; }
+  var html='';
+  DB.pacientes.forEach(function(p){
+    var um=ultimaMed(p);
+    var sub=um?('Última visita: '+um.fecha+' · '+um.peso+' kg'):'Sin mediciones';
+    html+='<div class="pac" onclick="verPaciente(\''+p.id+'\')"><div><div class="n">'+esc(p.nombre||'Sin nombre')+'</div><div class="s">'+sub+'</div></div><div class="go">›</div></div>';
+  });
+  cont.innerHTML=html;
+}
+
+function nuevoPaciente(){
+  var id='p'+Date.now();
+  DB.pacientes.push({id:id,nombre:'',genero:'H',fnac:'',tel:'',email:'',altura:'',objetivo:'mant',actividad:'mod',pesoObjetivo:'',mediciones:[],semana:clone(SEED.semanaVacia)});
+  salvar(); verPaciente(id);
+}
+
+function verPaciente(id){
+  var p=pacById(id); if(!p){ verInicio(); return; }
+  pacActual=id;
+  if(!p.semana) p.semana=clone(SEED.semanaVacia);
+  document.getElementById('pacTitulo').textContent=p.nombre||'Paciente';
+  document.getElementById('fNombre').value=p.nombre||'';
+  document.getElementById('fGenero').value=p.genero||'H';
+  document.getElementById('fNac').value=p.fnac||'';
+  document.getElementById('fTel').value=p.tel||'';
+  document.getElementById('fEmail').value=p.email||'';
+  document.getElementById('fObjetivo').value=p.objetivo||'mant';
+  document.getElementById('fActividad').value=p.actividad||'mod';
+  document.getElementById('fAltura').value=p.altura||'';
+  document.getElementById('fPesoObj').value=p.pesoObjetivo||'';
+  document.getElementById('fichaAviso').textContent='';
+  renderResumen(p); renderEvolucion(p); renderMediciones(p); renderDiasBar(); renderDia(p);
+  mostrar('pacienteView');
+}
+
+function guardarFicha(){
+  var p=pacById(pacActual); if(!p) return;
+  p.nombre=document.getElementById('fNombre').value.trim();
+  p.genero=document.getElementById('fGenero').value;
+  p.fnac=document.getElementById('fNac').value;
+  p.tel=document.getElementById('fTel').value.trim();
+  p.email=document.getElementById('fEmail').value.trim();
+  p.objetivo=document.getElementById('fObjetivo').value;
+  p.actividad=document.getElementById('fActividad').value;
+  p.pesoObjetivo=parseFloat(document.getElementById('fPesoObj').value)||'';
+  salvar();
+  document.getElementById('pacTitulo').textContent=p.nombre||'Paciente';
+  document.getElementById('fichaAviso').textContent='Guardado.';
+  renderResumen(p); renderEvolucion(p); renderDia(p);
+}
+function guardarAltura(){ var p=pacById(pacActual); if(!p) return; p.altura=parseFloat(document.getElementById('fAltura').value)||''; salvar(); renderResumen(p); renderDia(p); }
+
+/* ---- figura ---- */
+function figuraSVG(peso, altura, cintura, cadera, brazo, pierna){
+  function val(v,u){ return v?(v+(u||'')):'—'; }
+  var body='M50 40 C44 40 41 42 40 46 L34 52 C30 55 27 60 26 68 L21 92 C20 96 24 98 25 94 L30 72 C31 68 33 66 35 65 L34 78 C33 88 32 98 33 108 C34 118 33 128 35 150 L37 196 C37 201 45 201 45 196 L47 150 C48 140 49 134 50 130 C51 134 52 140 53 150 L55 196 C55 201 63 201 63 196 L65 150 C67 128 66 118 67 108 C68 98 67 88 66 78 L65 65 C67 66 69 68 70 72 L75 94 C76 98 80 96 79 92 L74 68 C73 60 70 55 66 52 L60 46 C59 42 56 40 50 40 Z';
+  /* El lienzo va de -34 a 134 a proposito: los rotulos se escriben fuera del
+     cuerpo, dos a cada lado. Con el viewBox pegado a la figura se recortaban. */
+  function guia(y,x1,x2){
+    return '<line x1="'+x1+'" y1="'+y+'" x2="'+x2+'" y2="'+y+'" stroke="var(--ivory)" stroke-opacity="0.28" stroke-width="1" stroke-dasharray="3 3"/>';
+  }
+  function rotulo(x,y,texto,valor){
+    return '<text x="'+x+'" y="'+y+'" font-family="JetBrains Mono, monospace" font-size="8.5" fill="var(--muted)">'+texto+'</text>'
+         + '<text x="'+x+'" y="'+(y+10)+'" font-family="JetBrains Mono, monospace" font-size="9.5" fill="var(--ivory)">'+valor+'</text>';
+  }
+  return ''
+  +'<svg viewBox="-34 -2 168 220" xmlns="http://www.w3.org/2000/svg">'
+  +'<ellipse cx="50" cy="22" rx="12.5" ry="14" fill="var(--accent)" fill-opacity="0.14" stroke="var(--accent)" stroke-width="1.4"/>'
+  +'<path d="'+body+'" fill="var(--accent)" fill-opacity="0.11" stroke="var(--accent)" stroke-width="1.4" stroke-linejoin="round"/>'
+  /* derecha: tronco */
+  +guia(86,20,80)+guia(112,20,80)
+  +rotulo(84,88,'cintura',val(cintura,''))
+  +rotulo(84,114,'cadera',val(cadera,''))
+  /* izquierda: extremidades, cada guia cruza el miembro que mide */
+  +guia(70,12,40)+guia(150,24,54)
+  +rotulo(-32,66,'brazo',val(brazo,''))
+  +rotulo(-32,146,'pierna',val(pierna,''))
+  +rotulo(-32,196,'peso',val(peso,' kg'))
+  +'</svg>';
+}
+
+function renderResumen(p){
+  var edad=edadDe(p.fnac), um=ultimaMed(p);
+  var peso=um?parseFloat(um.peso):null, cintura=um?parseFloat(um.cintura):null, cadera=um?parseFloat(um.cadera):null;
+  var imc=calcIMC(peso,p.altura), c=catIMC(imc);
+  var tmb=calcTMB(peso,p.altura,edad,p.genero), get=calcGET(tmb,p.actividad), icc=calcICC(cintura,cadera);
+  document.getElementById('figura').innerHTML=figuraSVG(um?um.peso:'',p.altura,um?um.cintura:'',um?um.cadera:'',um?um.brazo:'',um?um.pierna:'');
+  function kpi(k,v,u,tag){ return '<div class="kpi"><div class="k">'+k+'</div><div class="v">'+v+(u?' <span class="u">'+u+'</span>':'')+'</div>'+(tag||'')+'</div>'; }
+  var html='';
+  html+=kpi('Edad',(edad!=null?edad:'—'),(edad!=null?'años':''),'');
+  html+=kpi('IMC',(imc!=null?imc.toFixed(1):'—'),'',(c.t?'<div class="t '+c.cls+'">'+c.t+'</div>':''));
+  html+=kpi('TMB',(tmb!=null?Math.round(tmb):'—'),'kcal','');
+  html+=kpi('GET',(get!=null?Math.round(get):'—'),'kcal','');
+  if(icc!=null) html+=kpi('Cint/cadera',icc.toFixed(2),'','');
+  if(um&&um.graso) html+=kpi('% graso',um.graso,'','');
+  document.getElementById('kpis').innerHTML=html;
+  renderProgreso(p);
+  document.getElementById('resumenNota').innerHTML=um
+    ?'<b>IMC</b> orientativo: en personas muy entrenadas sobrestima; léelo junto al % graso y los perímetros. <b>TMB</b> (metabolismo basal, Mifflin-St Jeor) y <b>GET</b> (gasto total según actividad) son estimaciones; no sustituyen valoración clínica.'
+    :'Sin mediciones todavía. Registra la primera visita para calcular IMC, metabolismo y gasto.';
+}
+
+/* Cuanto queda para la meta. Sin peso objetivo no se pinta nada: mas vale
+   un hueco vacio que una barra que no significa nada. */
+function renderProgreso(p){
+  var cont=document.getElementById('progresoObj'); if(!cont) return;
+  var pr=progresoObjetivo(p);
+  if(!pr){ cont.innerHTML=''; return; }
+  var queda=Math.abs(pr.restante).toFixed(1).replace('.',',');
+  var titulo = Math.abs(pr.restante)<0.2 ? 'Objetivo alcanzado'
+    : (pr.restante<0 ? 'Quedan '+queda+' kg por bajar' : 'Quedan '+queda+' kg por subir');
+  cont.innerHTML=''
+    +'<div class="prog"><div class="ph"><span class="t">'+esc(OBJ_NOMBRE[p.objetivo]||'Objetivo')+'</span>'
+    +'<span class="q">'+titulo+'</span></div>'
+    +'<div class="rail"><i style="width:'+pr.pct.toFixed(0)+'%"></i></div>'
+    +'<div class="hitos"><span>inicio '+pr.inicio.toFixed(1).replace('.',',')+' kg</span>'
+    +'<span>hoy '+pr.actual.toFixed(1).replace('.',',')+' kg</span>'
+    +'<span>meta '+pr.meta.toFixed(1).replace('.',',')+' kg</span></div></div>';
+}
+
+/* Un historial en lista no deja ver la tendencia; el grafico si. La linea
+   ambar es el peso objetivo. */
+function renderEvolucion(p){
+  var cont=document.getElementById('evolucion'); if(!cont) return;
+  var meds=medsOrdenadas(p);
+  if(meds.length<2){ cont.innerHTML=''; return; }
+  var pesos=meds.map(function(m){ return parseFloat(m.peso); });
+  var meta=parseFloat(p.pesoObjetivo)||null;
+  var min=Math.min.apply(null,pesos), max=Math.max.apply(null,pesos);
+  if(meta){ min=Math.min(min,meta); max=Math.max(max,meta); }
+  var pad=Math.max(0.6,(max-min)*0.18); min-=pad; max+=pad;
+  var W=300, H=64, x0=4, x1=W-4, y0=8, y1=H-8;
+  function px(i){ return pesos.length<2 ? x0 : x0+(x1-x0)*i/(pesos.length-1); }
+  function py(v){ return y1-(y1-y0)*(v-min)/(max-min); }
+  var pts=pesos.map(function(v,i){ return px(i).toFixed(1)+','+py(v).toFixed(1); }).join(' ');
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">';
+  if(meta) svg+='<line x1="'+x0+'" y1="'+py(meta).toFixed(1)+'" x2="'+x1+'" y2="'+py(meta).toFixed(1)+'" stroke="var(--amber)" stroke-width="1" stroke-dasharray="4 4" stroke-opacity=".8"/>';
+  svg+='<polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  pesos.forEach(function(v,i){ svg+='<circle cx="'+px(i).toFixed(1)+'" cy="'+py(v).toFixed(1)+'" r="'+(i===pesos.length-1?3.2:2)+'" fill="var(--accent)"/>'; });
+  svg+='</svg>';
+  var d=pesos[pesos.length-1]-pesos[0], dias=diasEntre(meds[0].fecha, meds[meds.length-1].fecha);
+  var cls=claseDelta(d,p.objetivo), signo=d>0?'+':'';
+  var pct=pesos[0] ? (d/pesos[0]*100) : 0;
+  cont.innerHTML='<div class="spark"><div class="cab"><span class="t">Evolución del peso</span>'
+    +'<span class="r delta '+cls+'">'+signo+d.toFixed(1).replace('.',',')+' kg ('+signo+pct.toFixed(1).replace('.',',')+'%)</span></div>'
+    +svg
+    +'<div class="hitos" style="margin-top:6px"><span>'+esc(meds[0].fecha||'')+'</span>'
+    +(dias!=null?'<span>'+dias+' días · '+meds.length+' visitas</span>':'')
+    +'<span>'+esc(meds[meds.length-1].fecha||'')+'</span></div></div>';
+}
+
+function renderMediciones(p){
+  var cont=document.getElementById('listaMediciones');
+  if(!p.mediciones||!p.mediciones.length){ cont.innerHTML='<div class="empty">Sin visitas registradas.</div>'; return; }
+  var arr=p.mediciones.slice().sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||''); });
+  var html='';
+  arr.forEach(function(m,i){
+    /* la lista baja de reciente a antigua: la siguiente es la anterior en el tiempo */
+    var prev=arr[i+1];
+    var d=(prev && m.peso && prev.peso) ? (parseFloat(m.peso)-parseFloat(prev.peso)) : null;
+    var dHtml='';
+    if(d!=null){
+      var dias=diasEntre(prev.fecha,m.fecha);
+      dHtml='<span class="delta '+claseDelta(d,p.objetivo)+'">'+(d>0?'+':'')+d.toFixed(1).replace('.',',')+' kg'
+        +(dias?' · '+dias+' d':'')+'</span>';
+    }
+    var det=[]; if(m.graso) det.push('% graso: '+m.graso); if(m.cintura) det.push('cintura: '+m.cintura+' cm'); if(m.cadera) det.push('cadera: '+m.cadera+' cm'); if(m.brazo) det.push('brazo: '+m.brazo+' cm'); if(m.pierna) det.push('pierna: '+m.pierna+' cm');
+    html+='<div class="med"><div class="mf"><span class="fecha">'+esc(m.fecha||'—')+'</span><span class="peso">'+(m.peso!=null?m.peso+' kg':'—')+dHtml+'</span></div>'
+      +(det.length?'<div class="det">'+det.join(' · ')+'</div>':'')
+      +(m.notas?'<div class="notas">'+esc(m.notas)+'</div>':'')
+      +'<button class="del" onclick="borrarMedicion(\''+m.id+'\')">Eliminar visita</button></div>';
+  });
+  cont.innerHTML=html;
+}
+
+function nuevaMedicion(){
+  var p=pacById(pacActual); if(!p) return;
+  if(!p.altura||!p.fnac){ if(!confirm('Falta estatura o fecha de nacimiento; sin ellas no se calcula IMC ni metabolismo. ¿Continuar?')) return; }
+  document.getElementById('medPacNombre').textContent=p.nombre||'Paciente';
+  document.getElementById('mFecha').value=hoyISO();
+  ['mPeso','mGraso','mCintura','mCadera','mBrazo','mPierna','mNotas'].forEach(function(k){ document.getElementById(k).value=''; });
+  document.getElementById('medAviso').textContent='';
+  mostrar('medicionView');
+}
+function guardarMedicion(){
+  var p=pacById(pacActual); if(!p) return;
+  var peso=parseFloat(document.getElementById('mPeso').value);
+  if(!peso){ document.getElementById('medAviso').textContent='El peso es obligatorio.'; return; }
+  var m={id:'m'+Date.now(),fecha:document.getElementById('mFecha').value||hoyISO(),peso:peso,
+    graso:parseFloat(document.getElementById('mGraso').value)||'',cintura:parseFloat(document.getElementById('mCintura').value)||'',
+    cadera:parseFloat(document.getElementById('mCadera').value)||'',
+    brazo:parseFloat(document.getElementById('mBrazo').value)||'',
+    pierna:parseFloat(document.getElementById('mPierna').value)||'',
+    notas:document.getElementById('mNotas').value.trim()};
+  if(!p.mediciones) p.mediciones=[];
+  p.mediciones.push(m); salvar(); verPaciente(pacActual);
+}
+function borrarMedicion(id){
+  if(!confirm('¿Eliminar esta visita?')) return;
+  var p=pacById(pacActual); if(!p) return;
+  p.mediciones=p.mediciones.filter(function(x){ return x.id!==id; });
+  salvar(); verPaciente(pacActual);
+}
+
+/* ================= SEMANA (dieta + entreno por día) ================= */
+function renderDiasBar(){
+  var bar=document.getElementById('diasbar'), html='';
+  DIAS.forEach(function(d){
+    html+='<div class="diatab '+(d.k===diaActivo?'on':'')+'" onclick="cambiarDia(\''+d.k+'\')">'+d.ab+'<span class="day">'+d.n.slice(0,3)+'</span></div>';
+  });
+  bar.innerHTML=html;
+}
+function cambiarDia(k){
+  var p=pacById(pacActual); if(p) leerDiaDelDOM(p), salvar();
+  diaActivo=k; renderDiasBar(); renderDia(pacById(pacActual));
+}
+
+function renderDia(p){
+  if(!p) return;
+  var dia=p.semana[diaActivo];
+  document.getElementById('dietaDiaHead').textContent=diaNombre(diaActivo);
+  document.getElementById('entrenoDiaHead').textContent=diaNombre(diaActivo);
+  /* dieta */
+  dia.comidas.forEach(function(c){ if(!c.items) c.items = (c.c ? [{nombre:c.c,cant:'',uni:'g',kcal:''}] : []); });
+  var ld=document.getElementById('listaDieta');
+  if(!dia.comidas.length){ ld.innerHTML='<div class="empty">Sin tomas. Añade la primera.</div>'; }
+  else{
+    var h='';
+    dia.comidas.forEach(function(t,ti){
+      var sub=Math.round(sumaKcalItems(t.items));
+      h+='<div class="toma"><div class="th"><input class="tit" data-t="'+ti+'" data-f="n" value="'+esc(t.n)+'" placeholder="Toma"><span class="tk">'+sub+' kcal</span><button class="del" onclick="borrarToma('+ti+')">✕</button></div>';
+      (t.items||[]).forEach(function(it,ii){
+        h+='<div class="item">'
+          +'<input data-t="'+ti+'" data-i="'+ii+'" data-f="nombre" value="'+esc(it.nombre)+'" placeholder="Alimento">'
+          +'<input class="g" data-t="'+ti+'" data-i="'+ii+'" data-f="cant" type="number" inputmode="decimal" value="'+esc(it.cant)+'" placeholder="0">'
+          +'<select data-t="'+ti+'" data-i="'+ii+'" data-f="uni">'+uniOpts(it.uni)+'</select>'
+          +'<input class="k" data-t="'+ti+'" data-i="'+ii+'" data-f="kcal" type="number" inputmode="decimal" value="'+esc(it.kcal)+'" placeholder="kcal">'
+          +'<button class="del" onclick="borrarItem('+ti+','+ii+')">✕</button></div>';
+      });
+      h+='<button class="additem" onclick="addItem('+ti+')">+ alimento</button></div>';
+    });
+    ld.innerHTML=h;
+  }
+  renderBalance(p, dia);
+  /* entreno */
+  document.getElementById('focusDia').value=dia.focus||'';
+  var le=document.getElementById('listaEntreno');
+  if(!dia.bloques.length){ le.innerHTML='<div class="empty">Sin bloques. Añade el primero o es día de descanso.</div>'; }
+  else{
+    var e='';
+    dia.bloques.forEach(function(b,i){
+      e+='<div class="bloque"><div class="bh"><input class="cat" data-b="'+i+'" data-f="cat" value="'+esc(b.cat)+'" placeholder="A · CATEGORÍA">'
+        +'<input class="tit" data-b="'+i+'" data-f="tit" value="'+esc(b.tit)+'" placeholder="Título"><button class="del" onclick="borrarBloque('+i+')">✕</button></div>'
+        +'<textarea data-b="'+i+'" data-f="det" placeholder="Esquema, descripción y niveles…">'+esc(b.det)+'</textarea></div>';
+    });
+    le.innerHTML=e;
+  }
+  document.getElementById('comentarioDia').value=dia.comentario||'';
+  pintarHecho(dia.hecho);
+}
+function pintarHecho(hecho){
+  var btn=document.getElementById('checkDia'), est=document.getElementById('estadoDia');
+  btn.className='check '+(hecho?'on':''); btn.textContent=hecho?'✓':'';
+  est.className='estado '+(hecho?'on':'off'); est.textContent=hecho?'Sesión marcada como hecha':'Sesión pendiente';
+}
+
+function uniOpts(sel){ return (SEED.unidades||['g','ml','ud']).map(function(u){ return '<option value="'+u+'"'+(u===(sel||'g')?' selected':'')+'>'+u+'</option>'; }).join(''); }
+function getDe(p){ var edad=edadDe(p.fnac), um=ultimaMed(p), peso=um?parseFloat(um.peso):null; return calcGET(calcTMB(peso,p.altura,edad,p.genero), p.actividad); }
+
+function renderBalance(p, dia){
+  var plan=Math.round(sumaDia(dia)), get=getDe(p);
+  var cont=document.getElementById('balanceDia');
+  if(get==null){
+    cont.innerHTML='<div class="row"><span>Plan del día</span><b>'+plan+' kcal</b></div><div class="mant">Registra una medición para ver el mantenimiento y el balance.</div>';
+    return;
+  }
+  /* Decir "deficit de 300 kcal" no basta: lo que importa es si ese deficit es
+     el que pide el objetivo. La barra lleva dos marcas, mantenimiento y diana. */
+  var b=balanceDia(plan,get), ev=evaluarPlan(plan,get,p.objetivo);
+  var tope=get*1.6;
+  var pct=Math.max(4, Math.min(plan/tope,1)*100);
+  var markGet=(get/tope)*100, markObj=(ev.diana/tope)*100;
+  var signo=b.delta>0?'+':'', signoObj=ev.delta>0?'+':'';
+  var veredicto = ev.dentro ? 'En línea con el objetivo'
+    : (ev.delta>0 ? 'Te pasas '+Math.abs(ev.delta)+' kcal' : 'Te quedas '+Math.abs(ev.delta)+' kcal corto');
+  cont.innerHTML=''
+    +'<div class="row"><span>Mantenimiento (GET)</span><b>'+Math.round(get)+' kcal</b></div>'
+    +'<div class="row"><span>Diana · '+esc(OBJ_NOMBRE[p.objetivo]||'Objetivo')+'</span><b>'+Math.round(ev.diana)+' kcal</b></div>'
+    +'<div class="row"><span>Plan del día</span><b>'+plan+' kcal</b></div>'
+    +'<div class="bar"><i class="'+ev.cls+'" style="width:'+pct.toFixed(1)+'%"></i>'
+    +'<span class="mark" style="left:'+markGet.toFixed(1)+'%"></span>'
+    +'<span class="mark obj" style="left:'+markObj.toFixed(1)+'%"></span></div>'
+    +'<div class="fase '+ev.cls+'">'+veredicto+'</div>'
+    +'<div class="mant">'+b.estado+' '+signo+b.delta+' kcal sobre el mantenimiento · '+signoObj+ev.delta+' kcal sobre la diana. '
+    +'Marca clara = mantenimiento, marca ámbar = diana del objetivo. kcal orientativas; ajústalas a tu tabla.</div>';
+}
+
+function leerDiaDelDOM(p){
+  var dia=p.semana[diaActivo];
+  document.querySelectorAll('#listaDieta [data-t]').forEach(function(el){
+    var ti=parseInt(el.getAttribute('data-t'),10), f=el.getAttribute('data-f'), toma=dia.comidas[ti];
+    if(!toma) return;
+    if(el.hasAttribute('data-i')){ var ii=parseInt(el.getAttribute('data-i'),10); if(toma.items && toma.items[ii]) toma.items[ii][f]=el.value; }
+    else { toma[f]=el.value; }
+  });
+  document.querySelectorAll('#listaEntreno [data-b]').forEach(function(el){
+    var i=parseInt(el.getAttribute('data-b'),10); if(dia.bloques[i]) dia.bloques[i][el.getAttribute('data-f')]=el.value;
+  });
+  dia.focus=document.getElementById('focusDia').value;
+  dia.comentario=document.getElementById('comentarioDia').value;
+}
+function guardarDia(){ var p=pacById(pacActual); if(!p) return; leerDiaDelDOM(p); salvar(); renderDia(p); document.getElementById('fichaAviso').textContent=''; }
+function addToma(){ var p=pacById(pacActual); if(!p) return; leerDiaDelDOM(p); p.semana[diaActivo].comidas.push({n:'',items:[]}); salvar(); renderDia(p); }
+function borrarToma(i){ var p=pacById(pacActual); if(!p) return; leerDiaDelDOM(p); p.semana[diaActivo].comidas.splice(i,1); salvar(); renderDia(p); }
+function addItem(ti){ var p=pacById(pacActual); if(!p) return; leerDiaDelDOM(p); var c=p.semana[diaActivo].comidas[ti]; if(!c.items) c.items=[]; c.items.push({nombre:'',cant:'',uni:'g',kcal:''}); salvar(); renderDia(p); }
+function borrarItem(ti,ii){ var p=pacById(pacActual); if(!p) return; leerDiaDelDOM(p); p.semana[diaActivo].comidas[ti].items.splice(ii,1); salvar(); renderDia(p); }
+function addBloque(){ var p=pacById(pacActual); if(!p) return; leerDiaDelDOM(p); p.semana[diaActivo].bloques.push({id:'b'+Date.now(),cat:'',tit:'',det:''}); salvar(); renderDia(p); }
+function borrarBloque(i){ var p=pacById(pacActual); if(!p) return; leerDiaDelDOM(p); p.semana[diaActivo].bloques.splice(i,1); salvar(); renderDia(p); }
+function toggleHechoDia(){ var p=pacById(pacActual); if(!p) return; leerDiaDelDOM(p); p.semana[diaActivo].hecho=!p.semana[diaActivo].hecho; salvar(); pintarHecho(p.semana[diaActivo].hecho); }
+
+/* ================= CONSULTA / TEMA / UTIL ================= */
+/* Es una demo: cualquiera puede desordenarla. Que se pueda volver al ejemplo. */
+function restaurarEjemplo(){
+  if(!confirm('Se borran los pacientes de esta demo y vuelve el de ejemplo. ¿Continuar?')) return;
+  DB.pacientes=[clone(SEED.pacienteEjemplo)];
+  salvar(); pacActual=null; verInicio();
+}
+function guardarConsulta(){ DB.consulta=document.getElementById('consultaNombre').value.trim(); salvar(); }
+function toggleTema(){
+  document.body.classList.toggle('tema-cliente');
+  var cli=document.body.classList.contains('tema-cliente');
+  document.getElementById('themeBtn').textContent=cli?'Tema Pulso':'Tema cliente';
+  try{ localStorage.setItem(STORE+'_tema', cli?'cliente':'pulso'); }catch(e){}
+}
+function hoyISO(){ var d=new Date(),mm=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'); return d.getFullYear()+'-'+mm+'-'+dd; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+/* ================= INIT (siempre al final) ================= */
+function init(){
+  cargar();
+  if(!DB.pacientes.length && SEED.pacienteEjemplo){ DB.pacientes.push(clone(SEED.pacienteEjemplo)); salvar(); }
+  document.getElementById('consultaNombre').value=DB.consulta||'';
+  try{ if(localStorage.getItem(STORE+'_tema')==='cliente'){ document.body.classList.add('tema-cliente'); document.getElementById('themeBtn').textContent='Tema Pulso'; } }catch(e){}
+  verInicio();
+}
+if(typeof document!=='undefined' && document.getElementById('inicioView')) init();
+if(typeof module!=='undefined' && module.exports){ module.exports={edadDe,calcIMC,catIMC,calcTMB,calcGET,calcICC,sumaKcalItems,sumaDia,balanceDia,colorBalance,kcalObjetivo,evaluarPlan,medsOrdenadas,progresoObjetivo,claseDelta,diasEntre,FACTOR,AJUSTE,SEED}; }
+</script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulso · en vivo</title>
+<link rel="stylesheet" href="fuentes.css">
+<link rel="stylesheet" href="demo-navigation.css">
+<script src="demo-navigation.js" defer></script>
+<style>
+  :root{
+    --ink:#0B1418; --ink2:#10202A; --card:#152832; --card2:#1B313C;
+    --ivory:#F3EFE6; --muted:#8DA2AC; --muted2:#5E7681;
+    --signal:#5CE3A3; --signal-dim:#2C8E66;
+    --alert:#F3B64A; --coral:#FF8169; --blue:#62B6FF;
+    --line:rgba(243,239,230,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--ink);color:var(--ivory);font-family:'Hanken Grotesk',sans-serif;font-size:15px;-webkit-font-smoothing:antialiased;min-height:100%}
+  h1,h2,h3,.serif{font-family:'Fraunces',serif;font-weight:400;letter-spacing:-.01em}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .accent{color:var(--signal)}
+  button{font-family:inherit;cursor:pointer}
+
+  /* Topbar */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(11,20,24,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .top{max-width:1180px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:21px;font-weight:500}
+  .brand svg{display:block}
+  .brand .tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);border:1px solid rgba(92,227,163,.35);border-radius:100px;padding:3px 9px;margin-left:2px}
+  .top .spacer{flex:1}
+  .ghost{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:100px;padding:7px 14px;background:transparent}
+  .ghost:hover{color:var(--ivory);border-color:var(--signal)}
+
+  /* Vistas */
+  .view{display:none}
+  .view.on{display:block}
+
+  /* Sector */
+  .hero{max-width:1180px;margin:0 auto;padding:40px 22px 8px;text-align:center}
+  .hero .eye{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--signal-dim);margin-bottom:14px}
+  .hero h1{font-size:clamp(30px,6vw,46px);line-height:1.05;margin-bottom:14px}
+  .hero h1 em{font-style:italic;color:var(--signal)}
+  .hero p{color:var(--muted);max-width:560px;margin:0 auto;font-size:16px;line-height:1.6}
+  .grid{max-width:1180px;margin:0 auto;padding:30px 22px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .sector{position:relative;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 22px;text-align:left;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;overflow:hidden}
+  .sector:hover{transform:translateY(-4px);border-color:rgba(92,227,163,.4);box-shadow:0 26px 60px -30px #000}
+  .sector .ic{width:48px;height:48px;border-radius:13px;background:rgba(92,227,163,.12);color:var(--signal);display:grid;place-items:center;margin-bottom:16px}
+  .sector h3{font-size:21px;margin-bottom:7px}
+  .sector p{color:var(--muted);font-size:14px;line-height:1.55;margin-bottom:18px;min-height:63px}
+  .sector .go{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:#062013;background:var(--signal);border:none;border-radius:100px;padding:10px 18px}
+  .sector .go.soon{background:transparent;color:var(--muted);border:1px solid var(--line);cursor:default}
+  .status{position:absolute;top:18px;right:18px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:100px}
+  .status.live{color:var(--signal);border:1px solid rgba(92,227,163,.4)}
+  .status.live .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--signal);margin-right:5px;box-shadow:0 0 8px var(--signal);animation:pulse 1.8s infinite}
+  .status.soon{color:var(--alert);border:1px solid rgba(243,182,74,.35)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  /* Login */
+  #view-login{position:fixed;inset:0;z-index:120;background:radial-gradient(900px 600px at 70% -10%, rgba(92,227,163,.16), transparent 60%), var(--ink);align-items:center;justify-content:center;padding:24px}
+  #view-login.on{display:flex}
+  .login-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:36px 32px;box-shadow:0 40px 90px -30px #000}
+  .login-card .sector-lead{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+  .login-card .sector-lead .ic{width:42px;height:42px;border-radius:11px;background:rgba(92,227,163,.12);color:var(--signal);display:grid;place-items:center;flex:0 0 auto}
+  .login-card .sector-lead .t{font-family:'Fraunces',serif;font-size:20px}
+  .login-card .sector-lead .s{font-size:12.5px;color:var(--muted)}
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:7px}
+  .field input{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:11px;padding:13px 15px;color:var(--ivory);font-family:inherit;font-size:15px}
+  .field input:focus{outline:none;border-color:var(--signal)}
+  .btn{background:var(--signal);color:#062013;font-weight:700;border:none;border-radius:100px;padding:13px 22px;font-size:15px;cursor:pointer;transition:transform .2s,box-shadow .2s;width:100%}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px -10px rgba(92,227,163,.5)}
+  .err{color:var(--coral);font-size:13px;min-height:18px;margin-top:10px;text-align:center}
+  .hint{margin-top:16px;font-size:12.5px;color:var(--muted2);text-align:center;line-height:1.7}
+  .hint b{color:var(--ivory);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+  .back{display:block;margin-top:18px;text-align:center;font-size:13px;color:var(--muted);background:none;border:none;width:100%}
+  .back:hover{color:var(--ivory)}
+
+  /* Tool */
+  #view-tool{position:fixed;inset:0;z-index:110;background:var(--ink);flex-direction:column}
+  #view-tool.on{display:flex}
+  .toolbar{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--ink2)}
+  .toolbar .back-tools{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--ivory);background:transparent;border:1px solid var(--line);border-radius:100px;padding:8px 14px}
+  .toolbar .back-tools:hover{border-color:var(--signal)}
+  .toolbar .tname{font-family:'Fraunces',serif;font-size:16px}
+  .toolbar .demo-badge{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--alert);border:1px solid rgba(243,182,74,.35);border-radius:100px;padding:4px 10px}
+  #toolFrame{flex:1;width:100%;border:none;background:#fff}
+
+  /* En preparacion */
+  .soonwrap{flex:1;display:flex;align-items:center;justify-content:center;padding:30px}
+  .soonwrap.hidden{display:none}
+  .soon-card{max-width:440px;text-align:center}
+  .soon-card .ring{width:74px;height:74px;border-radius:50%;border:2px solid rgba(243,182,74,.4);display:grid;place-items:center;margin:0 auto 20px;color:var(--alert)}
+  .soon-card h2{font-size:26px;margin-bottom:12px}
+  .soon-card p{color:var(--muted);line-height:1.65;margin-bottom:22px}
+
+  .footnote{text-align:center;color:var(--muted2);font-size:12px;padding:0 22px 40px}
+  .footnote .mono{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- ================= SECTOR ================= -->
+<div id="view-sector" class="view on">
+  <div class="topbar"><div class="top">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 40 40" fill="none"><path d="M2 20h9l4-11 6 22 4-13 3 6h10" stroke="#5CE3A3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Pulso <span class="tag">en vivo</span>
+    </div>
+    <div class="spacer"></div>
+  </div></div>
+
+  <div class="hero">
+    <div class="eye">Herramientas a medida · en funcionamiento</div>
+    <h1>El pulso de tu negocio,<br><em>en tus manos</em></h1>
+    <p>Elige tu sector y entra a probar la herramienta real, tal cual la usan nuestros clientes. Acceso de demostración con datos de ejemplo.</p>
+  </div>
+
+  <div class="grid" id="sectorGrid"></div>
+
+  <div class="footnote">Acceso de demostración · usuario y clave <span class="mono">Demo</span> · datos de ejemplo, no reales.</div>
+</div>
+
+<!-- ================= LOGIN ================= -->
+<div id="view-login" class="view">
+  <div class="login-card">
+    <div class="sector-lead">
+      <div class="ic" id="loginIc"></div>
+      <div><div class="t" id="loginName">Sector</div><div class="s">Acceso de demostración</div></div>
+    </div>
+    <div class="field"><label>Usuario</label><input id="u" autocomplete="off" placeholder="Demo"></div>
+    <div class="field"><label>Contraseña</label><input id="p" type="password" autocomplete="off" placeholder="Demo"></div>
+    <button class="btn" onclick="tryLogin()">Entrar</button>
+    <div class="err" id="err"></div>
+    <div class="hint">Accede con usuario <b>Demo</b> y clave <b>Demo</b></div>
+    <button class="back" onclick="goSectors()">← Volver a los sectores</button>
+  </div>
+</div>
+
+<!-- ================= TOOL ================= -->
+<div id="view-tool" class="view">
+  <div class="toolbar">
+    <button class="back-tools" onclick="goSectors()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Herramientas</button>
+    <span class="tname" id="toolName"></span>
+    <span class="demo-badge">Demo · datos de ejemplo</span>
+  </div>
+  <iframe id="toolFrame" title="Herramienta"></iframe>
+  <div class="soonwrap hidden" id="soonWrap">
+    <div class="soon-card">
+      <div class="ring"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <h2 id="soonTitle">En preparación</h2>
+      <p id="soonText">Estamos dejando esta herramienta lista con datos de ejemplo para que puedas verla al completo. Muy pronto disponible.</p>
+      <button class="btn" style="max-width:240px;margin:0 auto" onclick="goSectors()">Ver otras herramientas</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Iconos por sector */
+const IC = {
+  albaran:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6"/><path d="M13 2v6h6"/><path d="M8 12h4M8 16h3"/><circle cx="17.5" cy="16.5" r="3.5"/><path d="M20 19l2 2"/></svg>',
+  bolt:'<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  llave:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2.7-.7-.7-2.7z"/></svg>',
+  reforma:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>',
+  clima:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M4.5 4.5l15 15M19.5 4.5l-15 15"/></svg>',
+  evento:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+  fitness:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4M6 18l-4 4M22 18l-4-4"/></svg>',
+  salud:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 3h6v3H9z"/><path d="M7 14h2l1.5-3.5L13 17l1.5-3H17"/></svg>',
+  factura:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6"/><path d="M14 2v6h6V8"/><path d="M8 7h3M8 11h6M8 15h4"/><circle cx="17.5" cy="17.5" r="4.5"/><path d="M17.5 15.6v2l1.3 1"/></svg>',
+};
+
+const SECTORS = [
+  { id:'electricidad', name:'Electricidad', ic:IC.bolt,
+    desc:'Presupuestos de instalación en minutos: mano de obra + material, catálogo cargado y PDF al momento.',
+    live:true, url:'generador.html' },
+  { id:'taller', name:'Taller · recambios', ic:IC.llave,
+    desc:'Compara al instante el precio de cada recambio entre tus proveedores y compra siempre al mejor precio.',
+    live:true, url:'taller.html' },
+  { id:'albaranes', name:'Albaranes · lector', ic:IC.albaran,
+    desc:'Fotografías el albarán y salen sus líneas solas, y te avisa de las referencias que el proveedor te ha subido de precio desde la última compra.',
+    live:true, url:'albaranes.html' },
+  { id:'reformas', name:'Reformas y obra', ic:IC.reforma,
+    desc:'Presupuestos por capítulos de obra: albañilería, fontanería, pintura, carpintería… con PDF al momento.',
+    live:true, url:'reformas.html' },
+  { id:'clima', name:'Clima y aire acondicionado', ic:IC.clima,
+    desc:'Presupuestos con catálogo de equipos de aire acondicionado e instalación, con PDF al momento.',
+    live:true, url:'clima.html' },
+  { id:'eventos', name:'Música y eventos', ic:IC.evento,
+    desc:'Panel de rentabilidad por bolo: cachés, gastos y merchandising, con el beneficio real de cada actuación.',
+    live:true, url:'eventos.html' },
+  { id:'fitness', name:'Fitness y box', ic:IC.fitness,
+    desc:'Semáforo de bajas y control de cuotas para detectar socios en riesgo antes de que se vayan.',
+    live:true, url:'fitness.html' },
+  { id:'facturas', name:'Facturación automática', ic:IC.factura,
+    desc:'Lee cada día tu hoja de clientes recurrentes y el último día del mes emite y envía las facturas solo. Tú únicamente lees el correo del resumen.',
+    live:true, url:'facturas.html' },
+  { id:'medicion', name:'Nutrición y entreno', ic:IC.salud,
+    desc:'Ficha del paciente: historial de mediciones con su evolución, progreso hacia el peso objetivo y plan de dieta y entreno de la semana.',
+    live:true, url:'medicion.html' },
+];
+
+let current = null;
+
+function buildSectors(){
+  const g=document.getElementById('sectorGrid'); g.innerHTML='';
+  SECTORS.forEach(s=>{
+    const card=document.createElement('div'); card.className='sector';
+    card.innerHTML=`
+      <span class="status ${s.live?'live':'soon'}">${s.live?'<span class="dot"></span>En vivo':'Muy pronto'}</span>
+      <div class="ic">${s.ic}</div>
+      <h3>${s.name}</h3>
+      <p>${s.desc}</p>
+      <button class="go ${s.live?'':'soon'}">${s.live?'Entrar →':'En preparación'}</button>`;
+    if(s.live) card.querySelector('.go').onclick=()=>openLogin(s);
+    else card.querySelector('.go').onclick=()=>{ current=s; openTool(s); };
+    g.appendChild(card);
+  });
+}
+
+function show(view){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('on')); document.getElementById(view).classList.add('on'); }
+
+function openLogin(s){
+  current=s;
+  document.getElementById('loginIc').innerHTML=s.ic;
+  document.getElementById('loginName').textContent=s.name;
+  document.getElementById('u').value=''; document.getElementById('p').value='';
+  document.getElementById('err').textContent='';
+  show('view-login');
+  setTimeout(()=>document.getElementById('u').focus(),50);
+}
+function goSectors(){
+  document.getElementById('toolFrame').src='about:blank';
+  show('view-sector');
+}
+function tryLogin(){
+  const u=document.getElementById('u').value.trim().toLowerCase();
+  const p=document.getElementById('p').value.trim().toLowerCase();
+  if(u==='demo' && p==='demo'){ openTool(current); }
+  else { document.getElementById('err').textContent='Usa Demo / Demo para entrar.'; }
+}
+function openTool(s){
+  document.getElementById('toolName').textContent=s.name;
+  const frame=document.getElementById('toolFrame');
+  const soon=document.getElementById('soonWrap');
+  if(s.live && s.url){
+    frame.style.display=''; soon.classList.add('hidden');
+    frame.src=s.url;
+  } else {
+    frame.style.display='none'; soon.classList.remove('hidden');
+    document.getElementById('soonTitle').textContent=s.name+' · en preparación';
+  }
+  show('view-tool');
+}
+
+document.getElementById('p').addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(); });
+document.getElementById('u').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('p').focus(); });
+
+buildSectors();
+</script>
+</body>
+</html>

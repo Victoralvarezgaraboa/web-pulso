@@ -1,0 +1,69 @@
+.demo-return-nav {
+  position: fixed;
+  inset: auto auto 16px 16px;
+  z-index: 10000;
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(7, 18, 13, 0.92);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.demo-return-nav a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 15px;
+  color: #ecefea;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.demo-return-nav a:first-child {
+  background: #5ce3a3;
+  color: #07120d;
+}
+
+.demo-return-nav a:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.demo-return-nav a:first-child:hover {
+  background: #7aebb6;
+  color: #07120d;
+}
+
+.demo-return-nav a:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .demo-return-nav {
+    inset: auto 10px 10px;
+    justify-content: stretch;
+  }
+
+  .demo-return-nav a {
+    flex: 1;
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+}
+
+@media print {
+  .demo-return-nav {
+    display: none;
+  }
+}

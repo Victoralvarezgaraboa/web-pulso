@@ -51,7 +51,14 @@ export const herramientas: Herramienta[] = [
 ];
 
 /** Muro público con las demos. Cada una es enlazable directamente. */
-export const muroDemos = 'https://pulso-demos.onrender.com';
+/**
+ * Las demos se sirven desde el propio dominio, no desde la direccion tecnica de
+ * Render. Un cliente al que le mandas un enlace a onrender.com ve el andamio,
+ * no la casa: la direccion es parte de lo que se vende.
+ *
+ * Los ficheros viven en public/demos y se despliegan con la web.
+ */
+export const muroDemos = 'https://pulsogestiona.es/demos';
 
 export interface Demo {
   nombre: string;

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de presupuestos · Electricidad</title>
+<link rel="stylesheet" href="fuentes.css">
+<link rel="stylesheet" href="demo-navigation.css">
+<script src="demo-navigation.js" defer></script>
+<style>
+  :root{
+    --nav:#0E2A47; --nav-soft:#1E5AA8; --tint:#EAF1FA; --acc:#F5B301;
+    --ink:#16233B; --muted:#697A95; --line:#DCE3EE; --app:#EEF2F7; --paper:#FFFFFF;
+    --mo:#1E5AA8; --mat:#0E8A6B; --ok:#1B7F4B;
+    --radius:14px; --shadow:0 1px 2px rgba(14,42,71,.06), 0 8px 24px rgba(14,42,71,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--app);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  h1,h2,h3,.display{font-family:'Archivo',sans-serif;}
+
+  .topbar{position:sticky;top:0;z-index:30;background:var(--nav);color:#fff;display:flex;align-items:center;gap:12px;padding:12px 16px;}
+  .logo{width:36px;height:36px;border-radius:9px;background:var(--acc);color:var(--nav);display:grid;place-items:center;flex:0 0 auto;}
+  .topbar .name{font-family:'Archivo';font-weight:700;font-size:17px;letter-spacing:.2px;line-height:1.1}
+  .topbar .sub{font-size:11.5px;opacity:.8;font-weight:500;letter-spacing:.3px;text-transform:uppercase}
+  .topbar .spacer{flex:1}
+  .btn{font-family:'Inter';font-weight:600;font-size:13.5px;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:transform .05s ease, background .15s ease;}
+  .btn:active{transform:translateY(1px)}
+  .btn-ghost{background:rgba(255,255,255,.14);color:#fff}
+  .btn-ghost:hover{background:rgba(255,255,255,.24)}
+  .btn-primary{background:#fff;color:var(--nav)}
+  .btn-primary:hover{background:#eef3fc}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:18px 16px 90px;}
+  .grid{display:grid;grid-template-columns:1fr;gap:18px;}
+  @media(min-width:980px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;}.doc-col{position:sticky;top:78px;}}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .card-pad{padding:16px;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--nav-soft);margin:0 0 10px}
+
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field.full{grid-column:1 / -1}
+  label.lab{font-size:11.5px;font-weight:600;color:var(--muted)}
+  input.in, textarea.in, select.in{font-family:'Inter';font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff;width:100%;}
+  input.in:focus, textarea.in:focus, select.in:focus{outline:2px solid var(--tint);border-color:var(--nav-soft)}
+  textarea.in{resize:vertical;min-height:54px}
+
+  .presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:8px 14px;transition:all .12s ease;}
+  .chip:hover{border-color:var(--nav-soft);color:var(--nav)}
+  .chip .pc{color:var(--muted);font-weight:500;margin-left:6px;font-size:11.5px}
+
+  .chap{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;background:#fff}
+  .chap.on{border-color:var(--nav-soft);box-shadow:0 0 0 1px var(--tint)}
+  .chap-head{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer;user-select:none;}
+  .chap-head:hover{background:#f7f9fd}
+  .chap-title{font-family:'Archivo';font-weight:600;font-size:15px;flex:1}
+  .chap-count{font-size:12px;font-weight:600;color:var(--nav);background:var(--tint);border-radius:999px;padding:2px 9px;min-width:22px;text-align:center}
+  .chap-count.zero{color:var(--muted);background:#f0f3f8}
+  .caret{color:var(--muted);transition:transform .18s ease;flex:0 0 auto}
+  .chap.open .caret{transform:rotate(90deg)}
+  .chap-body{display:none;padding:2px 14px 12px;border-top:1px solid var(--line)}
+  .chap.open .chap-body{display:block}
+  .chap-note{font-size:12px;color:var(--muted);margin:8px 2px 4px}
+
+  /* Linea con desglose */
+  .line{padding:11px 2px;border-bottom:1px dashed var(--line)}
+  .line:last-of-type{border-bottom:0}
+  .line-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .line-txt{font-size:13.5px;color:var(--ink);font-weight:600}
+  .line-sum{font-size:11px;color:var(--muted);font-weight:500;margin-left:6px}
+  .line-tag{font-size:10px;color:var(--muted);font-weight:600;margin-left:6px;border:1px solid var(--line);border-radius:6px;padding:1px 5px;vertical-align:middle}
+  .imp{font-family:'Archivo';font-weight:700;font-size:14px;color:var(--nav);white-space:nowrap}
+  .imp.zero{color:#c2cbd8;font-weight:500}
+  .line-controls{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:end;margin-top:9px}
+  @media(max-width:400px){.line-controls{grid-template-columns:1fr;}}
+  .stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;height:38px;width:118px}
+  .stepper button{width:34px;height:100%;border:0;background:#f2f5fa;color:var(--nav);font-size:20px;font-weight:600;cursor:pointer;line-height:1;display:grid;place-items:center}
+  .stepper button:active{background:var(--tint)}
+  .stepper input{width:50px;height:100%;border:0;border-left:1px solid var(--line);border-right:1px solid var(--line);text-align:center;font-family:'Inter';font-size:14px;font-weight:600;color:var(--ink);-moz-appearance:textfield}
+  .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .stepper input:focus{outline:none;background:var(--tint)}
+  .pcell{display:flex;flex-direction:column;gap:3px}
+  .pcell .plab{font-size:10.5px;font-weight:600;letter-spacing:.2px;display:flex;align-items:center;gap:5px}
+  .pcell .plab::before{content:"";width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+  .pcell.mo .plab{color:var(--mo)} .pcell.mo .plab::before{background:var(--mo)}
+  .pcell.mat .plab{color:var(--mat)} .pcell.mat .plab::before{background:var(--mat)}
+  .pcell .pin{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;height:38px;padding:0 9px;background:#fff}
+  .pcell .pin:focus-within{outline:2px solid var(--tint);border-color:var(--nav-soft)}
+  .pcell input{border:0;width:100%;font-family:'Inter';font-size:14px;text-align:right;color:var(--ink)}
+  .pcell input:focus{outline:none}
+  .pcell .eu{color:var(--muted);font-size:12px;margin-left:4px}
+
+  .add-line{display:grid;grid-template-columns:1fr;gap:6px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+  .add-line .add-grid{display:grid;grid-template-columns:auto auto auto auto;gap:6px}
+  .add-line input{font-size:12.5px;border:1px solid var(--line);border-radius:8px;padding:8px;font-family:'Inter'}
+  .add-line .concept{text-align:left}
+  .add-line .mini{width:74px;text-align:right}
+  .add-line button{background:var(--tint);color:var(--nav);border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px;justify-self:start}
+
+  .cfg-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:6px 0}
+  .cfg-row .val{width:120px}
+  .toggle-row{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer;font-size:13.5px}
+  .sw{width:38px;height:22px;border-radius:999px;background:#cfd8e6;position:relative;flex:0 0 auto;transition:background .15s ease}
+  .sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .15s ease}
+  .toggle-row.on .sw{background:var(--nav)}
+  .toggle-row.on .sw::after{left:18px}
+
+  .resumen{background:var(--nav);color:#fff;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .resumen h3{margin:0 0 8px;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--acc)}
+  .resumen pre{margin:0;white-space:pre-wrap;font-family:'Inter';font-size:13px;line-height:1.6}
+  .resumen .cp{margin-top:10px;background:var(--acc);color:var(--nav);border:0;border-radius:9px;padding:9px 14px;font-family:'Inter';font-weight:700;font-size:13px;cursor:pointer}
+
+  .paper{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:28px 26px 32px;font-size:12.5px;color:#1c2740}
+  .doc-head{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--nav);padding-bottom:12px;margin-bottom:14px}
+  .doc-logo{width:44px;height:44px;border-radius:9px;background:var(--acc);color:var(--nav);display:grid;place-items:center}
+  .doc-head .wm{font-family:'Archivo';font-weight:700;font-size:20px;letter-spacing:1px;color:#2a3a57;flex:1}
+  .doc-head .num{font-family:'Archivo';font-weight:700;font-size:16px;color:#2a3a57;text-align:right}
+  .doc-meta{margin-bottom:12px;font-size:12px;line-height:1.7}
+  .doc-meta b{color:#2a3a57}
+  .doc-meta .fecha{text-align:right;font-weight:700}
+  .doc-title{font-family:'Archivo';font-weight:700;font-size:13px;letter-spacing:.4px;margin:10px 0 12px;text-transform:uppercase;color:var(--nav)}
+  table.doc-t{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:12px}
+  table.doc-t th{text-align:left;font-weight:700;color:var(--muted);border-bottom:1.5px solid var(--line);padding:6px 4px;font-size:10px;letter-spacing:.3px;text-transform:uppercase}
+  table.doc-t th.r,table.doc-t td.r{text-align:right}
+  table.doc-t .sec td{background:#f4f7fb;font-family:'Archivo';font-weight:700;font-size:11.5px;color:var(--nav);padding:7px 4px;text-transform:uppercase;letter-spacing:.3px}
+  table.doc-t td{padding:5px 4px;border-bottom:1px solid #eef1f6;vertical-align:top}
+  table.doc-t td.imp{font-weight:700;color:#2a3a57;font-family:'Archivo'}
+  .tot{margin-top:14px;border-top:2px solid var(--nav);padding-top:10px}
+  .tot-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12.5px}
+  .tot-row.sub{color:var(--muted);font-size:12px}
+  .tot-row.big{font-family:'Archivo';font-weight:800;font-size:16px;color:var(--nav);border-top:1px dashed var(--line);margin-top:4px;padding-top:8px}
+  .tot-row .euro{font-variant-numeric:tabular-nums}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+  .dot.mo{background:var(--mo)} .dot.mat{background:var(--mat)}
+  .anticipo{background:var(--tint);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:12.5px;color:var(--nav);font-weight:600}
+  .doc-notas-h{font-family:'Archivo';font-weight:700;letter-spacing:.6px;margin:18px 0 8px;color:var(--nav)}
+  .doc-nota{margin:0 0 6px;padding-left:12px;position:relative}
+  .doc-nota::before{content:"\25AA";position:absolute;left:0;color:var(--acc)}
+  .doc-foot{margin-top:22px;padding-top:12px;border-top:1px solid var(--line);text-align:center;font-size:10.5px;color:#5b6b86;line-height:1.7}
+  .empty-doc{color:var(--muted);font-size:13.5px;text-align:center;padding:36px 10px}
+
+  /* Barra de acciones del documento */
+  .docbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .dbtn{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Inter';font-weight:600;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--nav);border-radius:10px;padding:10px 6px;cursor:pointer;transition:all .12s ease}
+  .dbtn:hover{border-color:var(--nav-soft);background:#f7f9fd}
+  .dbtn svg{flex:0 0 auto}
+  .dbtn.wa{color:#0b7a3b;border-color:#bfe6cd} .dbtn.wa:hover{background:#eefaf1;border-color:#0b7a3b}
+  .dbtn.ml{color:#1E5AA8;border-color:#c7dbf3} .dbtn.ml:hover{background:#eef4fc;border-color:#1E5AA8}
+  .btxt{display:inline}
+
+  .tabs{display:none;}
+  @media(max-width:979px){
+    .tabs{display:flex;position:sticky;top:60px;z-index:25;background:var(--app);padding:10px 0 4px;gap:8px}
+    .tab{flex:1;text-align:center;font-weight:700;font-size:13.5px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
+    .tab.on{background:var(--nav);color:#fff;border-color:var(--nav)}
+    .doc-col{display:none}
+    body.view-doc .build-col{display:none}
+    body.view-doc .doc-col{display:block}
+    .topbar .btn .btxt{display:none}
+    .topbar .btn{padding:9px 10px}
+    .docbar{grid-template-columns:repeat(2,1fr)}
+    .dbtn{padding:13px 6px;font-size:14px}
+  }
+
+  @media print{
+    .topbar,.tabs,.build-col,.docbar,.no-print,.resumen{display:none !important}
+    html,body{background:#fff}
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .wrap{padding:0;max-width:none}
+    .grid{display:block}
+    .doc-col{position:static;display:block !important}
+    .paper{border:0;box-shadow:none;padding:0;border-radius:0}
+    @page{margin:14mm 12mm}
+    .doc-head,.tot,.anticipo,.doc-nota,.doc-foot{break-inside:avoid;page-break-inside:avoid}
+    table.doc-t thead{display:table-header-group}
+    table.doc-t tr{break-inside:avoid;page-break-inside:avoid}
+    table.doc-t .sec td{break-after:avoid}
+    .doc-notas-h{break-after:avoid}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+  <div>
+    <div class="name">Generador de presupuestos</div>
+    <div class="sub">Electricidad</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn btn-ghost no-print" onclick="resetAll()" title="Limpiar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg><span class="btxt">Limpiar</span></button>
+  <button class="btn btn-ghost no-print" onclick="doLogout()" title="Salir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="btxt">Salir</span></button>
+</div>
+
+<div class="wrap">
+  <div class="tabs no-print">
+    <div class="tab on" id="tabBuild" onclick="setView('build')">Construir</div>
+    <div class="tab" id="tabDoc" onclick="setView('doc')">Presupuesto</div>
+  </div>
+
+  <div class="grid">
+    <div class="build-col">
+
+      <div class="card card-pad" style="margin-bottom:18px">
+        <p class="eyebrow">Datos del presupuesto</p>
+        <div class="fields">
+          <div class="field">
+            <label class="lab">Nº presupuesto</label>
+            <input class="in" id="f_num" placeholder="0001" oninput="render()">
+          </div>
+          <div class="field">
+            <label class="lab">Fecha</label>
+            <input class="in" id="f_fecha" oninput="render()">
+          </div>
+          <div class="field">
+            <label class="lab">Cliente</label>
+            <input class="in" id="f_cliente" placeholder="Nombre" oninput="render()">
+          </div>
+          <div class="field">
+            <label class="lab">Concepto de la obra</label>
+            <input class="in" id="f_titulo" placeholder="Instalación eléctrica" oninput="render()">
+          </div>
+          <div class="field full">
+            <label class="lab">Dirección</label>
+            <input class="in" id="f_dir" placeholder="Calle, número, piso" oninput="render()">
+          </div>
+          <div class="field full">
+            <label class="lab">Datos del emisor (opcional · va al pie del documento)</label>
+            <input class="in" id="f_emisor" placeholder="Empresa · email · teléfono · nº instalador" oninput="render()">
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-pad" style="margin-bottom:18px">
+        <p class="eyebrow">Punto de partida</p>
+        <p class="chap-note" style="margin-top:0;margin-bottom:8px">Cada elemento se compone de <b style="color:var(--mo)">mano de obra</b> (fija por trabajo) + <b style="color:var(--mat)">material</b> (editable según marca). Ajusta cantidades con los botones − / + o escribiéndolas.</p>
+        <div class="presets" id="presets"></div>
+      </div>
+
+      <div class="card card-pad" style="margin-bottom:18px">
+        <p class="eyebrow">Partidas · mano de obra + material</p>
+        <div id="sections"></div>
+      </div>
+
+      <div class="card card-pad">
+        <p class="eyebrow">Impuestos, pago y condiciones</p>
+
+        <div class="cfg-row">
+          <div>IVA aplicado <span class="chap-note" style="display:block;margin:0">10% en reforma de vivienda de más de 2 años · 21% resto</span></div>
+          <select class="in val" id="f_iva" onchange="setIva()">
+            <option value="0.21">21%</option>
+            <option value="0.10">10%</option>
+          </select>
+        </div>
+        <div class="cfg-row">
+          <div>Pago anticipado para comenzar</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input class="in val" style="width:80px;text-align:right" id="f_anticipo" value="50" oninput="render()"> <span style="font-size:12px;color:var(--muted)">%</span>
+          </div>
+        </div>
+
+        <div class="toggle-row on" id="t_desglose" onclick="toggleFlag('desglose')">
+          <div class="sw"></div><div>Mostrar desglose mano de obra / material en el documento</div>
+        </div>
+        <div class="toggle-row on" id="t_incluye" onclick="toggleFlag('incluye')">
+          <div class="sw"></div><div>Nota: conexiones, cables, bornas y pequeño material auxiliar incluidos</div>
+        </div>
+        <div class="toggle-row on" id="t_recuento" onclick="toggleFlag('recuento')">
+          <div class="sw"></div><div>Nota: pendiente del recuento final de la instalación</div>
+        </div>
+        <div class="toggle-row on" id="t_garantia" onclick="toggleFlag('garantia')">
+          <div class="sw"></div><div>Garantía: 6 meses mano de obra · 24 meses materiales</div>
+        </div>
+        <div class="toggle-row on" id="t_validez" onclick="toggleFlag('validez')">
+          <div class="sw"></div><div>Validez del presupuesto: 60 días</div>
+        </div>
+
+        <div class="field full" style="margin-top:8px">
+          <label class="lab">Nota libre adicional</label>
+          <textarea class="in" id="f_notalibre" placeholder="Cualquier aclaración extra..." oninput="render()"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="doc-col">
+      <div class="docbar no-print">
+        <button class="dbtn" onclick="window.print()" title="Descargar PDF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>PDF</button>
+        <button class="dbtn" onclick="exportWord()" title="Descargar Word"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Word</button>
+        <button class="dbtn wa" onclick="sendWhatsApp()" title="Enviar por WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.7.9-.1.1-.3.2-.5.1-.7-.3-1.4-.6-2-1.4-.2-.3.2-.3.5-.9.1-.1 0-.3 0-.4 0-.1-.5-1.2-.7-1.7-.2-.4-.4-.4-.5-.4h-.4c-.1 0-.4.1-.6.3-.2.2-.8.8-.8 1.9 0 1.1.8 2.2.9 2.3.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1-.1-.1-.2-.1-.4-.2z"/></svg>WhatsApp</button>
+        <button class="dbtn ml" onclick="sendEmail()" title="Enviar por email"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>Email</button>
+      </div>
+      <div class="resumen no-print" id="resumen"></div>
+      <div class="paper" id="paper"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   Catalogo. Cada linea:  mo = mano de obra fija (€/ud) · mat = material (€/ud)
+   El precio/ud del elemento = mo + mat. mo+mat estan calibrados para sumar
+   la media real de presupuestos de referencia (Reding, Chalet, El Palo).
+   El split mano de obra / material es una ESTIMACION -> ajustar con tarifa real.
+   noMat: la linea es servicio (desplazamiento, parking); no lleva material.
+   tag 'ref': precio de mercado (no sale del historico) -> ajustar.
+   ===================================================================== */
+const SECTIONS = [
+  { id:'apliques', title:'Apliques (mecanismos)', unit:'ud', lines:[
+    {id:'ap_luz',   label:'Punto de luz',                     mo:13, mat:5},
+    {id:'ap_ench',  label:'Enchufe 16A (uso general)',        mo:15, mat:7},
+    {id:'ap_ench2', label:'Enchufe doble 16A',                mo:32, mat:18},
+    {id:'ap_fuerza',label:'Enchufe de fuerza 20-25A (vitro/termo/lavadora/A.A.)', mo:30, mat:16},
+    {id:'ap_int',   label:'Interruptor',                      mo:15, mat:7},
+    {id:'ap_conm',  label:'Conmutador',                       mo:23, mat:12},
+    {id:'ap_cruz',  label:'Cruzamiento',                      mo:52, mat:23},
+    {id:'ap_puls',  label:'Pulsador / zumbador / timbre',     mo:15, mat:8},
+    {id:'ap_tv',    label:'Toma de TV',                       mo:23, mat:12},
+    {id:'ap_datos', label:'Toma de datos / telefonía RJ45',   mo:16, mat:9},
+    {id:'ap_aa',    label:'Punto / línea de aire acondicionado', mo:15, mat:5},
+  ]},
+  { id:'circuitos', title:'Circuitos, cuadro y protecciones', unit:'ud',
+    note:'Cuadro base = media de vivienda estándar. Chalet o gran superficie sube.', lines:[
+    {id:'ci_cuadro',label:'Cuadro eléctrico (montaje base)',            mo:250, mat:200, unit:'fijo'},
+    {id:'ci_circ',  label:'Circuito protegido (PIA + línea)',           mo:30,  mat:20, tag:'ref'},
+    {id:'ci_dif',   label:'Diferencial inmunizado',                     mo:15,  mat:25, tag:'ref'},
+    {id:'ci_sob',   label:'Protección sobretensión (perm. + transit.)', mo:30,  mat:60, tag:'ref'},
+    {id:'ci_cie',   label:'CIE · certificado instalación eléctrica (boletín)', mo:150, mat:0, unit:'fijo'},
+  ]},
+  { id:'metros', title:'Metros (canaleta, roza, cable, acometida)', unit:'m', lines:[
+    {id:'me_can',   label:'Canaleta (suministro + montaje)',            mo:8,  mat:7, unit:'m'},
+    {id:'me_roza',  label:'Roza empotrada (apertura + cable + tapado)', mo:12, mat:3, unit:'m', tag:'ref'},
+    {id:'me_cable', label:'Línea vista en tubo',                        mo:6,  mat:6, unit:'m', tag:'ref'},
+    {id:'me_acom',  label:'Acometida (de vivienda a contador)',         mo:500,mat:300, unit:'fijo'},
+  ]},
+  { id:'automatismos', title:'Automatismos', unit:'ud', lines:[
+    {id:'au_reg',   label:'Regulador de iluminación',         mo:20, mat:30},
+    {id:'au_sen',   label:'Sensor / detector (presencia, armario)', mo:20, mat:30},
+    {id:'au_per',   label:'Motorización de persiana',         mo:50, mat:70, tag:'ref'},
+    {id:'au_term',  label:'Termostato programable A.A.',       mo:30, mat:60, tag:'ref'},
+    {id:'au_dom',   label:'Punto / actuador domótico',        mo:25, mat:35, tag:'ref'},
+  ]},
+  { id:'desplazamientos', title:'Desplazamientos', unit:'ud', lines:[
+    {id:'de_urb',   label:'Desplazamiento urbano (por jornada)', mo:35, mat:0, unit:'jornada', noMat:true, tag:'ref'},
+    {id:'de_km',    label:'Kilometraje fuera de zona',           mo:0.40, mat:0, unit:'km', noMat:true, tag:'ref'},
+  ]},
+  { id:'parking', title:'Parking', unit:'ud', lines:[
+    {id:'pk_dia',   label:'Aparcamiento (por jornada)',          mo:12, mat:0, unit:'jornada', noMat:true, tag:'ref'},
+  ]},
+];
+
+/* Ejemplo real: C/ Reding 8 -> base 3.570 / IVA 10% / total 3.927 (split estimado) */
+const DEMO_REDING = {
+  header:{ num:'0001', cliente:'Ejemplo', dir:'C/ Reding Nº 8, 1/2', titulo:'Instalación eléctrica y telecomunicaciones', iva:'0.10' },
+  qty:{ ap_luz:47, ap_ench:75, ap_int:23, ap_conm:12, ap_tv:2, ap_aa:2, ci_cuadro:1 },
+  mo: { ap_luz:7,  ap_ench:13, ap_int:13, ap_conm:13, ap_tv:13, ap_aa:13, ci_cuadro:280 },
+  mat:{ ap_luz:3,  ap_ench:7,  ap_int:7,  ap_conm:7,  ap_tv:7,  ap_aa:7,  ci_cuadro:220 },
+  custom:{ apliques:[
+    {label:'PAU amplificador y repartidor TV', unit:'ud', q:1, mo:180, mat:120},
+    {label:'Timbre', unit:'ud', q:1, mo:13, mat:7}
+  ]}
+};
+
+const PRESETS = [
+  {id:'reding', label:'Ejemplo · C/ Reding 8', count:'suma 3.927 €'},
+  {id:'vacio',  label:'Empezar en blanco', count:''},
+];
+
+/* ---------------- Estado ---------------- */
+const state = {
+  qty:{}, mo:{}, mat:{}, custom:{}, open:new Set(),
+  iva:0.21, anticipoPct:50,
+  flags:{desglose:true, incluye:true, recuento:true, garantia:true, validez:true},
+};
+
+/* ---------------- Helpers ---------------- */
+function lineById(id){ for(const s of SECTIONS){ const l=s.lines.find(x=>x.id===id); if(l) return l; } return null; }
+function unitOf(l){ return l.unit || 'ud'; }
+function moOf(id){ const o=state.mo[id]; return (o!==undefined && o!=='')?num(o):lineById(id).mo; }
+function matOf(id){ const l=lineById(id); if(l.noMat) return 0; const o=state.mat[id]; return (o!==undefined && o!=='')?num(o):l.mat; }
+function num(v){ const n=parseFloat(String(v).replace(',','.')); return isFinite(n)?n:0; }
+function r2(n){ return Math.round(n*100)/100; }
+function fmt(n){ n=r2(n); const s=n.toFixed(2).split('.'); s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.'); return s[0]+','+s[1]; }
+function eur(n){ return fmt(n)+' \u20AC'; }
+function fmtQty(n){ n=num(n); return (Math.round(n)===n)?String(Math.round(n)):fmt(n); }
+
+/* ---------------- Motor de calculo (puro, sin DOM) ---------------- */
+function computeTotals(st){
+  const groups=[]; let moTotal=0, matTotal=0;
+  SECTIONS.forEach(s=>{
+    const rows=[];
+    s.lines.forEach(l=>{
+      const q=num(st.qty[l.id]);
+      if(q>0){
+        const mo=(st.mo[l.id]!==undefined && st.mo[l.id]!=='')?num(st.mo[l.id]):l.mo;
+        const mat=l.noMat?0:((st.mat[l.id]!==undefined && st.mat[l.id]!=='')?num(st.mat[l.id]):l.mat);
+        const moL=r2(q*mo), matL=r2(q*mat);
+        rows.push({label:l.label, unit:unitOf(l), q, mo, mat, moL, matL, importe:r2(moL+matL), noMat:!!l.noMat});
+        moTotal+=moL; matTotal+=matL;
+      }
+    });
+    (st.custom[s.id]||[]).forEach(c=>{
+      const q=num(c.q); if(q>0){
+        const mo=num(c.mo), mat=num(c.mat||0);
+        const moL=r2(q*mo), matL=r2(q*mat);
+        rows.push({label:c.label, unit:c.unit||'ud', q, mo, mat, moL, matL, importe:r2(moL+matL), noMat:!(c.mat>0)});
+        moTotal+=moL; matTotal+=matL;
+      }
+    });
+    if(rows.length) groups.push({title:s.title, rows});
+  });
+  moTotal=r2(moTotal); matTotal=r2(matTotal);
+  const base=r2(moTotal+matTotal);
+  const ivaAmt=r2(base*st.iva);
+  const total=r2(base+ivaAmt);
+  const anticipo=r2(total*(num(st.anticipoPct)/100));
+  return {groups, moTotal, matTotal, base, ivaRate:st.iva, ivaAmt, total, anticipo};
+}
+
+/* ---------------- Presets ---------------- */
+function buildPresets(){
+  const host=document.getElementById('presets'); host.innerHTML='';
+  PRESETS.forEach(pr=>{
+    const b=document.createElement('button'); b.className='chip';
+    b.innerHTML=pr.label + (pr.count?`<span class="pc">${pr.count}</span>`:'');
+    b.onclick=()=>applyPreset(pr.id);
+    host.appendChild(b);
+  });
+}
+function applyPreset(id){
+  if(id==='vacio'){ resetAll(true); return; }
+  if(id==='reding'){
+    resetAll(true);
+    const d=DEMO_REDING;
+    document.getElementById('f_num').value=d.header.num;
+    document.getElementById('f_cliente').value=d.header.cliente;
+    document.getElementById('f_dir').value=d.header.dir;
+    document.getElementById('f_titulo').value=d.header.titulo;
+    document.getElementById('f_iva').value=d.header.iva; state.iva=Number(d.header.iva);
+    state.qty=Object.assign({},d.qty);
+    state.mo=Object.assign({},d.mo);
+    state.mat=Object.assign({},d.mat);
+    state.custom=JSON.parse(JSON.stringify(d.custom));
+    SECTIONS.forEach(s=>{ if(s.lines.some(l=>state.qty[l.id]>0) || (state.custom[s.id]||[]).length) state.open.add(s.id); });
+    buildSections(); render();
+    if(window.matchMedia('(max-width:979px)').matches) setView('doc');
+  }
+}
+
+/* ---------------- Secciones ---------------- */
+function countSec(s){ return s.lines.filter(l=>num(state.qty[l.id])>0).length + (state.custom[s.id]||[]).filter(c=>num(c.q)>0).length; }
+
+function buildSections(){
+  const host=document.getElementById('sections'); host.innerHTML='';
+  SECTIONS.forEach(s=>{
+    const count=countSec(s);
+    const isOpen=state.open.has(s.id);
+    const sec=document.createElement('div');
+    sec.className='chap'+(isOpen?' open':'')+(count>0?' on':'');
+
+    const head=document.createElement('div'); head.className='chap-head';
+    head.onclick=()=>{ state.open.has(s.id)?state.open.delete(s.id):state.open.add(s.id); buildSections(); };
+    head.innerHTML=`
+      <span class="caret"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></span>
+      <span class="chap-title">${s.title}</span>
+      <span class="chap-count ${count?'':'zero'}">${count}</span>`;
+    sec.appendChild(head);
+
+    const body=document.createElement('div'); body.className='chap-body';
+    if(s.note){ const n=document.createElement('div'); n.className='chap-note'; n.textContent=s.note; body.appendChild(n); }
+
+    s.lines.forEach(l=>{
+      const q=num(state.qty[l.id]), mo=moOf(l.id), mat=matOf(l.id), u=unitOf(l);
+      const row=document.createElement('div'); row.className='line';
+      const priceEach = l.noMat ? `${eur(mo)}/${u==='fijo'?'ud':u}` : `${eur(mo+mat)}/${u==='fijo'?'ud':u}`;
+      const matCell = l.noMat ? '' : `
+          <div class="pcell mat">
+            <span class="plab">Material</span>
+            <span class="pin"><input type="number" min="0" step="any" value="${mat}" data-mat="${l.id}"><span class="eu">\u20AC</span></span>
+          </div>`;
+      row.innerHTML=`
+        <div class="line-head">
+          <div><span class="line-txt">${escapeHtml(l.label)}</span>${l.tag?`<span class="line-tag">${l.tag}</span>`:''}<span class="line-sum">${priceEach}</span></div>
+          <span class="imp ${q>0?'':'zero'}" data-imp="${l.id}">${eur(q*(mo+mat))}</span>
+        </div>
+        <div class="line-controls">
+          <div class="stepper">
+            <button type="button" data-dec="${l.id}">\u2212</button>
+            <input type="number" min="0" step="any" placeholder="0" value="${q>0?fmtQty(q):''}" data-q="${l.id}">
+            <button type="button" data-inc="${l.id}">+</button>
+          </div>
+          <div class="pcell mo">
+            <span class="plab">${l.noMat?'Precio':'Mano de obra'}</span>
+            <span class="pin"><input type="number" min="0" step="any" value="${mo}" data-mo="${l.id}"><span class="eu">\u20AC</span></span>
+          </div>
+          ${matCell}
+        </div>`;
+      // wiring
+      const qi=row.querySelector('[data-q]'), moi=row.querySelector('[data-mo]'), mati=row.querySelector('[data-mat]');
+      qi.oninput=()=>{ state.qty[l.id]=qi.value; refreshLine(l.id,row); };
+      moi.oninput=()=>{ state.mo[l.id]=moi.value; refreshLine(l.id,row); };
+      if(mati) mati.oninput=()=>{ state.mat[l.id]=mati.value; refreshLine(l.id,row); };
+      row.querySelector('[data-inc]').onclick=()=>stepQty(l.id,1,qi,row);
+      row.querySelector('[data-dec]').onclick=()=>stepQty(l.id,-1,qi,row);
+      body.appendChild(row);
+    });
+
+    /* custom existentes */
+    (state.custom[s.id]||[]).forEach((c,i)=>{
+      const row=document.createElement('div'); row.className='line';
+      row.innerHTML=`
+        <div class="line-head">
+          <div><span class="line-txt">${escapeHtml(c.label)}</span> <button data-del="${i}" style="border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px">&times;</button></div>
+          <span class="imp">${eur(num(c.q)*(num(c.mo)+num(c.mat||0)))}</span>
+        </div>
+        <div class="line-controls">
+          <div class="stepper">
+            <button type="button" data-cdec="${i}">\u2212</button>
+            <input type="number" min="0" step="any" value="${fmtQty(num(c.q))}" data-cq="${i}">
+            <button type="button" data-cinc="${i}">+</button>
+          </div>
+          <div class="pcell mo"><span class="plab">Mano de obra</span><span class="pin"><input type="number" min="0" step="any" value="${num(c.mo)}" data-cmo="${i}"><span class="eu">\u20AC</span></span></div>
+          <div class="pcell mat"><span class="plab">Material</span><span class="pin"><input type="number" min="0" step="any" value="${num(c.mat||0)}" data-cmat="${i}"><span class="eu">\u20AC</span></span></div>
+        </div>`;
+      row.querySelector('[data-del]').onclick=()=>{ state.custom[s.id].splice(i,1); buildSections(); render(); };
+      const cq=row.querySelector('[data-cq]'), cmo=row.querySelector('[data-cmo]'), cmat=row.querySelector('[data-cmat]');
+      cq.oninput=()=>{ c.q=cq.value; buildSections(); render(); };
+      cmo.oninput=()=>{ c.mo=cmo.value; buildSections(); render(); };
+      cmat.oninput=()=>{ c.mat=cmat.value; buildSections(); render(); };
+      row.querySelector('[data-cinc]').onclick=()=>{ c.q=num(c.q)+1; buildSections(); render(); };
+      row.querySelector('[data-cdec]').onclick=()=>{ c.q=Math.max(0,num(c.q)-1); buildSections(); render(); };
+      body.appendChild(row);
+    });
+
+    /* add custom */
+    const add=document.createElement('div'); add.className='add-line';
+    add.innerHTML=`
+      <input class="concept" placeholder="Concepto propio">
+      <div class="add-grid">
+        <input class="mini" type="number" min="0" step="any" placeholder="uds">
+        <input class="mini" type="number" min="0" step="any" placeholder="M.obra \u20AC">
+        <input class="mini" type="number" min="0" step="any" placeholder="Material \u20AC">
+        <button>Añadir</button>
+      </div>`;
+    const ci=add.querySelector('.concept');
+    const [qi2,mo2,mat2]=add.querySelectorAll('.mini');
+    const doAdd=()=>{ const lab=ci.value.trim(); if(!lab)return; (state.custom[s.id]=state.custom[s.id]||[]).push({label:lab,unit:'ud',q:num(qi2.value)||1,mo:num(mo2.value),mat:num(mat2.value)}); ci.value=qi2.value=mo2.value=mat2.value=''; buildSections(); render(); };
+    add.querySelector('button').onclick=doAdd; ci.onkeydown=(e)=>{ if(e.key==='Enter')doAdd(); };
+    body.appendChild(add);
+
+    sec.appendChild(body);
+    host.appendChild(sec);
+  });
+}
+function stepQty(id,delta,qi,row){
+  const v=Math.max(0, num(state.qty[id])+delta);
+  state.qty[id]=v; if(qi) qi.value = v>0?fmtQty(v):'';
+  refreshLine(id,row);
+}
+function refreshLine(id,row){
+  const q=num(state.qty[id]), mo=moOf(id), mat=matOf(id);
+  const impEl=row.querySelector('[data-imp]');
+  if(impEl){ impEl.textContent=eur(q*(mo+mat)); impEl.classList.toggle('zero', !(q>0)); }
+  const sec=SECTIONS.find(s=>s.lines.some(l=>l.id===id));
+  const head=row.closest('.chap');
+  if(head){ const cnt=countSec(sec); const badge=head.querySelector('.chap-count'); badge.textContent=cnt; badge.classList.toggle('zero',!cnt); head.classList.toggle('on',cnt>0); }
+  render();
+}
+
+/* ---------------- Config ---------------- */
+function setIva(){ state.iva=Number(document.getElementById('f_iva').value); render(); }
+function toggleFlag(f){ state.flags[f]=!state.flags[f]; document.getElementById('t_'+f).classList.toggle('on',state.flags[f]); render(); }
+
+/* ---------------- Documento ---------------- */
+function g(id){ const el=document.getElementById(id); return el?String(el.value||'').trim():''; }
+function buildNotas(){
+  const n=[];
+  if(state.flags.incluye) n.push('Conexiones, cables, bornas y pequeño material auxiliar incluidos.');
+  if(state.flags.recuento) n.push('Pendiente del recuento final de la instalación.');
+  const nl=g('f_notalibre'); if(nl) n.push(nl);
+  if(state.flags.garantia) n.push('Garantía: 6 meses mano de obra. 24 meses materiales.');
+  if(state.flags.validez) n.push('Validez del presupuesto: 60 días.');
+  return n;
+}
+
+function render(){
+  state.anticipoPct=num(document.getElementById('f_anticipo').value)||0;
+  const t=computeTotals(state);
+  const num_=g('f_num')||'—', cli=g('f_cliente'), dir=g('f_dir'), fecha=g('f_fecha')||'—', titulo=g('f_titulo');
+  const emisor=g('f_emisor'), ivaPct=Math.round(state.iva*100), des=state.flags.desglose;
+
+  const paper=document.getElementById('paper');
+  let h=`<div class="doc-head">
+      <span class="doc-logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+      <span class="wm">PRESUPUESTO</span>
+      <span class="num">Nº ${escapeHtml(num_)}</span>
+    </div>`;
+  h+=`<div class="doc-meta">
+      <div><b>CLIENTE:</b> ${escapeHtml(cli||'—')}</div>
+      ${dir?`<div><b>DIRECCIÓN:</b> ${escapeHtml(dir)}</div>`:''}
+      <div class="fecha">FECHA: ${escapeHtml(fecha)}</div>
+    </div>`;
+  if(titulo) h+=`<div class="doc-title">${escapeHtml(titulo)}</div>`;
+
+  if(!t.groups.length){
+    h+=`<div class="empty-doc">Añade cantidades en las partidas de la izquierda.<br>El presupuesto se calcula aquí solo.</div>`;
+  } else {
+    h+=`<table class="doc-t"><thead><tr>
+        <th>Concepto</th><th class="r">Uds.</th>`
+      + (des?`<th class="r">M. obra/ud</th><th class="r">Material/ud</th>`:`<th class="r">Precio/ud</th>`)
+      + `<th class="r">Importe</th></tr></thead><tbody>`;
+    t.groups.forEach(gr=>{
+      const cols = des?6:5;
+      h+=`<tr class="sec"><td colspan="${cols}">${escapeHtml(gr.title)}</td></tr>`;
+      gr.rows.forEach(r=>{
+        h+=`<tr><td>${escapeHtml(r.label)}</td><td class="r">${fmtQty(r.q)}</td>`
+          + (des
+              ? `<td class="r">${eur(r.mo)}</td><td class="r">${r.noMat?'—':eur(r.mat)}</td>`
+              : `<td class="r">${eur(r.mo+r.mat)}</td>`)
+          + `<td class="r imp">${eur(r.importe)}</td></tr>`;
+      });
+    });
+    h+=`</tbody></table>`;
+
+    h+=`<div class="tot">`;
+    if(des){
+      h+=`<div class="tot-row sub"><span><span class="dot mo"></span>Total mano de obra</span><span class="euro">${eur(t.moTotal)}</span></div>
+          <div class="tot-row sub"><span><span class="dot mat"></span>Total material</span><span class="euro">${eur(t.matTotal)}</span></div>`;
+    }
+    h+=`<div class="tot-row"><span>Base imponible (neto)</span><span class="euro">${eur(t.base)}</span></div>
+        <div class="tot-row"><span>IVA ${ivaPct}%</span><span class="euro">${eur(t.ivaAmt)}</span></div>
+        <div class="tot-row big"><span>TOTAL</span><span class="euro">${eur(t.total)}</span></div>
+      </div>`;
+    if(state.anticipoPct>0) h+=`<div class="anticipo">Para comenzar es necesario firmar el presupuesto y abonar el pago anticipado del ${fmtQty(state.anticipoPct)}%: <b>${eur(t.anticipo)}</b>. Resto a la terminación de la instalación.</div>`;
+
+    const notas=buildNotas();
+    if(notas.length){ h+=`<div class="doc-notas-h">NOTAS Y CONDICIONES</div>`; notas.forEach(x=>h+=`<div class="doc-nota">${escapeHtml(x)}</div>`); }
+  }
+  if(emisor) h+=`<div class="doc-foot">${escapeHtml(emisor)}</div>`;
+  paper.innerHTML=h;
+
+  /* Cabecera resumen */
+  const res=document.getElementById('resumen');
+  const lines=[
+    `PRESUPUESTO Nº ${num_}`,
+    `CLIENTE: ${cli||'—'}`,
+    dir?`DIRECCIÓN: ${dir}`:null,
+    `FECHA: ${fecha}`,
+    titulo?`CONCEPTO: ${titulo}`:null,
+    (t.groups.length && des)?`Mano de obra: ${eur(t.moTotal)} · Material: ${eur(t.matTotal)}`:null,
+    t.groups.length?`IMPORTE: ${eur(t.base)} (neto) · IVA ${ivaPct}%: ${eur(t.ivaAmt)} · TOTAL: ${eur(t.total)}`:null,
+    (t.groups.length && state.anticipoPct>0)?`Pago para comenzar (${fmtQty(state.anticipoPct)}%): ${eur(t.anticipo)}`:null,
+    state.flags.validez?`Validez del presupuesto: 60 días.`:null,
+  ].filter(Boolean);
+  const txt=lines.join('\n');
+  res.innerHTML=`<h3>Cabecera del presupuesto</h3><pre id="resumenTxt">${escapeHtml(txt)}</pre><button class="cp" onclick="copyResumen()">Copiar cabecera</button>`;
+}
+
+function copyResumen(){
+  const txt=document.getElementById('resumenTxt').textContent;
+  const done=()=>{ const b=document.querySelector('.resumen .cp'); if(b){ const o=b.textContent; b.textContent='Copiado'; setTimeout(()=>b.textContent=o,1400);} };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done)); }
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,cb){
+  const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); cb&&cb(); }catch(e){ alert('Copia manual:\n\n'+txt); }
+  document.body.removeChild(ta);
+}
+
+/* ---------------- Compartir / sesión ---------------- */
+function shareText(){ const el=document.getElementById('resumenTxt'); return el?el.textContent:''; }
+function hayPartidas(){ return computeTotals(state).groups.length>0; }
+function sendWhatsApp(){
+  if(!hayPartidas()){ alert('Añade al menos una partida antes de enviar.'); return; }
+  window.open('https://wa.me/?text='+encodeURIComponent(shareText()),'_blank');
+}
+function sendEmail(){
+  if(!hayPartidas()){ alert('Añade al menos una partida antes de enviar.'); return; }
+  const n=g('f_num'); const subject='Presupuesto'+(n?(' Nº '+n):'');
+  window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(shareText());
+}
+function doLogout(){
+  const go=()=>window.location.assign('/');
+  try{ fetch('/logout',{method:'POST'}).then(go).catch(go); }catch(e){ go(); }
+}
+
+/* ---------------- Export Word (.doc) ---------------- */
+function exportWord(){
+  const t=computeTotals(state);
+  if(!t.groups.length){ alert('Añade al menos una partida antes de generar el documento.'); return; }
+  const esc=escapeHtml, AR="font-family:Arial,sans-serif;", des=state.flags.desglose;
+  const num_=g('f_num')||'—', cli=g('f_cliente'), dir=g('f_dir'), fecha=g('f_fecha')||'—', titulo=g('f_titulo'), emisor=g('f_emisor');
+  const ivaPct=Math.round(state.iva*100);
+  let b='';
+  b+=`<table style="width:100%;border-collapse:collapse;border-bottom:2px solid #0E2A47;margin-bottom:12px"><tr>
+      <td style="${AR}font-size:18pt;font-weight:bold;color:#0E2A47">PRESUPUESTO</td>
+      <td style="${AR}font-size:12pt;font-weight:bold;color:#0E2A47;text-align:right">Nº ${esc(num_)}</td></tr></table>`;
+  b+=`<p style="${AR}font-size:10.5pt;margin:0"><b>CLIENTE:</b> ${esc(cli||'—')}</p>`;
+  if(dir) b+=`<p style="${AR}font-size:10.5pt;margin:0"><b>DIRECCIÓN:</b> ${esc(dir)}</p>`;
+  b+=`<p style="${AR}font-size:10.5pt;font-weight:bold;text-align:right;margin:2px 0 12px">FECHA: ${esc(fecha)}</p>`;
+  if(titulo) b+=`<p style="${AR}font-size:11pt;font-weight:bold;color:#0E2A47;margin:0 0 10px">${esc(titulo.toUpperCase())}</p>`;
+
+  b+=`<table style="width:100%;border-collapse:collapse;${AR}font-size:10pt">
+      <tr style="border-bottom:1.5px solid #999">
+        <td style="padding:4px"><b>CONCEPTO</b></td><td style="padding:4px;text-align:right"><b>UDS.</b></td>`
+    + (des?`<td style="padding:4px;text-align:right"><b>M. OBRA/UD</b></td><td style="padding:4px;text-align:right"><b>MATERIAL/UD</b></td>`:`<td style="padding:4px;text-align:right"><b>PRECIO/UD</b></td>`)
+    + `<td style="padding:4px;text-align:right"><b>IMPORTE</b></td></tr>`;
+  t.groups.forEach(gr=>{
+    const cols=des?5:4;
+    b+=`<tr><td colspan="${cols}" style="padding:6px 4px;background:#f0f4f9;${AR}font-weight:bold;color:#0E2A47">${esc(gr.title.toUpperCase())}</td></tr>`;
+    gr.rows.forEach(r=>{
+      b+=`<tr><td style="padding:3px 4px;border-bottom:1px solid #eee">${esc(r.label)}</td>
+        <td style="padding:3px 4px;text-align:right;border-bottom:1px solid #eee">${fmtQty(r.q)}</td>`
+        + (des
+            ? `<td style="padding:3px 4px;text-align:right;border-bottom:1px solid #eee">${eur(r.mo)}</td><td style="padding:3px 4px;text-align:right;border-bottom:1px solid #eee">${r.noMat?'—':eur(r.mat)}</td>`
+            : `<td style="padding:3px 4px;text-align:right;border-bottom:1px solid #eee">${eur(r.mo+r.mat)}</td>`)
+        + `<td style="padding:3px 4px;text-align:right;border-bottom:1px solid #eee"><b>${eur(r.importe)}</b></td></tr>`;
+    });
+  });
+  b+=`</table>`;
+  b+=`<table style="width:100%;border-collapse:collapse;${AR}font-size:11pt;margin-top:12px;border-top:2px solid #0E2A47">`;
+  if(des){
+    b+=`<tr><td style="padding:2px 4px;color:#555">Total mano de obra</td><td style="padding:2px 4px;text-align:right;color:#555">${eur(t.moTotal)}</td></tr>
+        <tr><td style="padding:2px 4px;color:#555">Total material</td><td style="padding:2px 4px;text-align:right;color:#555">${eur(t.matTotal)}</td></tr>`;
+  }
+  b+=`<tr><td style="padding:3px 4px">Base imponible (neto)</td><td style="padding:3px 4px;text-align:right">${eur(t.base)}</td></tr>
+      <tr><td style="padding:3px 4px">IVA ${ivaPct}%</td><td style="padding:3px 4px;text-align:right">${eur(t.ivaAmt)}</td></tr>
+      <tr><td style="padding:5px 4px;font-size:13pt;font-weight:bold;color:#0E2A47;border-top:1px solid #ccc">TOTAL</td>
+          <td style="padding:5px 4px;text-align:right;font-size:13pt;font-weight:bold;color:#0E2A47;border-top:1px solid #ccc">${eur(t.total)}</td></tr>
+    </table>`;
+  if(state.anticipoPct>0) b+=`<p style="${AR}font-size:10.5pt;background:#eaf1fa;padding:8px;margin:10px 0 0"><b>Para comenzar:</b> firmar el presupuesto y abonar el ${fmtQty(state.anticipoPct)}% anticipado: <b>${eur(t.anticipo)}</b>. Resto a la terminación.</p>`;
+
+  const notas=buildNotas();
+  if(notas.length){ b+=`<p style="${AR}font-size:11pt;font-weight:bold;color:#0E2A47;margin:16px 0 6px">NOTAS Y CONDICIONES</p>`; notas.forEach(x=>b+=`<p style="${AR}font-size:10pt;margin:0 0 4px">- ${esc(x)}</p>`); }
+  if(emisor) b+=`<p style="${AR}font-size:8.5pt;color:#5b6b86;text-align:center;margin:22px 0 0">${esc(emisor)}</p>`;
+
+  const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Presupuesto ${esc(num_)}</title></head><body>${b}</body></html>`;
+  try{
+    const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=`Presupuesto_${String(num_).replace(/[^\w\-]/g,'')||'electricidad'}.doc`;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); },2000);
+  }catch(err){ alert('No se pudo descargar en este entorno. Abre la herramienta en el navegador (no en la vista previa) y reintenta.'); }
+}
+
+/* ---------------- Util ---------------- */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function setView(v){
+  document.body.classList.toggle('view-doc', v==='doc');
+  document.getElementById('tabBuild').classList.toggle('on', v==='build');
+  document.getElementById('tabDoc').classList.toggle('on', v==='doc');
+}
+function setToday(){
+  const d=new Date(); const mm=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  document.getElementById('f_fecha').value=String(d.getDate()).padStart(2,'0')+'-'+mm[d.getMonth()]+'-'+d.getFullYear();
+}
+function resetAll(silent){
+  if(!silent && !confirm('¿Vaciar el presupuesto y empezar de cero?')) return;
+  state.qty={}; state.mo={}; state.mat={}; state.custom={}; state.open.clear();
+  state.iva=0.21; state.anticipoPct=50;
+  state.flags={desglose:true,incluye:true,recuento:true,garantia:true,validez:true};
+  ['f_num','f_cliente','f_dir','f_titulo','f_notalibre','f_emisor'].forEach(id=>{ const e=document.getElementById(id); if(e)e.value=''; });
+  const iv=document.getElementById('f_iva'); if(iv)iv.value='0.21';
+  const an=document.getElementById('f_anticipo'); if(an)an.value='50';
+  ['desglose','incluye','recuento','garantia','validez'].forEach(f=>{ const e=document.getElementById('t_'+f); if(e)e.classList.add('on'); });
+  setToday(); buildSections(); render();
+}
+
+/* ---------------- Init ---------------- */
+buildPresets();
+buildSections();
+setToday();
+render();
+</script>
+</body>
+</html>

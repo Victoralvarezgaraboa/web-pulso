@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Albaranes · el precio que pagas de verdad</title>
+<link rel="stylesheet" href="fuentes.css">
+<link rel="stylesheet" href="demo-navigation.css">
+<script src="demo-navigation.js" defer></script>
+<!-- OCR en el propio navegador. Si no carga, la demo sigue funcionando con los
+     albaranes de ejemplo: lo unico que se pierde es leer una foto propia. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.0/tesseract.min.js" defer></script>
+<style>
+  :root{
+    --graf:#1B2026; --graf2:#262d35; --acc:#FF7A1A; --acc-soft:#ffe6d2;
+    --ink:#1a2230; --muted:#6b7684; --line:#e2e6ec; --app:#f2f4f7; --paper:#fff;
+    --best:#12855a; --best-bg:#e8f6ef;
+    --alert:#c2410c; --alert-bg:#fff1e7;
+    --warn:#a16207; --warn-bg:#fef7e3;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(20,30,45,.06), 0 8px 24px rgba(20,30,45,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--app);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+  h1,h2,h3{font-family:'Archivo',sans-serif}
+
+  .topbar{position:sticky;top:0;z-index:30;background:var(--graf);color:#fff;display:flex;align-items:center;gap:12px;padding:12px 16px}
+  .logo{width:36px;height:36px;border-radius:9px;background:var(--acc);color:#2a1500;display:grid;place-items:center;flex:0 0 auto}
+  .topbar .name{font-family:'Archivo';font-weight:700;font-size:16px;line-height:1.1}
+  .topbar .sub{font-size:11px;opacity:.75;font-weight:500;letter-spacing:.3px;text-transform:uppercase}
+  .topbar .base{margin-left:auto;text-align:right;font-size:11px;opacity:.8;line-height:1.35}
+  .topbar .base b{font-family:'Archivo';font-size:14px;display:block;opacity:1}
+
+  /* Las dos caras del circuito */
+  .tabs{background:var(--graf);display:flex;gap:0;padding:0 16px;position:sticky;top:60px;z-index:29}
+  .tab{flex:1;max-width:280px;background:none;border:0;border-bottom:3px solid transparent;color:rgba(255,255,255,.62);font-family:'Inter';font-weight:600;font-size:13.5px;padding:11px 8px 10px;cursor:pointer;text-align:left;line-height:1.3}
+  .tab b{display:block;font-family:'Archivo';font-size:14.5px;font-weight:700}
+  .tab.on{color:#fff;border-bottom-color:var(--acc)}
+  .tab:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+
+  .flecha{background:var(--graf2);color:rgba(255,255,255,.75);font-size:11.5px;padding:7px 16px;display:flex;align-items:center;gap:7px}
+  .flecha svg{flex:0 0 auto;color:var(--acc)}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 16px 120px}
+  .pane{display:none}
+  .pane.on{display:block}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .card-h{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .card-h h2{font-size:15px}
+  .card-h .hint{font-size:11.5px;color:var(--muted)}
+
+  /* ---------- Entra material ---------- */
+  .origen{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:18px}
+  .origen .lab{font-family:'Archivo';font-weight:700;font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-size:13px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 13px;cursor:pointer;text-align:left;font-family:'Inter'}
+  .chip:hover{border-color:var(--graf)}
+  .chip.on{background:var(--graf);color:#fff;border-color:var(--graf)}
+  .chip.hecho{border-color:var(--best);color:var(--best)}
+  .chip .cp{display:block;font-size:11px;font-weight:500;opacity:.7;margin-top:1px}
+  .chip.subir{border-style:dashed;color:var(--acc);border-color:var(--acc)}
+  .chip.subir:hover{background:var(--acc-soft)}
+  .chip:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+
+  .grid{display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:1000px){.grid{grid-template-columns:minmax(0,370px) minmax(0,1fr);align-items:start}.col-papel{position:sticky;top:120px}}
+
+  .papel{background:#fdfcf8;margin:16px;padding:18px 16px;border:1px solid #e6e2d6;border-radius:6px;box-shadow:0 1px 0 #fff inset, 0 6px 16px rgba(20,30,45,.08);font-family:'Archivo',monospace;font-size:11.5px;color:#3a3a34;line-height:1.45}
+  .papel .pv{font-weight:800;font-size:14px;letter-spacing:.3px;color:#1a1a16}
+  .papel .meta{display:flex;justify-content:space-between;gap:10px;margin-top:2px;color:#7a7568;font-size:10.5px}
+  .papel hr{border:0;border-top:1px dashed #cfc9b8;margin:11px 0}
+  .plin{display:flex;gap:8px;padding:3px 0}
+  .plin .pr{flex:0 0 88px;color:#7a7568}
+  .plin .pd{flex:1}
+  .plin .pc{flex:0 0 26px;text-align:right}
+  .plin .pp{flex:0 0 56px;text-align:right;font-weight:700}
+  .papel .ptot{display:flex;justify-content:space-between;font-weight:800;font-size:13px;margin-top:9px;color:#1a1a16}
+  .sello{margin-top:12px;padding-top:9px;border-top:1px dashed #cfc9b8;font-size:10px;color:#9a9384;text-transform:uppercase;letter-spacing:.5px}
+
+  .leyendo{margin:16px;padding:26px 16px;text-align:center;color:var(--muted);font-size:13.5px}
+  .barra{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:14px}
+  .barra i{display:block;height:100%;width:0;background:var(--acc);transition:width .25s ease}
+
+  .lrow{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:start}
+  .lrow:last-child{border-bottom:0}
+  .lrow .nm{font-weight:600;font-size:14px;line-height:1.3}
+  .lrow .rf{font-size:11.5px;color:var(--muted);font-family:'Archivo';margin-top:1px}
+  .lrow .num{text-align:right;white-space:nowrap}
+  .lrow .imp{font-family:'Archivo';font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+  .lrow .uds{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .lrow .apunte{grid-column:1/-1;margin-top:7px;font-size:12.5px;color:var(--muted)}
+  .lrow .apunte b{color:var(--alert)}
+  .lrow .apunte.nuevo b{color:var(--best)}
+
+  .editable{border:1px dashed transparent;border-radius:5px;padding:0 3px;margin:0 -3px;cursor:text}
+  .editable:hover{border-color:var(--line);background:#f8fafc}
+  .editable:focus{outline:none;border-color:var(--acc);background:#fff}
+
+  .pie-registro{padding:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+  .btn{border:0;border-radius:10px;padding:13px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:'Inter';width:100%}
+  .btn.p{background:var(--acc);color:#2a1500}
+  .btn.s{background:var(--graf);color:#fff}
+  .btn:disabled{background:var(--best-bg);color:var(--best);cursor:default}
+  .btn:focus-visible{outline:3px solid var(--graf);outline-offset:2px}
+  .btn-nota{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.45}
+
+  /* ---------- Voy a comprar ---------- */
+  .buscador{padding:14px}
+  .buscador .box{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fff}
+  .buscador .box svg{flex:0 0 auto;color:var(--muted)}
+  .buscador input{border:0;width:100%;font-family:'Inter';font-size:15px;color:var(--ink);background:none}
+  .buscador input:focus{outline:none}
+
+  .art{border-bottom:1px solid var(--line);padding:14px 16px}
+  .art:last-child{border-bottom:0}
+  .art-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:11px}
+  .art-h .nm{font-weight:700;font-size:15px}
+  .art-h .rf{font-size:11.5px;color:var(--muted);font-family:'Archivo'}
+  .prow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line)}
+  .prow:last-child{border-bottom:0}
+  .prow .pv-name{flex:1;font-size:13.5px;min-width:0}
+  .prow .fuente{font-size:11px;color:var(--muted);display:block;margin-top:1px}
+  .prow .fuente.real{color:var(--best);font-weight:600}
+  .prow .pv-price{font-family:'Archivo';font-weight:700;font-size:14.5px;min-width:78px;text-align:right;font-variant-numeric:tabular-nums}
+  .prow.best{background:var(--best-bg);border-radius:9px;margin:0 -8px;padding:9px 10px;border-bottom:0}
+  .prow.best .pv-price{color:var(--best)}
+  .prow.best .tag{font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#fff;background:var(--best);border-radius:5px;padding:2px 6px;margin-left:6px;white-space:nowrap}
+  .prow.subio .pv-price{color:var(--alert)}
+  .veredicto{margin-top:11px;background:var(--best-bg);color:var(--best);border-radius:9px;padding:10px 12px;font-size:12.5px}
+  .veredicto.aviso{background:var(--alert-bg);color:var(--alert)}
+  .veredicto b{font-weight:700}
+  .sin-dato{color:var(--muted);font-size:13px;padding:30px 16px;text-align:center}
+
+  .nota-demo{margin-top:18px;font-size:12px;color:var(--muted);line-height:1.55;max-width:70ch}
+  .nota-demo b{color:var(--ink)}
+  .aviso-ocr{margin:0 16px 16px;background:var(--warn-bg);color:var(--warn);border-radius:9px;padding:11px 13px;font-size:12.5px;display:none}
+  .aviso-ocr.on{display:block}
+  input[type=file]{display:none}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+  </div>
+  <div>
+    <div class="name">Albaranes</div>
+    <div class="sub">El precio que pagas de verdad</div>
+  </div>
+  <div class="base" id="contador"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" type="button" data-p="entra"><b>1 · Entra material</b>Registras el albarán</button>
+  <button class="tab" type="button" data-p="compra"><b>2 · Vas a comprar</b>Te dice a quién</button>
+</div>
+<div class="flecha">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  <span>Cada albarán que registras alimenta los precios con los que decides la próxima compra.</span>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ 1 · ENTRA MATERIAL ============ -->
+  <section class="pane on" id="pane-entra">
+    <div class="origen">
+      <div class="lab">Elige un albarán o fotografía el tuyo</div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="grid">
+      <div class="col-papel">
+        <div class="card">
+          <div class="card-h">
+            <h2>El papel</h2>
+            <span class="hint" id="hint-papel">Tal como entra por la puerta</span>
+          </div>
+          <div id="zona-papel"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-h">
+            <h2>Lo que ha leído</h2>
+            <span class="hint">Toca cualquier dato para corregirlo</span>
+          </div>
+          <div class="aviso-ocr" id="aviso-ocr"></div>
+          <div id="lineas"></div>
+          <div class="pie-registro" id="pie-registro"></div>
+        </div>
+
+        <p class="nota-demo">
+          <b>Esto es una demostración de Pulso.</b> Los albaranes y los precios son
+          inventados para enseñar el circuito. En tu taller no hay que cargar ningún
+          catálogo a mano: la base de precios la escriben tus propios albaranes según
+          van entrando.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 · VAS A COMPRAR ============ -->
+  <section class="pane" id="pane-compra">
+    <div class="card buscador">
+      <div class="box">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Busca la pieza: filtro, pastillas, correa…" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="card-h">
+        <h2>A quién comprar</h2>
+        <span class="hint">Ordenado por lo que cuesta hoy</span>
+      </div>
+      <div id="resultados"></div>
+    </div>
+
+    <p class="nota-demo">
+      Fíjate en de dónde sale cada precio. Los que dicen <b>«de tu albarán»</b> son
+      los que has pagado tú de verdad; los demás son tarifa de catálogo, que casi
+      nunca es lo que acabas pagando. Cuantos más albaranes registres, menos tarifas
+      quedan y mejor decide el sistema.
+    </p>
+  </section>
+
+</div>
+
+<input type="file" id="foto" accept="image/*" capture="environment">
+
+<script>
+/* ------------------------------------------------------------------
+   LA BASE DE PRECIOS. Es el corazon del asunto y por eso vive en una
+   sola estructura: cada referencia guarda lo que pide cada proveedor,
+   y de cada precio se sabe SI SALE DE UN ALBARAN TUYO o de una tarifa.
+   Registrar un albaran no es archivar un papel: es meter precios reales
+   aqui dentro, que es lo que hace que la pestana de comprar acierte.
+------------------------------------------------------------------- */
+const CATALOGO = {
+  '15208-65F0E': 'Filtro de aceite',
+  'BP-2244':     'Pastillas freno delanteras',
+  'AC-5W30-5L':  'Aceite 5W30 garrafa 5 L',
+  'FA-9912':     'Filtro de aire',
+  'BUJ-4X':      'Juego 4 bujías iridio',
+  'DF-280':      'Discos freno ventilados',
+  'LIQ-DOT4':    'Líquido de frenos DOT4 1 L',
+  'CORREA-K6':   'Correa distribución kit',
+};
+
+/* Punto de partida: unos pocos albaranes ya registrados en mayo y junio,
+   y tarifas de catalogo para lo que todavia no se ha comprado a ese
+   proveedor. Asi se ve la diferencia entre saber y suponer. */
+const BASE = {
+  '15208-65F0E': [
+    { prov:'Recambios Delgado',  precio:4.20,  fecha:'12 may', real:true },
+    { prov:'AutoParts Sur',      precio:4.35,  fecha:null,     real:false },
+    { prov:'Distrib. Mecánicas', precio:4.80,  fecha:null,     real:false },
+  ],
+  'BP-2244': [
+    { prov:'AutoParts Sur',      precio:31.90, fecha:'3 jun',  real:true },
+    { prov:'Recambios Delgado',  precio:36.10, fecha:null,     real:false },
+    { prov:'Distrib. Mecánicas', precio:34.20, fecha:null,     real:false },
+  ],
+  'AC-5W30-5L': [
+    { prov:'Recambios Delgado',  precio:28.40, fecha:'28 jun', real:true },
+    { prov:'AutoParts Sur',      precio:29.95, fecha:null,     real:false },
+    { prov:'Distrib. Mecánicas', precio:28.90, fecha:null,     real:false },
+  ],
+  'FA-9912': [
+    { prov:'Distrib. Mecánicas', precio:9.75,  fecha:'12 may', real:true },
+    { prov:'Recambios Delgado',  precio:10.90, fecha:null,     real:false },
+    { prov:'AutoParts Sur',      precio:10.40, fecha:null,     real:false },
+  ],
+  'BUJ-4X': [
+    { prov:'AutoParts Sur',      precio:42.00, fecha:'21 abr', real:true },
+    { prov:'Recambios Delgado',  precio:45.80, fecha:null,     real:false },
+    { prov:'Distrib. Mecánicas', precio:43.60, fecha:null,     real:false },
+  ],
+  'DF-280': [
+    { prov:'Distrib. Mecánicas', precio:74.50, fecha:'9 jun',  real:true },
+    { prov:'Recambios Delgado',  precio:79.00, fecha:null,     real:false },
+    { prov:'AutoParts Sur',      precio:76.20, fecha:null,     real:false },
+  ],
+  'LIQ-DOT4': [
+    { prov:'Recambios Delgado',  precio:6.30,  fecha:'28 jun', real:true },
+    { prov:'AutoParts Sur',      precio:6.95,  fecha:null,     real:false },
+    { prov:'Distrib. Mecánicas', precio:6.60,  fecha:null,     real:false },
+  ],
+  'CORREA-K6': [
+    { prov:'AutoParts Sur',      precio:96.00, fecha:'15 mar', real:true },
+    { prov:'Recambios Delgado',  precio:101.50,fecha:null,     real:false },
+    { prov:'Distrib. Mecánicas', precio:99.80, fecha:null,     real:false },
+  ],
+};
+
+const ALBARANES = [
+  {
+    id:'a1', prov:'Recambios Delgado', num:'ALB 2026/4417', fecha:'1 sep 2026',
+    rotulo:'Recambios Delgado', pie:'Mantenimiento y frenos',
+    lineas:[
+      { ref:'15208-65F0E', desc:'Filtro de aceite',           uds:12, precio:5.15 },
+      { ref:'BP-2244',     desc:'Pastillas freno delanteras', uds:4,  precio:38.50 },
+      { ref:'AC-5W30-5L',  desc:'Aceite 5W30 garrafa 5 L',    uds:6,  precio:28.40 },
+      { ref:'LIQ-DOT4',    desc:'Líquido de frenos DOT4 1 L', uds:5,  precio:6.30 },
+    ]
+  },
+  {
+    id:'a2', prov:'AutoParts Sur', num:'AS-118902', fecha:'28 ago 2026',
+    rotulo:'AutoParts Sur', pie:'Distribución y encendido',
+    lineas:[
+      { ref:'BUJ-4X',    desc:'Juego 4 bujías iridio',   uds:6, precio:41.20 },
+      { ref:'CORREA-K6', desc:'Correa distribución kit', uds:2, precio:101.50 },
+      { ref:'FA-9912',   desc:'Filtro de aire',          uds:8, precio:10.40 },
+    ]
+  },
+  {
+    id:'a3', prov:'Distrib. Mecánicas', num:'DM/25-7734', fecha:'26 ago 2026',
+    rotulo:'Distribuciones Mecánicas', pie:'Frenos',
+    lineas:[
+      { ref:'DF-280',  desc:'Discos freno ventilados',    uds:4,  precio:71.90 },
+      { ref:'BP-2244', desc:'Pastillas freno delanteras', uds:6,  precio:34.20 },
+      { ref:'FA-9912', desc:'Filtro de aire',             uds:10, precio:9.40 },
+    ]
+  },
+];
+
+const eur = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+const registrados = new Set();
+let actual = null;
+
+/* ---------- Contador de la base ---------- */
+function pintarContador(){
+  let reales = 0, total = 0;
+  Object.values(BASE).forEach(fs => fs.forEach(f => { total++; if (f.real) reales++; }));
+  document.getElementById('contador').innerHTML =
+    `<b>${reales}/${total}</b>precios de tus albaranes`;
+}
+
+/* ---------- Pestanas ---------- */
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('.pane').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    document.getElementById('pane-' + t.dataset.p).classList.add('on');
+    if (t.dataset.p === 'compra') pintarResultados();
+  });
+});
+
+/* ---------- Chips ---------- */
+function pintarChips(){
+  const c = document.getElementById('chips');
+  c.innerHTML = '';
+  ALBARANES.forEach(a => {
+    const b = document.createElement('button');
+    const hecho = registrados.has(a.id);
+    b.className = 'chip' + (actual && actual.id === a.id ? ' on' : '') + (hecho ? ' hecho' : '');
+    b.type = 'button';
+    b.innerHTML = `${a.prov}<span class="cp">${hecho ? 'Registrado ✓' : a.num + ' · ' + a.fecha}</span>`;
+    b.addEventListener('click', () => cargar(a));
+    c.appendChild(b);
+  });
+  const s = document.createElement('button');
+  s.className = 'chip subir';
+  s.type = 'button';
+  s.innerHTML = `Fotografiar un albarán<span class="cp">Se lee aquí mismo, no sale del móvil</span>`;
+  s.addEventListener('click', () => document.getElementById('foto').click());
+  c.appendChild(s);
+}
+
+/* ---------- El papel ---------- */
+function pintarPapel(a){
+  const z = document.getElementById('zona-papel');
+  const total = a.lineas.reduce((s,l) => s + l.uds * l.precio, 0);
+  z.innerHTML = `
+    <div class="papel">
+      <div class="pv">${a.rotulo}</div>
+      <div class="meta"><span>${a.num}</span><span>${a.fecha}</span></div>
+      <hr>
+      ${a.lineas.map(l => `
+        <div class="plin">
+          <span class="pr">${l.ref}</span>
+          <span class="pd">${l.desc}</span>
+          <span class="pc">${l.uds}</span>
+          <span class="pp">${l.precio.toFixed(2)}</span>
+        </div>`).join('')}
+      <hr>
+      <div class="ptot"><span>TOTAL</span><span>${total.toFixed(2)} €</span></div>
+      <div class="sello">${a.pie} · Copia para el cliente</div>
+    </div>`;
+  document.getElementById('hint-papel').textContent = 'Tal como entra por la puerta';
+}
+
+function pintarFoto(url){
+  document.getElementById('zona-papel').innerHTML =
+    `<div style="margin:16px"><img src="${url}" alt="Albarán fotografiado" style="width:100%;border-radius:8px;border:1px solid var(--line)"></div>`;
+  document.getElementById('hint-papel').textContent = 'Tu foto';
+}
+
+/* ---------- Lineas leidas ---------- */
+function pintarLineas(a){
+  const z = document.getElementById('lineas');
+  z.innerHTML = '';
+
+  a.lineas.forEach((l, i) => {
+    const fila = (BASE[l.ref] || []).find(f => f.prov === a.prov);
+    let apunte = '';
+    if (fila && fila.real) {
+      if (l.precio > fila.precio + 0.001) {
+        const pct = ((l.precio - fila.precio) / fila.precio) * 100;
+        apunte = `<div class="apunte">A este proveedor se lo pagabas a ${eur(fila.precio)} el ${fila.fecha}. <b>Sube un ${pct.toFixed(1)}%</b>.</div>`;
+      } else if (l.precio < fila.precio - 0.001) {
+        apunte = `<div class="apunte nuevo">Se lo pagabas a ${eur(fila.precio)} el ${fila.fecha}. <b>Ha bajado</b>.</div>`;
+      } else {
+        apunte = `<div class="apunte">Mismo precio que el ${fila.fecha}.</div>`;
+      }
+    } else {
+      apunte = `<div class="apunte nuevo"><b>Precio nuevo</b> para este proveedor: hasta ahora solo teníamos su tarifa.</div>`;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'lrow';
+    row.innerHTML = `
+      <div class="desc">
+        <div class="nm"><span class="editable" contenteditable="true" data-i="${i}" data-c="desc">${l.desc}</span></div>
+        <div class="rf">${l.ref}</div>
+      </div>
+      <div class="num">
+        <div class="imp">${eur(l.uds * l.precio)}</div>
+        <div class="uds"><span class="editable" contenteditable="true" data-i="${i}" data-c="uds">${l.uds}</span> ud × <span class="editable" contenteditable="true" data-i="${i}" data-c="precio">${l.precio.toFixed(2)}</span> €</div>
+      </div>
+      ${apunte}`;
+    z.appendChild(row);
+  });
+
+  z.querySelectorAll('.editable').forEach(el => {
+    el.addEventListener('blur', () => {
+      const i = +el.dataset.i, c = el.dataset.c;
+      if (c === 'desc') actual.lineas[i].desc = el.textContent.trim();
+      else {
+        const v = parseFloat(el.textContent.replace(',', '.'));
+        if (!isNaN(v) && v >= 0) actual.lineas[i][c] = v;
+      }
+      pintarLineas(actual); pintarPie(actual);
+    });
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
+  });
+}
+
+/* ---------- El boton que alimenta la base ---------- */
+function pintarPie(a){
+  const z = document.getElementById('pie-registro');
+  const total = a.lineas.reduce((s,l) => s + l.uds * l.precio, 0);
+  const ya = registrados.has(a.id);
+
+  z.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:14px">
+      <span>Total del albarán</span>
+      <span style="font-family:'Archivo';font-weight:800;font-size:20px">${eur(total)}</span>
+    </div>
+    <button class="btn ${ya ? '' : 'p'}" type="button" id="btn-reg" ${ya ? 'disabled' : ''}>
+      ${ya ? '✓ Registrado: sus precios ya están en la base' : 'Registrar la entrada'}
+    </button>
+    <p class="btn-nota">${ya
+      ? 'Mira ahora la pestaña <b>Vas a comprar</b>: estos precios ya mandan sobre las tarifas.'
+      : 'Al registrarlo, estos ' + a.lineas.length + ' precios pasan a ser los tuyos y el sistema decidirá con ellos la próxima compra.'}</p>`;
+
+  const b = document.getElementById('btn-reg');
+  if (b && !ya) b.addEventListener('click', () => registrar(a));
+}
+
+/* Registrar = meter en la base lo que este proveedor te cobra HOY. Es el
+   unico sitio donde la base cambia, y por eso es el corazon de la demo. */
+function registrar(a){
+  a.lineas.forEach(l => {
+    if (!BASE[l.ref]) BASE[l.ref] = [];
+    if (!CATALOGO[l.ref]) CATALOGO[l.ref] = l.desc;
+    const fila = BASE[l.ref].find(f => f.prov === a.prov);
+    const corta = a.fecha.replace(/\s*\d{4}$/, '');
+    if (fila) { fila.precio = l.precio; fila.fecha = corta; fila.real = true; }
+    else BASE[l.ref].push({ prov:a.prov, precio:l.precio, fecha:corta, real:true });
+  });
+  registrados.add(a.id);
+  pintarChips(); pintarPie(a); pintarLineas(a); pintarContador();
+}
+
+function cargar(a){
+  actual = JSON.parse(JSON.stringify(a));
+  document.getElementById('aviso-ocr').classList.remove('on');
+  pintarChips(); pintarPapel(actual); pintarLineas(actual); pintarPie(actual);
+}
+
+/* ---------- Pestana de comprar ---------- */
+function pintarResultados(){
+  const q = (document.getElementById('q').value || '').trim().toLowerCase();
+  const z = document.getElementById('resultados');
+  const refs = Object.keys(CATALOGO).filter(r =>
+    !q || CATALOGO[r].toLowerCase().includes(q) || r.toLowerCase().includes(q));
+
+  if (!refs.length) { z.innerHTML = `<div class="sin-dato">Nada con ese nombre. Prueba con «filtro», «freno» o «aceite».</div>`; return; }
+
+  z.innerHTML = refs.map(ref => {
+    const fs = (BASE[ref] || []).slice().sort((a,b) => a.precio - b.precio);
+    if (!fs.length) return '';
+    const mejor = fs[0];
+    const caro = fs[fs.length - 1];
+    const reales = fs.filter(f => f.real).length;
+
+    const filas = fs.map((f, i) => `
+      <div class="prow ${i === 0 ? 'best' : ''}">
+        <div class="pv-name">${f.prov}
+          <span class="fuente ${f.real ? 'real' : ''}">${f.real ? 'de tu albarán del ' + f.fecha : 'tarifa de catálogo'}</span>
+        </div>
+        <div class="pv-price">${eur(f.precio)}${i === 0 ? '<span class="tag">Mejor</span>' : ''}</div>
+      </div>`).join('');
+
+    const dif = caro.precio - mejor.precio;
+    const veredicto = reales === 0
+      ? `<div class="veredicto aviso">Aquí el sistema va a ciegas: <b>ningún precio sale de un albarán tuyo</b>, son las tres tarifas. Registra una compra de esta pieza y dejará de suponer.</div>`
+      : `<div class="veredicto">Cómprala a <b>${mejor.prov}</b>: son <b>${eur(dif)}</b> menos por unidad que el más caro.${mejor.real ? ' Y ese precio no es una tarifa, es lo que le pagaste el ' + mejor.fecha + '.' : ' Ojo: ese precio es tarifa, todavía no se lo has comprado.'}</div>`;
+
+    return `<div class="art">
+        <div class="art-h"><span class="nm">${CATALOGO[ref]}</span><span class="rf">${ref}</span></div>
+        ${filas}
+        ${veredicto}
+      </div>`;
+  }).join('');
+}
+document.getElementById('q').addEventListener('input', pintarResultados);
+
+/* ---------- Leer una foto de verdad ---------- */
+document.getElementById('foto').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  pintarFoto(url);
+
+  const aviso = document.getElementById('aviso-ocr');
+  const lineas = document.getElementById('lineas');
+  document.getElementById('pie-registro').innerHTML = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+
+  if (typeof Tesseract === 'undefined') {
+    aviso.textContent = 'No se ha podido cargar el lector en este navegador. Prueba con uno de los albaranes de ejemplo.';
+    aviso.classList.add('on'); lineas.innerHTML = ''; return;
+  }
+
+  lineas.innerHTML = `<div class="leyendo">Leyendo el albarán…<div class="barra"><i id="pg"></i></div></div>`;
+  try {
+    const r = await Tesseract.recognize(url, 'spa+eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          const pg = document.getElementById('pg');
+          if (pg) pg.style.width = Math.round(m.progress * 100) + '%';
+        }
+      }
+    });
+    const leidas = extraerLineas(r.data.text || '');
+    if (!leidas.length) {
+      aviso.innerHTML = 'He leído la foto pero no he reconocido ninguna línea con referencia, cantidad y precio. Con una foto de frente y bien iluminada suele salir. Mientras tanto, mira uno de los albaranes de ejemplo.';
+      aviso.classList.add('on'); lineas.innerHTML = ''; return;
+    }
+    actual = { id:'foto-' + Date.now(), prov:'Tu proveedor', num:'Foto', fecha:'hoy', rotulo:'Tu albarán', pie:'', lineas: leidas };
+    aviso.innerHTML = 'Leídas <b>' + leidas.length + '</b> líneas. Repásalas: lo que no haya cogido bien lo corriges tocando encima, y al registrarlas entran en tu base de precios.';
+    aviso.classList.add('on');
+    pintarLineas(actual); pintarPie(actual);
+  } catch (err) {
+    aviso.textContent = 'No he podido leer esa imagen. Prueba con una foto de frente, con el albarán plano y bien iluminado.';
+    aviso.classList.add('on'); lineas.innerHTML = '';
+  }
+});
+
+/* Saca de un texto suelto las lineas que parecen de albaran: una referencia,
+   un texto, una cantidad y un precio con decimales al final. Lo que no encaje
+   se ignora en vez de inventarlo: mejor tres lineas buenas que ocho a medias. */
+function extraerLineas(texto){
+  const out = [];
+  texto.split('\n').forEach(cruda => {
+    const l = cruda.trim();
+    if (l.length < 8) return;
+    const precios = l.match(/\d+[.,]\d{2}/g);
+    if (!precios || !precios.length) return;
+    const precio = parseFloat(precios[precios.length - 1].replace(',', '.'));
+    if (!precio || precio > 100000) return;
+
+    const mRef = l.match(/\b([A-Z0-9][A-Z0-9\-\/]{3,})\b/);
+    const ref = mRef ? mRef[1] : '';
+    let uds = 1;
+    const mUds = l.match(/(?:^|\s)(\d{1,3})(?:\s|x|u|ud|uds)/i);
+    if (mUds) uds = parseInt(mUds[1], 10) || 1;
+
+    let desc = l;
+    if (ref) desc = desc.replace(ref, ' ');
+    precios.forEach(p => { desc = desc.replace(p, ' '); });
+    desc = desc.replace(/[€|]/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    if (desc.length < 3) desc = 'Línea sin descripción';
+
+    out.push({ ref: ref || 'SIN-REF', desc: desc.slice(0, 60), uds, precio });
+  });
+  return out.slice(0, 30);
+}
+
+pintarContador();
+cargar(ALBARANES[0]);
+pintarResultados();
+</script>
+
+</body>
+</html>

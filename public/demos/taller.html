@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recambios · buscador de precios</title>
+<link rel="stylesheet" href="fuentes.css">
+<link rel="stylesheet" href="demo-navigation.css">
+<script src="demo-navigation.js" defer></script>
+<style>
+  :root{
+    --graf:#1B2026; --graf2:#262d35; --acc:#FF7A1A; --acc-soft:#ffe6d2;
+    --ink:#1a2230; --muted:#6b7684; --line:#e2e6ec; --app:#f2f4f7; --paper:#fff;
+    --best:#12855a; --best-bg:#e8f6ef; --radius:14px;
+    --shadow:0 1px 2px rgba(20,30,45,.06), 0 8px 24px rgba(20,30,45,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--app);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+  h1,h2,h3{font-family:'Archivo',sans-serif}
+
+  .topbar{position:sticky;top:0;z-index:30;background:var(--graf);color:#fff;display:flex;align-items:center;gap:12px;padding:12px 16px}
+  .logo{width:36px;height:36px;border-radius:9px;background:var(--acc);color:#2a1500;display:grid;place-items:center;flex:0 0 auto}
+  .topbar .name{font-family:'Archivo';font-weight:700;font-size:16px;line-height:1.1}
+  .topbar .sub{font-size:11px;opacity:.75;font-weight:500;letter-spacing:.3px;text-transform:uppercase}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 16px 120px}
+  .grid{display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:980px){.grid{grid-template-columns:minmax(0,1fr) 340px;align-items:start}.aside{position:sticky;top:78px}}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .search{padding:14px}
+  .search .box{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fff}
+  .search .box svg{flex:0 0 auto;color:var(--muted)}
+  .search input{border:0;width:100%;font-family:'Inter';font-size:15px;color:var(--ink)}
+  .search input:focus{outline:none}
+  .fams{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+  .fam{font-size:12.5px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer}
+  .fam.on{background:var(--graf);color:#fff;border-color:var(--graf)}
+
+  .fam-h{font-family:'Archivo';font-weight:700;font-size:13px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin:20px 4px 8px}
+  .item{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
+  .item-head{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer}
+  .item-head:hover{background:#f8fafc}
+  .item-title{flex:1}
+  .item-title .nm{font-weight:600;font-size:14.5px}
+  .item-title .rf{font-size:11.5px;color:var(--muted);font-family:'Archivo'}
+  .best-pill{text-align:right;flex:0 0 auto}
+  .best-pill .lab{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .best-pill .val{font-family:'Archivo';font-weight:800;font-size:16px;color:var(--best)}
+  .caret{color:var(--muted);transition:transform .18s ease;flex:0 0 auto}
+  .item.open .caret{transform:rotate(90deg)}
+  .prices{display:none;border-top:1px solid var(--line);padding:6px 14px 12px}
+  .item.open .prices{display:block}
+  .prow{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line)}
+  .prow:last-child{border-bottom:0}
+  .prow .pv-name{flex:1;font-size:13.5px}
+  .prow .diff{font-size:11.5px;color:var(--muted);font-family:'Archivo'}
+  .prow .pv-price{font-family:'Archivo';font-weight:700;font-size:14.5px;min-width:82px;text-align:right}
+  .prow.best{background:var(--best-bg);border-radius:9px;margin:0 -8px;padding-left:10px;padding-right:10px;border-bottom:0}
+  .prow.best .pv-price{color:var(--best)}
+  .prow.best .tag{font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#fff;background:var(--best);border-radius:5px;padding:2px 6px;margin-left:6px}
+  .add-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+  .stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;height:38px}
+  .stepper button{width:34px;height:100%;border:0;background:#f2f5fa;color:var(--graf);font-size:20px;font-weight:600;cursor:pointer;display:grid;place-items:center}
+  .stepper input{width:46px;height:38px;border:0;border-left:1px solid var(--line);border-right:1px solid var(--line);text-align:center;font-family:'Inter';font-size:14px;font-weight:600;-moz-appearance:textfield}
+  .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .add-btn{background:var(--acc);color:#2a1500;font-weight:700;font-size:13.5px;border:0;border-radius:9px;padding:10px 16px;cursor:pointer}
+  .add-btn:active{transform:translateY(1px)}
+  .no-res{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+
+  /* Aside lista */
+  .aside .card{padding:16px}
+  .aside h3{font-size:16px;margin-bottom:3px}
+  .aside .note{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .cart-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .cart-item .ci-main{flex:1}
+  .cart-item .ci-nm{font-size:13.5px;font-weight:600;line-height:1.3}
+  .cart-item .ci-prov{font-size:11.5px;color:var(--muted)}
+  .cart-item .ci-right{text-align:right;white-space:nowrap}
+  .cart-item .ci-sub{font-family:'Archivo';font-weight:700;font-size:14px}
+  .cart-item .ci-x{font-size:11px;color:var(--muted);cursor:pointer;margin-top:3px}
+  .cart-item .ci-x:hover{color:var(--acc)}
+  .cart-empty{color:var(--muted);font-size:13.5px;text-align:center;padding:24px 6px}
+  .tot{border-top:2px solid var(--graf);margin-top:12px;padding-top:12px}
+  .tot .row{display:flex;justify-content:space-between;font-size:13.5px;padding:2px 0}
+  .tot .row.big{font-family:'Archivo';font-weight:800;font-size:18px;color:var(--graf);margin-top:4px}
+  .tot .save{background:var(--best-bg);color:var(--best);border-radius:9px;padding:8px 11px;font-size:12.5px;font-weight:600;margin-top:10px}
+  .copy-btn{width:100%;margin-top:12px;background:var(--graf);color:#fff;border:0;border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer}
+
+  /* Barra movil */
+  .mobar{display:none}
+  @media(max-width:979px){
+    .aside{display:none}
+    .mobar{display:flex;align-items:center;gap:12px;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--graf);color:#fff;padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(0,0,0,.2)}
+    .mobar .mb-info{flex:1}
+    .mobar .mb-info .l{font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.4px}
+    .mobar .mb-info .v{font-family:'Archivo';font-weight:800;font-size:17px}
+    .mobar .mb-btn{background:var(--acc);color:#2a1500;font-weight:700;border:0;border-radius:9px;padding:11px 16px;font-size:14px;cursor:pointer}
+    .sheet-bg{display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45)}
+    .sheet-bg.on{display:block}
+    .sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--paper);border-radius:18px 18px 0 0;max-height:86vh;overflow:auto;padding:18px 16px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .25s ease}
+    .sheet.on{transform:translateY(0)}
+    .sheet h3{font-size:18px;margin-bottom:3px}
+    .sheet .sh-close{position:absolute;top:14px;right:16px;font-size:22px;color:var(--muted);cursor:pointer;border:0;background:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2.7-.7-.7-2.7z"/></svg></div>
+  <div>
+    <div class="name">Recambios</div>
+    <div class="sub">Buscador de precios</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="grid">
+    <div>
+      <div class="card search">
+        <div class="box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="q" placeholder="Busca una pieza: pastillas, filtro, batería..." oninput="render()">
+        </div>
+        <div class="fams" id="fams"></div>
+      </div>
+      <div id="list"></div>
+    </div>
+
+    <div class="aside">
+      <div class="card" id="cartCard"></div>
+    </div>
+  </div>
+</div>
+
+<div class="mobar">
+  <div class="mb-info"><div class="l">Mi lista · mejor precio</div><div class="v" id="moTotal">0,00 €</div></div>
+  <button class="mb-btn" onclick="openSheet()">Ver lista (<span id="moCount">0</span>)</button>
+</div>
+<div class="sheet-bg" id="sheetBg" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"><button class="sh-close" onclick="closeSheet()">&times;</button><div id="cartSheet"></div></div>
+
+<script>
+const PROVS = [
+  {id:'delta', name:'Recambios Delta'},
+  {id:'autostock', name:'AutoStock'},
+  {id:'piezaya', name:'PiezaYa'},
+  {id:'motorparts', name:'MotorParts'},
+];
+/* Catalogo de EJEMPLO (proveedores y precios ficticios). p:null = no disponible */
+const CAT = [
+  {fam:'Frenos', items:[
+    {ref:'FRE-101', name:'Pastillas de freno delanteras', p:{delta:26.40, autostock:23.90, piezaya:24.50, motorparts:22.80}},
+    {ref:'FRE-102', name:'Pastillas de freno traseras',  p:{delta:22.10, autostock:20.90, piezaya:null,  motorparts:21.50}},
+    {ref:'FRE-110', name:'Discos de freno delanteros (par)', p:{delta:58.00, autostock:54.90, piezaya:61.00, motorparts:56.40}},
+    {ref:'FRE-120', name:'Líquido de frenos DOT4 (1 L)', p:{delta:7.90, autostock:6.80, piezaya:7.20, motorparts:null}},
+  ]},
+  {fam:'Filtros', items:[
+    {ref:'FIL-201', name:'Filtro de aceite',        p:{delta:6.20, autostock:5.40, piezaya:5.90, motorparts:6.00}},
+    {ref:'FIL-202', name:'Filtro de aire',          p:{delta:12.40, autostock:11.20, piezaya:13.00, motorparts:10.90}},
+    {ref:'FIL-203', name:'Filtro de habitáculo',    p:{delta:9.80, autostock:8.90, piezaya:9.10, motorparts:null}},
+    {ref:'FIL-204', name:'Filtro de combustible',   p:{delta:15.60, autostock:null, piezaya:14.20, motorparts:16.00}},
+  ]},
+  {fam:'Aceites y líquidos', items:[
+    {ref:'ACE-301', name:'Aceite 5W30 (garrafa 5 L)', p:{delta:38.90, autostock:34.50, piezaya:36.00, motorparts:35.20}},
+    {ref:'ACE-302', name:'Aceite 5W40 (garrafa 5 L)', p:{delta:41.00, autostock:37.90, piezaya:39.50, motorparts:38.40}},
+    {ref:'ACE-310', name:'Anticongelante refrigerante (5 L)', p:{delta:16.80, autostock:15.20, piezaya:null, motorparts:15.90}},
+  ]},
+  {fam:'Suspensión y dirección', items:[
+    {ref:'SUS-401', name:'Amortiguador delantero',  p:{delta:52.00, autostock:48.90, piezaya:55.00, motorparts:47.50}},
+    {ref:'SUS-402', name:'Amortiguador trasero',    p:{delta:44.00, autostock:41.20, piezaya:43.00, motorparts:null}},
+    {ref:'SUS-410', name:'Rótula de dirección',     p:{delta:18.90, autostock:16.40, piezaya:17.20, motorparts:16.90}},
+    {ref:'SUS-411', name:'Bieleta estabilizadora',  p:{delta:11.50, autostock:9.90, piezaya:10.40, motorparts:10.00}},
+  ]},
+  {fam:'Motor', items:[
+    {ref:'MOT-501', name:'Kit correa de distribución', p:{delta:96.00, autostock:88.50, piezaya:92.00, motorparts:90.00}},
+    {ref:'MOT-510', name:'Bujía de encendido (ud.)',   p:{delta:5.40, autostock:4.60, piezaya:4.90, motorparts:5.00}},
+    {ref:'MOT-520', name:'Bomba de agua',              p:{delta:34.90, autostock:31.50, piezaya:33.00, motorparts:32.20}},
+    {ref:'MOT-530', name:'Termostato',                 p:{delta:14.20, autostock:12.90, piezaya:null, motorparts:13.40}},
+  ]},
+  {fam:'Eléctrico', items:[
+    {ref:'ELE-601', name:'Batería 60 Ah',   p:{delta:74.00, autostock:69.90, piezaya:72.00, motorparts:68.50}},
+    {ref:'ELE-602', name:'Batería 70 Ah',   p:{delta:88.00, autostock:83.50, piezaya:null, motorparts:82.00}},
+    {ref:'ELE-610', name:'Alternador',      p:{delta:145.00, autostock:132.00, piezaya:139.00, motorparts:135.00}},
+    {ref:'ELE-620', name:'Escobillas limpiaparabrisas (par)', p:{delta:12.90, autostock:11.40, piezaya:11.90, motorparts:12.00}},
+  ]},
+  {fam:'Neumáticos', items:[
+    {ref:'NEU-701', name:'Neumático 195/65 R15 (ud.)', p:{delta:58.00, autostock:54.00, piezaya:56.50, motorparts:55.00}},
+    {ref:'NEU-702', name:'Neumático 205/55 R16 (ud.)', p:{delta:68.00, autostock:63.50, piezaya:66.00, motorparts:64.00}},
+    {ref:'NEU-703', name:'Neumático 225/45 R17 (ud.)', p:{delta:82.00, autostock:77.00, piezaya:null, motorparts:79.00}},
+  ]},
+];
+
+/* Estado */
+const state = { q:'', fam:'todas', open:new Set(), cart:{} };
+
+/* Helpers */
+function num(v){ const n=parseFloat(String(v).replace(',','.')); return isFinite(n)?n:0; }
+function fmt(n){ n=Math.round(n*100)/100; const s=n.toFixed(2).split('.'); s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.'); return s[0]+','+s[1]; }
+function eur(n){ return fmt(n)+' \u20AC'; }
+function provName(id){ const p=PROVS.find(x=>x.id===id); return p?p.name:id; }
+function itemByRef(ref){ for(const f of CAT){ const it=f.items.find(i=>i.ref===ref); if(it) return it; } return null; }
+/* Lista de precios disponibles ordenada asc */
+function offers(item){
+  return PROVS.map(p=>({prov:p.id, name:p.name, price:item.p[p.id]}))
+    .filter(o=>o.price!=null)
+    .sort((a,b)=>a.price-b.price);
+}
+function bestOf(item){ const o=offers(item); return o.length?o[0]:null; }
+function worstOf(item){ const o=offers(item); return o.length?o[o.length-1]:null; }
+
+/* Familias */
+function buildFams(){
+  const host=document.getElementById('fams'); host.innerHTML='';
+  const all=[{id:'todas',name:'Todas'}].concat(CAT.map(f=>({id:f.fam,name:f.fam})));
+  all.forEach(f=>{
+    const b=document.createElement('button');
+    b.className='fam'+(state.fam===f.id?' on':'');
+    b.textContent=f.name;
+    b.onclick=()=>{ state.fam=f.id; buildFams(); render(); };
+    host.appendChild(b);
+  });
+}
+
+/* Render catalogo */
+function render(){
+  state.q=document.getElementById('q').value.trim().toLowerCase();
+  const host=document.getElementById('list'); host.innerHTML='';
+  let shown=0;
+  CAT.forEach(f=>{
+    if(state.fam!=='todas' && state.fam!==f.fam) return;
+    const items=f.items.filter(it=> !state.q || it.name.toLowerCase().includes(state.q) || it.ref.toLowerCase().includes(state.q));
+    if(!items.length) return;
+    const h=document.createElement('div'); h.className='fam-h'; h.textContent=f.fam; host.appendChild(h);
+    items.forEach(it=>{ shown++; host.appendChild(renderItem(it)); });
+  });
+  if(!shown){ const n=document.createElement('div'); n.className='no-res'; n.textContent='No hay piezas que coincidan con la búsqueda.'; host.appendChild(n); }
+  renderCart();
+}
+
+function renderItem(it){
+  const best=bestOf(it);
+  const isOpen=state.open.has(it.ref);
+  const wrap=document.createElement('div'); wrap.className='item'+(isOpen?' open':'');
+  const offs=offers(it);
+  let rows='';
+  offs.forEach((o,i)=>{
+    const diff = o.price-best.price;
+    rows+=`<div class="prow ${i===0?'best':''}">
+      <span class="pv-name">${o.name}${i===0?'<span class="tag">Más barato</span>':''}</span>
+      <span class="diff">${i===0?'':'+'+fmt(diff)+' \u20AC'}</span>
+      <span class="pv-price">${eur(o.price)}</span>
+    </div>`;
+  });
+  const q = state.cart[it.ref]||0;
+  wrap.innerHTML=`
+    <div class="item-head">
+      <span class="caret"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></span>
+      <div class="item-title"><div class="nm">${it.name}</div><div class="rf">${it.ref} · ${offs.length} proveedor${offs.length!==1?'es':''}</div></div>
+      <div class="best-pill"><div class="lab">desde</div><div class="val">${eur(best.price)}</div></div>
+    </div>
+    <div class="prices">
+      ${rows}
+      <div class="add-row">
+        <div class="stepper">
+          <button type="button" data-dec>\u2212</button>
+          <input type="number" min="0" step="1" value="${q>0?q:''}" placeholder="0" data-q>
+          <button type="button" data-inc>+</button>
+        </div>
+        <button class="add-btn" data-add>Añadir a mi lista</button>
+      </div>
+    </div>`;
+  wrap.querySelector('.item-head').onclick=(e)=>{ if(e.target.closest('.prices'))return; state.open.has(it.ref)?state.open.delete(it.ref):state.open.add(it.ref); render(); };
+  const qi=wrap.querySelector('[data-q]');
+  wrap.querySelector('[data-inc]').onclick=()=>{ qi.value=(num(qi.value)||0)+1; };
+  wrap.querySelector('[data-dec]').onclick=()=>{ qi.value=Math.max(0,(num(qi.value)||0)-1); };
+  wrap.querySelector('[data-add]').onclick=()=>{ const q=Math.max(0,Math.round(num(qi.value))||1); state.cart[it.ref]=(state.cart[it.ref]||0)+q; render(); };
+  return wrap;
+}
+
+/* Lista / carrito */
+function cartData(){
+  const rows=[]; let total=0, save=0;
+  Object.keys(state.cart).forEach(ref=>{
+    const q=state.cart[ref]; if(q<=0) return;
+    const it=itemByRef(ref); if(!it) return;
+    const best=bestOf(it), worst=worstOf(it);
+    const sub=Math.round(best.price*q*100)/100;
+    total+=sub; save+=Math.round((worst.price-best.price)*q*100)/100;
+    rows.push({ref, name:it.name, q, prov:best.name, unit:best.price, sub});
+  });
+  return {rows, total:Math.round(total*100)/100, save:Math.round(save*100)/100};
+}
+function cartHtml(inSheet){
+  const d=cartData();
+  if(!d.rows.length){
+    return `<h3>Mi lista de compra</h3><div class="note">Al mejor precio disponible</div><div class="cart-empty">Añade piezas para comparar el total.<br>Tú eliges dónde comprar.</div>`;
+  }
+  let h=`<h3>Mi lista de compra</h3><div class="note">Al mejor precio disponible · tú decides el proveedor</div>`;
+  d.rows.forEach(r=>{
+    h+=`<div class="cart-item">
+      <div class="ci-main">
+        <div class="ci-nm">${r.name} <span style="color:var(--muted);font-weight:600">×${r.q}</span></div>
+        <div class="ci-prov">${r.prov} · ${eur(r.unit)}/ud</div>
+        <div class="ci-x" data-del="${r.ref}">Quitar</div>
+      </div>
+      <div class="ci-right"><div class="ci-sub">${eur(r.sub)}</div></div>
+    </div>`;
+  });
+  h+=`<div class="tot">
+      <div class="row big"><span>Total mejor precio</span><span>${eur(d.total)}</span></div>
+      <div class="save">Frente a comprar cada pieza al proveedor más caro, ahorras ${eur(d.save)}.</div>
+      <button class="copy-btn" onclick="copyList()">Copiar lista</button>
+    </div>`;
+  return h;
+}
+function renderCart(){
+  document.getElementById('cartCard').innerHTML=cartHtml(false);
+  document.getElementById('cartSheet').innerHTML=cartHtml(true);
+  const d=cartData();
+  document.getElementById('moTotal').textContent=eur(d.total);
+  document.getElementById('moCount').textContent=d.rows.reduce((a,r)=>a+r.q,0);
+  document.querySelectorAll('[data-del]').forEach(el=>{ el.onclick=()=>{ delete state.cart[el.getAttribute('data-del')]; render(); }; });
+}
+function copyList(){
+  const d=cartData(); if(!d.rows.length)return;
+  let t='LISTA DE COMPRA (mejor precio)\n';
+  d.rows.forEach(r=>{ t+=`- ${r.name} x${r.q} — ${r.prov} ${eur(r.unit)}/ud = ${eur(r.sub)}\n`; });
+  t+=`\nTotal al mejor precio: ${eur(d.total)}\nAhorro frente al mas caro: ${eur(d.save)}`;
+  const done=()=>{ const b=document.querySelector('.copy-btn'); if(b){const o=b.textContent;b.textContent='Copiado';setTimeout(()=>b.textContent=o,1400);} };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done).catch(()=>fb(t,done));
+  else fb(t,done);
+}
+function fb(t,cb){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');cb&&cb();}catch(e){alert(t);} document.body.removeChild(ta); }
+
+/* Sheet movil */
+function openSheet(){ document.getElementById('sheetBg').classList.add('on'); document.getElementById('sheet').classList.add('on'); }
+function closeSheet(){ document.getElementById('sheetBg').classList.remove('on'); document.getElementById('sheet').classList.remove('on'); }
+
+/* Init */
+buildFams();
+render();
+</script>
+</body>
+</html>
